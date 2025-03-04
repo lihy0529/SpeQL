@@ -1,12 +1,3 @@
-<div style="font-family: monospace; white-space: pre;">
-<span style="color: #4285F4;"> ____  </span><span style="color: #EA4335;">              </span><span style="color: #FBBC05;"> ___  </span><span style="color: #34A853;">  _     </span><span style="color: #4285F4;">
-</span><span style="color: #4285F4;">/ ___| </span><span style="color: #EA4335;"> _ __    ___ </span><span style="color: #FBBC05;"> / _ \ </span><span style="color: #34A853;"> | |    </span><span style="color: #4285F4;">
-</span><span style="color: #4285F4;">\___ \ </span><span style="color: #EA4335;">| '_ \  / _ \</span><span style="color: #FBBC05;">| | | |</span><span style="color: #34A853;"> | |    </span><span style="color: #4285F4;">
-</span><span style="color: #4285F4;"> ___) |</span><span style="color: #EA4335;">| |_) ||  __/</span><span style="color: #FBBC05;">| |_| |</span><span style="color: #34A853;"> | |___ </span><span style="color: #4285F4;">
-</span><span style="color: #4285F4;">|____/ </span><span style="color: #EA4335;">| .__/  \___|</span><span style="color: #FBBC05;"> \__\_\ </span><span style="color: #34A853;">|_____|</span><span style="color: #4285F4;">
-       </span><span style="color: #EA4335;">|_|      </span><span style="color: #FBBC05;">       </span><span style="color: #34A853;">       </span><span style="color: #4285F4;">       </span>
-</div>
-
 # Speculative Ad-hoc Querying
 
 ![Version](https://img.shields.io/badge/version-1.0-blue)
