@@ -1,0 +1,421 @@
+[
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query54.tpl query 81 in stream 0\nwith /* TPC-DS query54.tpl 0.81 */ my_customers as (\n select distinct c_customer_sk\n        , c_current_addr_sk\n from   \n        ( select cs_sold_date_sk sold_date_sk,\n                 cs_bill_customer_sk customer_sk,\n                 cs_item_sk item_sk\n          from   catalog_sales\n          union all\n          select ws_sold_date_sk sold_date_sk,\n                 ws_bill_customer_sk customer_sk,\n                 ws_item_sk item_sk\n          from   web_sales\n         ) cs_or_ws_sales,\n         item,\n         date_dim,\n         customer\n where   sold_date_sk = d_date_sk\n         and item_sk = i_item_sk\n         and i_category = 'Jewelry'\n         and i_class = 'rings'\n         and c_customer_sk = cs_or_ws_sales.customer_sk\n         and d_moy = 6\n         and d_year = 1998\n )\n , my_revenue as (\n select c_customer_sk,\n        sum(ss_ext_sales_price) as revenue\n from   my_customers,\n        store_sales,\n        customer_address,\n        store,\n        date_dim\n where  c_current_addr_sk = ca_address_sk\n        and ca_county = s_county\n        and ca_state = s_state\n        and ss_sold_date_sk = d_date_sk\n        and c_customer_sk = ss_customer_sk\n        and d_month_seq between (select distinct d_month_seq+1\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n                           and  (select distinct d_month_seq+3\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n group by c_customer_sk\n )\n , segments as\n (select cast((revenue/50) as int) as segment\n  from   my_revenue\n )\n  select  segment, count(*) as num_customers, segment*50 as segment_base\n from segments\ngroup by segment\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CS_OR_WS_SALES\" AS ( SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" ) , \"MY_CUSTOMERS\" AS ( SELECT DISTINCT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CS_OR_WS_SALES\" AS \"CS_OR_WS_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CS_OR_WS_SALES\".\"CUSTOMER_SK\" = \"CUSTOMER\".\"C_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CS_OR_WS_SALES\".\"SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 JOIN \"ITEM\" AS \"ITEM\" ON \"CS_OR_WS_SALES\".\"ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" AND \"ITEM\".\"I_CATEGORY\" = 'Jewelry' AND \"ITEM\".\"I_CLASS\" = 'rings' ) , \"_U_0\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 1 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_U_1\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 3 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"MY_REVENUE\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"REVENUE\" FROM \"MY_CUSTOMERS\" AS \"MY_CUSTOMERS\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"MY_CUSTOMERS\".\"C_CURRENT_ADDR_SK\" JOIN \"STORE_SALES\" AS \"STORE_SALES\" ON \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"CUSTOMER_ADDRESS\".\"CA_COUNTY\" = \"STORE\".\"S_COUNTY\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = \"STORE\".\"S_STATE\" JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"_COL_0\" <= \"DATE_DIM\".\"D_MONTH_SEQ\" JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"_COL_0\" >= \"DATE_DIM\".\"D_MONTH_SEQ\" GROUP BY \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" ) SELECT CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) AS \"SEGMENT\" , COUNT ( * ) AS \"NUM_CUSTOMERS\" , CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) * 50 AS \"SEGMENT_BASE\" FROM \"MY_REVENUE\" AS \"MY_REVENUE\" GROUP BY CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT )"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH MY_CUSTOMERS AS ( SELECT DISTINCT C_CUSTOMER_SK , C_CURRENT_ADDR_SK FROM ( SELECT CS_SOLD_DATE_SK AS SOLD_DATE_SK , CS_BILL_CUSTOMER_SK AS CUSTOMER_SK , CS_ITEM_SK AS ITEM_SK FROM CATALOG_SALES UNION ALL SELECT WS_SOLD_DATE_SK AS SOLD_DATE_SK , WS_BILL_CUSTOMER_SK AS CUSTOMER_SK , WS_ITEM_SK AS ITEM_SK FROM WEB_SALES ) AS CS_OR_WS_SALES , ITEM , DATE_DIM , CUSTOMER WHERE SOLD_DATE_SK = D_DATE_SK AND ITEM_SK = I_ITEM_SK AND I_CATEGORY = 'Jewelry' AND I_CLASS = 'rings' AND C_CUSTOMER_SK = CS_OR_WS_SALES.CUSTOMER_SK AND D_MOY = 6 AND D_YEAR = 1998 ) , MY_REVENUE AS ( SELECT C_CUSTOMER_SK , SUM ( SS_EXT_SALES_PRICE ) AS REVENUE FROM MY_CUSTOMERS , STORE_SALES , CUSTOMER_ADDRESS , STORE , DATE_DIM WHERE C_CURRENT_ADDR_SK = CA_ADDRESS_SK AND CA_COUNTY = S_COUNTY AND CA_STATE = S_STATE AND SS_SOLD_DATE_SK = D_DATE_SK AND C_CUSTOMER_SK = SS_CUSTOMER_SK AND D_MONTH_SEQ BETWEEN ( SELECT DISTINCT D_MONTH_SEQ + 1 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) AND ( SELECT DISTINCT D_MONTH_SEQ + 3 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) GROUP BY C_CUSTOMER_SK ) , SEGMENTS AS ( SELECT CAST ( ( REVENUE / 50 ) AS INTEGER ) AS SEGMENT FROM MY_REVENUE ) SELECT SEGMENT , COUNT ( * ) AS NUM_CUSTOMERS , SEGMENT * 50 AS SEGMENT_BASE FROM SEGMENTS GROUP BY SEGMENT LIMIT 21",
+                "preview": "\n/*    segment  num_customers  segment_base\n0       609              2         30450\n1       784              1         39200\n2       916              2         45800\n3     29261              1       1463050\n4       607              2         30350\n5     25544              1       1277200\n6     33816              1       1690800\n7       351              2         17550\n8      1122              1         56100\n9      2764              1        138200\n10    16093              1        804650\n11     1379              2         68950\n12      323              1         16150\n13     3090              1        154500\n14      392              1         19600\n15    21165              1       1058250\n16      476              2         23800\n17      776              3         38800\n18     1738              1         86900\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.837892,
+                    "execution_time": 0.699422,
+                    "compile_time": 0.000708,
+                    "planning_time": 0.101819
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 14.859662,
+                    "execution_time": 1.003115,
+                    "compile_time": 13.750637,
+                    "planning_time": 0.201486
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*    segment  num_customers  segment_base\n0       609              2         30450\n1       784              1         39200\n2       916              2         45800\n3     29261              1       1463050\n4       607              2         30350\n5     25544              1       1277200\n6     33816              1       1690800\n7       351              2         17550\n8      1122              1         56100\n9      2764              1        138200\n10    16093              1        804650\n11     1379              2         68950\n12      323              1         16150\n13     3090              1        154500\n14      392              1         19600\n15    21165              1       1058250\n16      476              2         23800\n17      776              3         38800\n18     1738              1         86900\n...*/"
+    },
+    {
+        "input": "-- start template query54.tpl query 81 in stream 0\nwith /* TPC-DS query54.tpl 0.81 */ my_customers as (\n select distinct c_customer_sk\n        , c_current_addr_sk\n from   \n        ( select cs_sold_date_sk sold_date_sk,\n                 cs_bill_customer_sk customer_sk,\n                 cs_item_sk item_sk\n          from   catalog_sales\n          union all\n          select ws_sold_date_sk sold_date_sk,\n                 ws_bill_customer_sk customer_sk,\n                 ws_item_sk item_sk\n          from   web_sales\n         ) cs_or_ws_sales,\n         item,\n         date_dim,\n         customer\n where   sold_date_sk = d_date_sk\n         and item_sk = i_item_sk\n         and i_category = 'Jewelry'\n         and i_class = 'rings'\n         and c_customer_sk = cs_or_ws_sales.customer_sk\n         and d_moy = 6\n         and d_year = 1998\n )\n , my_revenue as (\n select c_customer_sk,\n        sum(ss_ext_sales_price) as revenue\n from   my_customers,\n        store_sales,\n        customer_address,\n        store,\n        date_dim\n where  c_current_addr_sk = ca_address_sk\n        and ca_county = s_county\n        and ca_state = s_state\n        and ss_sold_date_sk = d_date_sk\n        and c_customer_sk = ss_customer_sk\n        and d_month_seq between (select distinct d_month_seq+1\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n                           and  (select distinct d_month_seq+3\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n group by c_customer_sk\n )\n , segments as\n (select cast((revenue/50) as int) as segment\n  from   my_revenue\n )\n  select  segment, count(*) as num_customers, segment*50 as segment_base\n from segments\n group by segment\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CS_OR_WS_SALES\" AS ( SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" ) , \"MY_CUSTOMERS\" AS ( SELECT DISTINCT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CS_OR_WS_SALES\" AS \"CS_OR_WS_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CS_OR_WS_SALES\".\"CUSTOMER_SK\" = \"CUSTOMER\".\"C_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CS_OR_WS_SALES\".\"SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 JOIN \"ITEM\" AS \"ITEM\" ON \"CS_OR_WS_SALES\".\"ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" AND \"ITEM\".\"I_CATEGORY\" = 'Jewelry' AND \"ITEM\".\"I_CLASS\" = 'rings' ) , \"_U_0\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 1 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_U_1\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 3 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"MY_REVENUE\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"REVENUE\" FROM \"MY_CUSTOMERS\" AS \"MY_CUSTOMERS\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"MY_CUSTOMERS\".\"C_CURRENT_ADDR_SK\" JOIN \"STORE_SALES\" AS \"STORE_SALES\" ON \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"CUSTOMER_ADDRESS\".\"CA_COUNTY\" = \"STORE\".\"S_COUNTY\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = \"STORE\".\"S_STATE\" JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"_COL_0\" <= \"DATE_DIM\".\"D_MONTH_SEQ\" JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"_COL_0\" >= \"DATE_DIM\".\"D_MONTH_SEQ\" GROUP BY \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" ) SELECT CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) AS \"SEGMENT\" , COUNT ( * ) AS \"NUM_CUSTOMERS\" , CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) * 50 AS \"SEGMENT_BASE\" FROM \"MY_REVENUE\" AS \"MY_REVENUE\" GROUP BY CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT )"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH MY_CUSTOMERS AS ( SELECT DISTINCT C_CUSTOMER_SK , C_CURRENT_ADDR_SK FROM ( SELECT CS_SOLD_DATE_SK AS SOLD_DATE_SK , CS_BILL_CUSTOMER_SK AS CUSTOMER_SK , CS_ITEM_SK AS ITEM_SK FROM CATALOG_SALES UNION ALL SELECT WS_SOLD_DATE_SK AS SOLD_DATE_SK , WS_BILL_CUSTOMER_SK AS CUSTOMER_SK , WS_ITEM_SK AS ITEM_SK FROM WEB_SALES ) AS CS_OR_WS_SALES , ITEM , DATE_DIM , CUSTOMER WHERE SOLD_DATE_SK = D_DATE_SK AND ITEM_SK = I_ITEM_SK AND I_CATEGORY = 'Jewelry' AND I_CLASS = 'rings' AND C_CUSTOMER_SK = CS_OR_WS_SALES.CUSTOMER_SK AND D_MOY = 6 AND D_YEAR = 1998 ) , MY_REVENUE AS ( SELECT C_CUSTOMER_SK , SUM ( SS_EXT_SALES_PRICE ) AS REVENUE FROM MY_CUSTOMERS , STORE_SALES , CUSTOMER_ADDRESS , STORE , DATE_DIM WHERE C_CURRENT_ADDR_SK = CA_ADDRESS_SK AND CA_COUNTY = S_COUNTY AND CA_STATE = S_STATE AND SS_SOLD_DATE_SK = D_DATE_SK AND C_CUSTOMER_SK = SS_CUSTOMER_SK AND D_MONTH_SEQ BETWEEN ( SELECT DISTINCT D_MONTH_SEQ + 1 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) AND ( SELECT DISTINCT D_MONTH_SEQ + 3 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) GROUP BY C_CUSTOMER_SK ) , SEGMENTS AS ( SELECT CAST ( ( REVENUE / 50 ) AS INTEGER ) AS SEGMENT FROM MY_REVENUE ) SELECT SEGMENT , COUNT ( * ) AS NUM_CUSTOMERS , SEGMENT * 50 AS SEGMENT_BASE FROM SEGMENTS GROUP BY SEGMENT LIMIT 21",
+                "preview": "\n/*    segment  num_customers  segment_base\n0      1014              1         50700\n1      1781              1         89050\n2     52959              1       2647950\n3       640              3         32000\n4      1030              1         51500\n5     17562              1        878100\n6      4573              1        228650\n7       790              2         39500\n8       409              1         20450\n9       476              2         23800\n10     1791              2         89550\n11     6575              1        328750\n12     1991              2         99550\n13     2012              1        100600\n14      121              1          6050\n15    25333              1       1266650\n16      636              1         31800\n17      539              2         26950\n18    54924              1       2746200\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.821578,
+                    "execution_time": 0.685662,
+                    "compile_time": 0.000699,
+                    "planning_time": 0.099957
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 1.551036,
+                    "execution_time": 1.414203,
+                    "compile_time": 0.000728,
+                    "planning_time": 0.100372
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*    segment  num_customers  segment_base\n0      1014              1         50700\n1      1781              1         89050\n2     52959              1       2647950\n3       640              3         32000\n4      1030              1         51500\n5     17562              1        878100\n6      4573              1        228650\n7       790              2         39500\n8       409              1         20450\n9       476              2         23800\n10     1791              2         89550\n11     6575              1        328750\n12     1991              2         99550\n13     2012              1        100600\n14      121              1          6050\n15    25333              1       1266650\n16      636              1         31800\n17      539              2         26950\n18    54924              1       2746200\n...*/"
+    },
+    {
+        "input": "-- start template query54.tpl query 81 in stream 0\nwith /* TPC-DS query54.tpl 0.81 */ my_customers as (\n select distinct c_customer_sk\n        , c_current_addr_sk\n from   \n        ( select cs_sold_date_sk sold_date_sk,\n                 cs_bill_customer_sk customer_sk,\n                 cs_item_sk item_sk\n          from   catalog_sales\n          union all\n          select ws_sold_date_sk sold_date_sk,\n                 ws_bill_customer_sk customer_sk,\n                 ws_item_sk item_sk\n          from   web_sales\n         ) cs_or_ws_sales,\n         item,\n         date_dim,\n         customer\n where   sold_date_sk = d_date_sk\n         and item_sk = i_item_sk\n         and i_category = 'Jewelry'\n         and i_class = 'rings'\n         and c_customer_sk = cs_or_ws_sales.customer_sk\n         and d_moy = 6\n         and d_year = 1998\n )\n , my_revenue as (\n select c_customer_sk,\n        sum(ss_ext_sales_price) as revenue\n from   my_customers,\n        store_sales,\n        customer_address,\n        store,\n        date_dim\n where  c_current_addr_sk = ca_address_sk\n        and ca_county = s_county\n        and ca_state = s_state\n        and ss_sold_date_sk = d_date_sk\n        and c_customer_sk = ss_customer_sk\n        and d_month_seq between (select distinct d_month_seq+1\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n                           and  (select distinct d_month_seq+3\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n group by c_customer_sk\n )\n , segments as\n (select cast((revenue/50) as int) as segment\n  from   my_revenue\n )\n  select  segment, count(*) as num_customers, segment*50 as segment_base\n from segments\n group by segment\n order by segment, num_customers\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CS_OR_WS_SALES\" AS ( SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" ) , \"MY_CUSTOMERS\" AS ( SELECT DISTINCT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CS_OR_WS_SALES\" AS \"CS_OR_WS_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CS_OR_WS_SALES\".\"CUSTOMER_SK\" = \"CUSTOMER\".\"C_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CS_OR_WS_SALES\".\"SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 JOIN \"ITEM\" AS \"ITEM\" ON \"CS_OR_WS_SALES\".\"ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" AND \"ITEM\".\"I_CATEGORY\" = 'Jewelry' AND \"ITEM\".\"I_CLASS\" = 'rings' ) , \"_U_0\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 1 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_U_1\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 3 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"MY_REVENUE\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"REVENUE\" FROM \"MY_CUSTOMERS\" AS \"MY_CUSTOMERS\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"MY_CUSTOMERS\".\"C_CURRENT_ADDR_SK\" JOIN \"STORE_SALES\" AS \"STORE_SALES\" ON \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"CUSTOMER_ADDRESS\".\"CA_COUNTY\" = \"STORE\".\"S_COUNTY\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = \"STORE\".\"S_STATE\" JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"_COL_0\" <= \"DATE_DIM\".\"D_MONTH_SEQ\" JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"_COL_0\" >= \"DATE_DIM\".\"D_MONTH_SEQ\" GROUP BY \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" ) SELECT CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) AS \"SEGMENT\" , COUNT ( * ) AS \"NUM_CUSTOMERS\" , CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) * 50 AS \"SEGMENT_BASE\" FROM \"MY_REVENUE\" AS \"MY_REVENUE\" GROUP BY CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) ORDER BY \"SEGMENT\" NULLS LAST , \"NUM_CUSTOMERS\" NULLS LAST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH MY_CUSTOMERS AS ( SELECT DISTINCT C_CUSTOMER_SK , C_CURRENT_ADDR_SK FROM ( SELECT CS_SOLD_DATE_SK AS SOLD_DATE_SK , CS_BILL_CUSTOMER_SK AS CUSTOMER_SK , CS_ITEM_SK AS ITEM_SK FROM CATALOG_SALES UNION ALL SELECT WS_SOLD_DATE_SK AS SOLD_DATE_SK , WS_BILL_CUSTOMER_SK AS CUSTOMER_SK , WS_ITEM_SK AS ITEM_SK FROM WEB_SALES ) AS CS_OR_WS_SALES , ITEM , DATE_DIM , CUSTOMER WHERE SOLD_DATE_SK = D_DATE_SK AND ITEM_SK = I_ITEM_SK AND I_CATEGORY = 'Jewelry' AND I_CLASS = 'rings' AND C_CUSTOMER_SK = CS_OR_WS_SALES.CUSTOMER_SK AND D_MOY = 6 AND D_YEAR = 1998 ) , MY_REVENUE AS ( SELECT C_CUSTOMER_SK , SUM ( SS_EXT_SALES_PRICE ) AS REVENUE FROM MY_CUSTOMERS , STORE_SALES , CUSTOMER_ADDRESS , STORE , DATE_DIM WHERE C_CURRENT_ADDR_SK = CA_ADDRESS_SK AND CA_COUNTY = S_COUNTY AND CA_STATE = S_STATE AND SS_SOLD_DATE_SK = D_DATE_SK AND C_CUSTOMER_SK = SS_CUSTOMER_SK AND D_MONTH_SEQ BETWEEN ( SELECT DISTINCT D_MONTH_SEQ + 1 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) AND ( SELECT DISTINCT D_MONTH_SEQ + 3 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) GROUP BY C_CUSTOMER_SK ) , SEGMENTS AS ( SELECT CAST ( ( REVENUE / 50 ) AS INTEGER ) AS SEGMENT FROM MY_REVENUE ) SELECT SEGMENT , COUNT ( * ) AS NUM_CUSTOMERS , SEGMENT * 50 AS SEGMENT_BASE FROM SEGMENTS GROUP BY SEGMENT ORDER BY SEGMENT NULLS FIRST , NUM_CUSTOMERS NULLS FIRST LIMIT 21",
+                "preview": "\n/*    segment  num_customers  segment_base\n0        92              1          4600\n1       104              1          5200\n2       110              1          5500\n3       121              1          6050\n4       132              1          6600\n5       147              1          7350\n6       163              1          8150\n7       169              1          8450\n8       175              1          8750\n9       179              1          8950\n10      183              1          9150\n11      191              1          9550\n12      198              1          9900\n13      214              1         10700\n14      219              1         10950\n15      222              1         11100\n16      234              1         11700\n17      240              1         12000\n18      251              1         12550\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.799035,
+                    "execution_time": 0.659603,
+                    "compile_time": 0.000851,
+                    "planning_time": 0.102782
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 4.875095,
+                    "execution_time": 0.903509,
+                    "compile_time": 4.029665,
+                    "planning_time": 0.201061
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*    segment  num_customers  segment_base\n0        92              1          4600\n1       104              1          5200\n2       110              1          5500\n3       121              1          6050\n4       132              1          6600\n5       147              1          7350\n6       163              1          8150\n7       169              1          8450\n8       175              1          8750\n9       179              1          8950\n10      183              1          9150\n11      191              1          9550\n12      198              1          9900\n13      214              1         10700\n14      219              1         10950\n15      222              1         11100\n16      234              1         11700\n17      240              1         12000\n18      251              1         12550\n...*/"
+    },
+    {
+        "input": "-- start template query54.tpl query 81 in stream 0\nwith /* TPC-DS query54.tpl 0.81 */ my_customers as (\n select distinct c_customer_sk\n        , c_current_addr_sk\n from   \n        ( select cs_sold_date_sk sold_date_sk,\n                 cs_bill_customer_sk customer_sk,\n                 cs_item_sk item_sk\n          from   catalog_sales\n          union all\n          select ws_sold_date_sk sold_date_sk,\n                 ws_bill_customer_sk customer_sk,\n                 ws_item_sk item_sk\n          from   web_sales\n         ) cs_or_ws_sales,\n         item,\n         date_dim,\n         customer\n where   sold_date_sk = d_date_sk\n         and item_sk = i_item_sk\n         and i_category = 'Jewelry'\n         and i_class = 'rings'\n         and c_customer_sk = cs_or_ws_sales.customer_sk\n         and d_moy = 6\n         and d_year = 1998\n )\n , my_revenue as (\n select c_customer_sk,\n        sum(ss_ext_sales_price) as revenue\n from   my_customers,\n        store_sales,\n        customer_address,\n        store,\n        date_dim\n where  c_current_addr_sk = ca_address_sk\n        and ca_county = s_county\n        and ca_state = s_state\n        and ss_sold_date_sk = d_date_sk\n        and c_customer_sk = ss_customer_sk\n        and d_month_seq between (select distinct d_month_seq+1\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n                           and  (select distinct d_month_seq+3\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n group by c_customer_sk\n )\n , segments as\n (select cast((revenue/50) as int) as segment\n  from   my_revenue\n )\n  select  segment, count(*) as num_customers, segment*50 as segment_base\n from segments\n group by segment\n order by segment, num_customers\n limit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CS_OR_WS_SALES\" AS ( SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" ) , \"MY_CUSTOMERS\" AS ( SELECT DISTINCT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CS_OR_WS_SALES\" AS \"CS_OR_WS_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CS_OR_WS_SALES\".\"CUSTOMER_SK\" = \"CUSTOMER\".\"C_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CS_OR_WS_SALES\".\"SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 JOIN \"ITEM\" AS \"ITEM\" ON \"CS_OR_WS_SALES\".\"ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" AND \"ITEM\".\"I_CATEGORY\" = 'Jewelry' AND \"ITEM\".\"I_CLASS\" = 'rings' ) , \"_U_0\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 1 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_U_1\" AS ( SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 3 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"MY_REVENUE\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"REVENUE\" FROM \"MY_CUSTOMERS\" AS \"MY_CUSTOMERS\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"MY_CUSTOMERS\".\"C_CURRENT_ADDR_SK\" JOIN \"STORE_SALES\" AS \"STORE_SALES\" ON \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"CUSTOMER_ADDRESS\".\"CA_COUNTY\" = \"STORE\".\"S_COUNTY\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = \"STORE\".\"S_STATE\" JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"_COL_0\" <= \"DATE_DIM\".\"D_MONTH_SEQ\" JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"_COL_0\" >= \"DATE_DIM\".\"D_MONTH_SEQ\" GROUP BY \"MY_CUSTOMERS\".\"C_CUSTOMER_SK\" ) SELECT CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) AS \"SEGMENT\" , COUNT ( * ) AS \"NUM_CUSTOMERS\" , CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) * 50 AS \"SEGMENT_BASE\" FROM \"MY_REVENUE\" AS \"MY_REVENUE\" GROUP BY CAST ( ( \"MY_REVENUE\".\"REVENUE\" / 50 ) AS INT ) ORDER BY \"SEGMENT\" NULLS LAST , \"NUM_CUSTOMERS\" NULLS LAST LIMIT 100"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" UNION ALL SELECT \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" AS \"CUSTOMER_SK\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 57.630502,
+                    "execution_time": 57.433201,
+                    "compile_time": 0.000249,
+                    "planning_time": 0.034661,
+                    "create_size": 29954
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 58.946939,
+                    "execution_time": 58.745615,
+                    "compile_time": 0.000253,
+                    "planning_time": 0.036212,
+                    "create_size": 29954
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT DISTINCT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"SPEQLITE_TEMP_TABLE_1\".\"CUSTOMER_SK\" = \"CUSTOMER\".\"C_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"SPEQLITE_TEMP_TABLE_1\".\"SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998 JOIN \"ITEM\" AS \"ITEM\" ON \"SPEQLITE_TEMP_TABLE_1\".\"ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" AND \"ITEM\".\"I_CATEGORY\" = 'Jewelry' AND \"ITEM\".\"I_CLASS\" = 'rings'",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.968926,
+                    "execution_time": 0.841046,
+                    "compile_time": 0.000423,
+                    "planning_time": 0.04234,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 11.078086,
+                    "execution_time": 7.208635,
+                    "compile_time": 3.663322,
+                    "planning_time": 0.11569,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 1 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.080165,
+                    "execution_time": 0.030436,
+                    "compile_time": 0.000246,
+                    "planning_time": 0.025076,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.152387,
+                    "execution_time": 0.031294,
+                    "compile_time": 0.001365,
+                    "planning_time": 0.094363,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT DISTINCT \"DATE_DIM\".\"D_MONTH_SEQ\" + 3 AS \"_COL_0\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 6 AND \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.086869,
+                    "execution_time": 0.032286,
+                    "compile_time": 0.000244,
+                    "planning_time": 0.024923,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.144357,
+                    "execution_time": 0.030637,
+                    "compile_time": 0.000248,
+                    "planning_time": 0.088516,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"REVENUE\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"SPEQLITE_TEMP_TABLE_2\".\"C_CURRENT_ADDR_SK\" JOIN \"STORE_SALES\" AS \"STORE_SALES\" ON \"SPEQLITE_TEMP_TABLE_2\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"CUSTOMER_ADDRESS\".\"CA_COUNTY\" = \"STORE\".\"S_COUNTY\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = \"STORE\".\"S_STATE\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ON \"SPEQLITE_TEMP_TABLE_3\".\"_COL_0\" = \"DATE_DIM\".\"D_MONTH_SEQ\" JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"_COL_0\" = \"DATE_DIM\".\"D_MONTH_SEQ\" GROUP BY \"SPEQLITE_TEMP_TABLE_2\".\"C_CUSTOMER_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.153477,
+                    "execution_time": 0.060984,
+                    "compile_time": 0.000542,
+                    "planning_time": 0.056113,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.245326,
+                    "execution_time": 0.065201,
+                    "compile_time": 0.007322,
+                    "planning_time": 0.134663,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT CAST ( ( \"SPEQLITE_TEMP_TABLE_5\".\"REVENUE\" / 50 ) AS INT ) AS \"SEGMENT\" , COUNT ( * ) AS \"NUM_CUSTOMERS\" , CAST ( ( \"SPEQLITE_TEMP_TABLE_5\".\"REVENUE\" / 50 ) AS INT ) * 50 AS \"SEGMENT_BASE\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" GROUP BY CAST ( ( \"SPEQLITE_TEMP_TABLE_5\".\"REVENUE\" / 50 ) AS INT )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.062671,
+                    "execution_time": 0.034469,
+                    "compile_time": 0.000232,
+                    "planning_time": 0.005233,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.121665,
+                    "execution_time": 0.033617,
+                    "compile_time": 0.002063,
+                    "planning_time": 0.061523,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"SEGMENT\" AS \"SEGMENT\" , \"SPEQLITE_TEMP_TABLE_6\".\"NUM_CUSTOMERS\" AS \"NUM_CUSTOMERS\" , \"SPEQLITE_TEMP_TABLE_6\".\"SEGMENT_BASE\" AS \"SEGMENT_BASE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ORDER BY \"SEGMENT\" , \"NUM_CUSTOMERS\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [segment, num_customers, segment_base]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017725,
+                    "execution_time": 0.007591,
+                    "compile_time": 6.6e-05,
+                    "planning_time": 0.004449
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.203617,
+                    "execution_time": 0.008377,
+                    "compile_time": 0.149139,
+                    "planning_time": 0.039844
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT CAST ( ( \"SPEQLITE_TEMP_TABLE_5\".\"REVENUE\" / 50 ) AS INT ) AS \"SEGMENT\" , COUNT ( * ) AS \"NUM_CUSTOMERS\" , CAST ( ( \"SPEQLITE_TEMP_TABLE_5\".\"REVENUE\" / 50 ) AS INT ) * 50 AS \"SEGMENT_BASE\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" GROUP BY CAST ( ( \"SPEQLITE_TEMP_TABLE_5\".\"REVENUE\" / 50 ) AS INT ) ORDER BY \"SEGMENT\" NULLS LAST , \"NUM_CUSTOMERS\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"SEGMENT\" AS \"SEGMENT\" , \"SPEQLITE_TEMP_TABLE_6\".\"NUM_CUSTOMERS\" AS \"NUM_CUSTOMERS\" , \"SPEQLITE_TEMP_TABLE_6\".\"SEGMENT_BASE\" AS \"SEGMENT_BASE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ORDER BY \"SEGMENT\" NULLS LAST , \"NUM_CUSTOMERS\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [segment, num_customers, segment_base]\nIndex: []*/"
+    }
+]

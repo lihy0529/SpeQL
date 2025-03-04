@@ -1,0 +1,831 @@
+[
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.WS_ORDER_NUMBER, ws1.WS_WAREHOUSE_SK as wh1, ws2.WS_WAREHOUSE_SK as wh2\n from web_sales ws1, web_sales ws2\n where ws1.WS_ORDER_NUMBER = ws2.WS_ORDER_NUMBER\n   and ws1.WS_WAREHOUSE_SK <> ws2.WS_WAREHOUSE_SK)\n select  \n   count(distinct ws1.WS_ORDER_NUMBER) as \"order count\"\n  ,sum(ws1.WS_EXT_SHIP_COST) as \"total shipping cost\"\n  ,sum(ws1.WS_NET_PROFIT) as \"total net profit\"\nfrom web_sales ws1\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0      6000000         9.178347e+10     -1.840949e+10*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.509214,
+                    "execution_time": 0.47115,
+                    "compile_time": 0.000113,
+                    "planning_time": 0.029145
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.507217,
+                    "execution_time": 0.469037,
+                    "compile_time": 0.000112,
+                    "planning_time": 0.029184
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\"",
+                "rewrite": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\""
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0      6000000         9.178347e+10     -1.840949e+10*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_wh.ws_order_number) as \"order count\"\n  ,sum((select ws_ext_ship_cost from web_sales where ws_order_number = ws_wh.ws_order_number limit 1)) as \"total shipping cost\"\n  ,sum((select ws_net_profit from web_sales where ws_order_number = ws_wh.ws_order_number limit 1)) as \"total net profit\"\nfrom ws_wh\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( ( SELECT \"WEB_SALES\".\"WS_EXT_SHIP_COST\" AS \"WS_EXT_SHIP_COST\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1 ) ) AS \"TOTAL SHIPPING COST\" , SUM ( ( SELECT \"WEB_SALES\".\"WS_NET_PROFIT\" AS \"WS_NET_PROFIT\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1 ) ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( ( SELECT \"WEB_SALES\".\"WS_EXT_SHIP_COST\" AS \"WS_EXT_SHIP_COST\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1 ) ) AS \"TOTAL SHIPPING COST\" , SUM ( ( SELECT \"WEB_SALES\".\"WS_NET_PROFIT\" AS \"WS_NET_PROFIT\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1 ) ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\"",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM((SELECT \"WEB_SALES\".\"WS_EXT_SHIP_COST\" AS \"WS_EXT_SHIP_COST\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1)) AS \"TOTAL SHIPPING COST\", SUM((SELECT \"WEB_SALES\".\"WS_NET_PROFIT\" AS \"WS_NET_PROFIT\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1)) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\"",
+                "rewrite": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( ( SELECT \"WEB_SALES\".\"WS_EXT_SHIP_COST\" AS \"WS_EXT_SHIP_COST\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1 ) ) AS \"TOTAL SHIPPING COST\" , SUM ( ( SELECT \"WEB_SALES\".\"WS_NET_PROFIT\" AS \"WS_NET_PROFIT\" FROM \"WEB_SALES\" AS \"WEB_SALES\" WHERE \"WEB_SALES\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LIMIT 1 ) ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0      6000000         9.178347e+10     -1.840949e+10*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.510213,
+                    "execution_time": 0.471625,
+                    "compile_time": 0.000115,
+                    "planning_time": 0.029437
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.519969,
+                    "execution_time": 0.468691,
+                    "compile_time": 0.000139,
+                    "planning_time": 0.04139
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\"",
+                "rewrite": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\""
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0      6000000         9.178347e+10     -1.840949e+10*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\"",
+                "rewrite": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\"",
+                "rewrite": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "rewrite": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\n/*CURSOR_IDENTIFIER*/\n",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "rewrite": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and '2002-03-31' \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= CAST ( '2002-03-31' AS DATE ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= CAST ( '2002-03-31' AS DATE ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= CAST ( '2002-03-31' AS DATE ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= CAST('2002-03-31' AS DATE) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "rewrite": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= CAST ( '2002-03-31' AS DATE ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD('DAY', 60, DAY, TIMESTAMP) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\"",
+                "rewrite": null
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD('DAY', 60, DAY, TIMESTAMP) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\"",
+                "rewrite": null
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0       556809         7.111423e+10     -1.428779e+10*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.381624,
+                    "execution_time": 0.316843,
+                    "compile_time": 0.000278,
+                    "planning_time": 0.049576
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.461728,
+                    "execution_time": 0.317821,
+                    "compile_time": 0.000293,
+                    "planning_time": 0.127718
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD('DAY', 60, DAY, TIMESTAMP) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\"",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0       556809         7.111423e+10     -1.428779e+10*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0        17373         2.222742e+09     -4.471679e+08*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.127904,
+                    "execution_time": 0.059728,
+                    "compile_time": 0.000264,
+                    "planning_time": 0.053511
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.328113,
+                    "execution_time": 0.06263,
+                    "compile_time": 0.121631,
+                    "planning_time": 0.1267
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" CROSS JOIN \"WEB_SITE\" AS \"WEB_SITE\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD('DAY', 60, DAY, TIMESTAMP) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\"",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0        17373         2.222742e+09     -4.471679e+08*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0        17373          92612763.58      -18629534.32*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.120357,
+                    "execution_time": 0.050937,
+                    "compile_time": 0.00027,
+                    "planning_time": 0.054131
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.338475,
+                    "execution_time": 0.050433,
+                    "compile_time": 0.14316,
+                    "planning_time": 0.129072
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD('DAY', 60, DAY, TIMESTAMP) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\"",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0        17373          92612763.58      -18629534.32*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\nand web_company_name = 'pri'\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK AND WEB_COMPANY_NAME = 'pri' LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.121571,
+                    "execution_time": 0.055673,
+                    "compile_time": 0.00026,
+                    "planning_time": 0.051004
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.201706,
+                    "execution_time": 0.053286,
+                    "compile_time": 0.000279,
+                    "planning_time": 0.131881
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT(DISTINCT \"WS1\".\"WS_ORDER_NUMBER\") AS \"ORDER COUNT\", SUM(\"WS1\".\"WS_EXT_SHIP_COST\") AS \"TOTAL SHIPPING COST\", SUM(\"WS1\".\"WS_NET_PROFIT\") AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD('DAY', 60, DAY, TIMESTAMP) AND \"DATE_DIM\".\"D_DATE\" >= CAST('2002-03-01' AS DATE) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\"",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\nand web_company_name = 'pri'\nand ws1.ws_order_number in (select ws_order_number from ws_wh\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" GROUP BY \"WS1\".\"WS_ORDER_NUMBER\" ) SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"_U_0\".\"WS_ORDER_NUMBER\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" GROUP BY \"WS1\".\"WS_ORDER_NUMBER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.593187,
+                    "execution_time": 2.486864,
+                    "compile_time": 0.000334,
+                    "planning_time": 0.03184,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.351503,
+                    "execution_time": 2.49026,
+                    "compile_time": 3.684388,
+                    "planning_time": 0.099399,
+                    "create_size": 512
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK AND WEB_COMPANY_NAME = 'pri' AND WS1.WS_ORDER_NUMBER IN ( SELECT WS_ORDER_NUMBER FROM WS_WH ) LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.242888,
+                    "execution_time": 0.151587,
+                    "compile_time": 0.00049,
+                    "planning_time": 0.067355
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 6.464033,
+                    "execution_time": 0.151957,
+                    "compile_time": 6.185866,
+                    "planning_time": 0.138972
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" ON \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" IS NULL",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\nand web_company_name = 'pri'\nand ws1.ws_order_number in (select ws_order_number\n                            from ws_wh)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" GROUP BY \"WS1\".\"WS_ORDER_NUMBER\" ) SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"_U_0\".\"WS_ORDER_NUMBER\" IS NULL"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK AND WEB_COMPANY_NAME = 'pri' AND WS1.WS_ORDER_NUMBER IN ( SELECT WS_ORDER_NUMBER FROM WS_WH ) LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.242035,
+                    "execution_time": 0.151615,
+                    "compile_time": 0.000469,
+                    "planning_time": 0.067397
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.244758,
+                    "execution_time": 0.152145,
+                    "compile_time": 0.000476,
+                    "planning_time": 0.066063
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" ON \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" IS NULL",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.WS_WAREHOUSE_SK as wh1,ws2.WS_WAREHOUSE_SK as wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.WS_WAREHOUSE_SK <> ws2.WS_WAREHOUSE_SK)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim dd\n  ,customer_address ca\n  ,web_site ws\nwhere\n    dd.d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.WS_SHIP_DATE_SK = dd.d_date_sk\nand ws1.WS_SHIP_ADDR_SK = ca.ca_address_sk\nand ca.ca_state = 'IA'\nand ws1.WS_WEB_SITE_SK = ws.web_site_sk\nand ws.web_company_name = 'pri'\nand ws1.ws_order_number in (select ws_order_number\n                            from ws_wh)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" GROUP BY \"WS1\".\"WS_ORDER_NUMBER\" ) SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CA\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DD\" ON \"DD\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DD\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DD\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WS\" ON \"WS\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WS\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"_U_0\".\"WS_ORDER_NUMBER\" IS NULL"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM AS DD , CUSTOMER_ADDRESS AS CA , WEB_SITE AS WS WHERE DD.D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = DD.D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA.CA_ADDRESS_SK AND CA.CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WS.WEB_SITE_SK AND WS.WEB_COMPANY_NAME = 'pri' AND WS1.WS_ORDER_NUMBER IN ( SELECT WS_ORDER_NUMBER FROM WS_WH ) LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.238866,
+                    "execution_time": 0.150155,
+                    "compile_time": 0.000437,
+                    "planning_time": 0.066636
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.321101,
+                    "execution_time": 0.150315,
+                    "compile_time": 0.000469,
+                    "planning_time": 0.146278
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" ON \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CA\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DD\" ON \"DD\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DD\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DD\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WS\" ON \"WS\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WS\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" IS NULL",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         5079           7669674.43       -1277712.25*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\nand web_company_name = 'pri'\nand ws1.ws_order_number in (select ws_order_number\n                            from ws_wh)\nand ws1.ws_order_number in (select wr_order_number\n                            from web_returns,ws_wh\n                            where wr_order_number = ws_wh.ws_order_number)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"WS_WH\" AS ( SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" ) , \"_U_0\" AS ( SELECT \"WS_WH\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WS_WH\" AS \"WS_WH\" GROUP BY \"WS_WH\".\"WS_ORDER_NUMBER\" ) , \"_U_1\" AS ( SELECT \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" AS \"WR_ORDER_NUMBER\" FROM \"WEB_RETURNS\" AS \"WEB_RETURNS\" JOIN \"WS_WH\" AS \"WS_WH\" ON \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" = \"WS_WH\".\"WS_ORDER_NUMBER\" GROUP BY \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" ) SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"WR_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"_U_0\".\"WS_ORDER_NUMBER\" IS NULL AND NOT \"_U_1\".\"WR_ORDER_NUMBER\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.624218,
+                    "execution_time": 0.538125,
+                    "compile_time": 0.014218,
+                    "planning_time": 0.002938,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.9795,
+                    "execution_time": 0.536911,
+                    "compile_time": 3.310043,
+                    "planning_time": 0.059054,
+                    "create_size": 512
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"SPEQLITE_TEMP_TABLE_2\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" GROUP BY \"SPEQLITE_TEMP_TABLE_2\".\"WS_ORDER_NUMBER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.818373,
+                    "execution_time": 0.725649,
+                    "compile_time": 0.019474,
+                    "planning_time": 0.003384,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.132765,
+                    "execution_time": 0.726123,
+                    "compile_time": 3.263426,
+                    "planning_time": 0.068172,
+                    "create_size": 512
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" AS \"WR_ORDER_NUMBER\" FROM \"WEB_RETURNS\" AS \"WEB_RETURNS\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" ON \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" = \"SPEQLITE_TEMP_TABLE_2\".\"WS_ORDER_NUMBER\" GROUP BY \"WEB_RETURNS\".\"WR_ORDER_NUMBER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.639318,
+                    "execution_time": 0.492974,
+                    "compile_time": 0.046507,
+                    "planning_time": 0.026192,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.933719,
+                    "execution_time": 0.483458,
+                    "compile_time": 3.285335,
+                    "planning_time": 0.087109,
+                    "create_size": 512
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK AND WEB_COMPANY_NAME = 'pri' AND WS1.WS_ORDER_NUMBER IN ( SELECT WS_ORDER_NUMBER FROM WS_WH ) AND WS1.WS_ORDER_NUMBER IN ( SELECT WR_ORDER_NUMBER FROM WEB_RETURNS , WS_WH WHERE WR_ORDER_NUMBER = WS_WH.WS_ORDER_NUMBER ) LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         3642           5528895.19        -882164.15*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.268639,
+                    "execution_time": 0.156011,
+                    "compile_time": 0.000519,
+                    "planning_time": 0.088163
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 6.897751,
+                    "execution_time": 0.157095,
+                    "compile_time": 6.584888,
+                    "planning_time": 0.165522
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ON \"SPEQLITE_TEMP_TABLE_3\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"WR_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_3\".\"WS_ORDER_NUMBER\" IS NULL AND NOT \"SPEQLITE_TEMP_TABLE_4\".\"WR_ORDER_NUMBER\" IS NULL",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         3642           5528895.19        -882164.15*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\nand web_company_name = 'pri'\nand ws1.ws_order_number in (select ws_order_number\n                            from ws_wh)\nand ws1.ws_order_number in (select wr_order_number\n                            from web_returns,ws_wh\n                            where wr_order_number = ws_wh.ws_order_number)\norder by count(distinct ws_order_number)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"WS_WH\" AS ( SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" ) , \"_U_0\" AS ( SELECT \"WS_WH\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WS_WH\" AS \"WS_WH\" GROUP BY \"WS_WH\".\"WS_ORDER_NUMBER\" ) , \"_U_1\" AS ( SELECT \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" AS \"WR_ORDER_NUMBER\" FROM \"WEB_RETURNS\" AS \"WEB_RETURNS\" JOIN \"WS_WH\" AS \"WS_WH\" ON \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" = \"WS_WH\".\"WS_ORDER_NUMBER\" GROUP BY \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" ) SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"WR_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"_U_0\".\"WS_ORDER_NUMBER\" IS NULL AND NOT \"_U_1\".\"WR_ORDER_NUMBER\" IS NULL ORDER BY COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK AND WEB_COMPANY_NAME = 'pri' AND WS1.WS_ORDER_NUMBER IN ( SELECT WS_ORDER_NUMBER FROM WS_WH ) AND WS1.WS_ORDER_NUMBER IN ( SELECT WR_ORDER_NUMBER FROM WEB_RETURNS , WS_WH WHERE WR_ORDER_NUMBER = WS_WH.WS_ORDER_NUMBER ) ORDER BY COUNT ( DISTINCT WS_ORDER_NUMBER ) NULLS FIRST LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         3642           5528895.19        -882164.15*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.267819,
+                    "execution_time": 0.154314,
+                    "compile_time": 0.000537,
+                    "planning_time": 0.089281
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.557873,
+                    "execution_time": 0.155465,
+                    "compile_time": 0.000523,
+                    "planning_time": 0.368941
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ON \"SPEQLITE_TEMP_TABLE_3\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"WR_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_3\".\"WS_ORDER_NUMBER\" IS NULL AND NOT \"SPEQLITE_TEMP_TABLE_4\".\"WR_ORDER_NUMBER\" IS NULL ORDER BY COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) NULLS LAST",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         3642           5528895.19        -882164.15*/"
+    },
+    {
+        "input": "-- start template query95.tpl query 43 in stream 0\nwith /* TPC-DS query95.tpl 0.43 */ ws_wh as\n(select ws1.ws_order_number,ws1.ws_warehouse_sk wh1,ws2.ws_warehouse_sk wh2\n from web_sales ws1,web_sales ws2\n where ws1.ws_order_number = ws2.ws_order_number\n   and ws1.ws_warehouse_sk <> ws2.ws_warehouse_sk)\n select  \n   count(distinct ws_order_number) as \"order count\"\n  ,sum(ws_ext_ship_cost) as \"total shipping cost\"\n  ,sum(ws_net_profit) as \"total net profit\"\nfrom\n   web_sales ws1\n  ,date_dim\n  ,customer_address\n  ,web_site\nwhere\n    d_date between '2002-3-01' and \n           dateadd(day,60,cast('2002-3-01' as date))\nand ws1.ws_ship_date_sk = d_date_sk\nand ws1.ws_ship_addr_sk = ca_address_sk\nand ca_state = 'IA'\nand ws1.ws_web_site_sk = web_site_sk\nand web_company_name = 'pri'\nand ws1.ws_order_number in (select ws_order_number\n                            from ws_wh)\nand ws1.ws_order_number in (select wr_order_number\n                            from web_returns,ws_wh\n                            where wr_order_number = ws_wh.ws_order_number)\norder by count(distinct ws_order_number)\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"WS_WH\" AS ( SELECT \"WS1\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WEB_SALES\" AS \"WS1\" JOIN \"WEB_SALES\" AS \"WS2\" ON \"WS1\".\"WS_ORDER_NUMBER\" = \"WS2\".\"WS_ORDER_NUMBER\" AND \"WS1\".\"WS_WAREHOUSE_SK\" <> \"WS2\".\"WS_WAREHOUSE_SK\" ) , \"_U_0\" AS ( SELECT \"WS_WH\".\"WS_ORDER_NUMBER\" AS \"WS_ORDER_NUMBER\" FROM \"WS_WH\" AS \"WS_WH\" GROUP BY \"WS_WH\".\"WS_ORDER_NUMBER\" ) , \"_U_1\" AS ( SELECT \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" AS \"WR_ORDER_NUMBER\" FROM \"WEB_RETURNS\" AS \"WEB_RETURNS\" JOIN \"WS_WH\" AS \"WS_WH\" ON \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" = \"WS_WH\".\"WS_ORDER_NUMBER\" GROUP BY \"WEB_RETURNS\".\"WR_ORDER_NUMBER\" ) SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"WR_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"_U_0\".\"WS_ORDER_NUMBER\" IS NULL AND NOT \"_U_1\".\"WR_ORDER_NUMBER\" IS NULL ORDER BY COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "WITH WS_WH AS ( SELECT WS1.WS_ORDER_NUMBER , WS1.WS_WAREHOUSE_SK AS WH1 , WS2.WS_WAREHOUSE_SK AS WH2 FROM WEB_SALES AS WS1 , WEB_SALES AS WS2 WHERE WS1.WS_ORDER_NUMBER = WS2.WS_ORDER_NUMBER AND WS1.WS_WAREHOUSE_SK <> WS2.WS_WAREHOUSE_SK ) SELECT COUNT ( DISTINCT WS_ORDER_NUMBER ) AS \"ORDER COUNT\" , SUM ( WS_EXT_SHIP_COST ) AS \"TOTAL SHIPPING COST\" , SUM ( WS_NET_PROFIT ) AS \"TOTAL NET PROFIT\" FROM WEB_SALES AS WS1 , DATE_DIM , CUSTOMER_ADDRESS , WEB_SITE WHERE D_DATE BETWEEN '2002-03-01' AND DATEADD ( DAY , 60 , CAST ( '2002-03-01' AS DATE ) ) AND WS1.WS_SHIP_DATE_SK = D_DATE_SK AND WS1.WS_SHIP_ADDR_SK = CA_ADDRESS_SK AND CA_STATE = 'IA' AND WS1.WS_WEB_SITE_SK = WEB_SITE_SK AND WEB_COMPANY_NAME = 'pri' AND WS1.WS_ORDER_NUMBER IN ( SELECT WS_ORDER_NUMBER FROM WS_WH ) AND WS1.WS_ORDER_NUMBER IN ( SELECT WR_ORDER_NUMBER FROM WEB_RETURNS , WS_WH WHERE WR_ORDER_NUMBER = WS_WH.WS_ORDER_NUMBER ) ORDER BY COUNT ( DISTINCT WS_ORDER_NUMBER ) NULLS FIRST LIMIT 21",
+                "preview": "\n/*   order count  total shipping cost  total net profit\n0         3642           5528895.19        -882164.15*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.267718,
+                    "execution_time": 0.156915,
+                    "compile_time": 0.000492,
+                    "planning_time": 0.087292
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.277635,
+                    "execution_time": 0.160642,
+                    "compile_time": 0.000536,
+                    "planning_time": 0.09264
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) AS \"ORDER COUNT\" , SUM ( \"WS1\".\"WS_EXT_SHIP_COST\" ) AS \"TOTAL SHIPPING COST\" , SUM ( \"WS1\".\"WS_NET_PROFIT\" ) AS \"TOTAL NET PROFIT\" FROM \"WEB_SALES\" AS \"WS1\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ON \"SPEQLITE_TEMP_TABLE_3\".\"WS_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"WR_ORDER_NUMBER\" = \"WS1\".\"WS_ORDER_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WS1\".\"WS_SHIP_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" = 'IA' JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE\" <= TS_OR_DS_ADD ( 'DAY' , 60 , DAY , TIMESTAMP ) AND \"DATE_DIM\".\"D_DATE\" >= CAST ( '2002-03-01' AS DATE ) AND \"DATE_DIM\".\"D_DATE_SK\" = \"WS1\".\"WS_SHIP_DATE_SK\" JOIN \"WEB_SITE\" AS \"WEB_SITE\" ON \"WEB_SITE\".\"WEB_COMPANY_NAME\" = 'pri' AND \"WEB_SITE\".\"WEB_SITE_SK\" = \"WS1\".\"WS_WEB_SITE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_3\".\"WS_ORDER_NUMBER\" IS NULL AND NOT \"SPEQLITE_TEMP_TABLE_4\".\"WR_ORDER_NUMBER\" IS NULL ORDER BY COUNT ( DISTINCT \"WS1\".\"WS_ORDER_NUMBER\" ) NULLS LAST LIMIT 100",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   order count  total shipping cost  total net profit\n0         3642           5528895.19        -882164.15*/"
+    }
+]

@@ -1,0 +1,850 @@
+[
+    {
+        "input": "select /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  )\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.12993,
+                    "execution_time": 0.040847,
+                    "compile_time": 0.000451,
+                    "planning_time": 0.058534,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.220451,
+                    "execution_time": 0.042384,
+                    "compile_time": 0.001336,
+                    "planning_time": 0.14455,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015312,
+                    "execution_time": 0.007023,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.002864
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.052596,
+                    "execution_time": 0.007388,
+                    "compile_time": 0.000911,
+                    "planning_time": 0.037978
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n )\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.138474,
+                    "execution_time": 0.04184,
+                    "compile_time": 0.000445,
+                    "planning_time": 0.066561,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.215609,
+                    "execution_time": 0.041511,
+                    "compile_time": 0.000456,
+                    "planning_time": 0.142813,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01534,
+                    "execution_time": 0.006936,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.002888
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051805,
+                    "execution_time": 0.007391,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.038492
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015076,
+                    "execution_time": 0.006809,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.002775
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051196,
+                    "execution_time": 0.007552,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.037997
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n /*CURSOR_IDENTIFIER*/\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015435,
+                    "execution_time": 0.006825,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.00301
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.015683,
+                    "execution_time": 0.007026,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.002949
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  /*CURSOR_IDENTIFIER*/\n  )\n)\n",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.130672,
+                    "execution_time": 0.041883,
+                    "compile_time": 0.000462,
+                    "planning_time": 0.058604,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.212615,
+                    "execution_time": 0.042799,
+                    "compile_time": 0.000438,
+                    "planning_time": 0.139532,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015346,
+                    "execution_time": 0.006749,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002995
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050642,
+                    "execution_time": 0.007054,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.037777
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  /*CURSOR_IDENTIFIER*/\n  )\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015547,
+                    "execution_time": 0.007274,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.002814
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050882,
+                    "execution_time": 0.00706,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.038076
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  /*CURSOR_IDENTIFIER*/\n  )\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States'",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.35799,
+                    "execution_time": 0.3153,
+                    "compile_time": 0.000308,
+                    "planning_time": 0.024266,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.46046,
+                    "execution_time": 0.352911,
+                    "compile_time": 0.001337,
+                    "planning_time": 0.084836,
+                    "create_size": 512
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" LIMIT 21",
+                "preview": "\n/*   _col_0\n0    None\n1    None\n2    None\n3    None\n4    None\n5    None\n6    None\n7    None\n8    None\n9    None\n10   None\n11   None\n12   None\n13   None\n14   None\n15   None\n16   None\n17   None\n18   None\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.0161,
+                    "execution_time": 0.007585,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.002979
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053079,
+                    "execution_time": 0.007643,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.037765
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": "\n/*   _col_0\n0    None\n1    None\n2    None\n3    None\n4    None\n5    None\n6    None\n7    None\n8    None\n9    None\n10   None\n11   None\n12   None\n13   None\n14   None\n15   None\n16   None\n17   None\n18   None\n...*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum(ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n   ss_addr_sk = ca_address_sk\n   and\n   ca_country = 'United States'\n   and\n   ca_state in ('IN', 'WV', 'VA')\n   and ss_net_profit between 0 and 2000  \n  )\n or\n  (\n   ss_addr_sk = ca_address_sk\n   and\n   ca_country = 'United States'\n   and\n   ca_state in ('CA', 'NY') /* Assuming these were the intended condition for the second OR clause */\n   and ss_net_profit between 0 and 3000\n  )\n )\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'CA' , 'NY' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'CA' , 'NY' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.134857,
+                    "execution_time": 0.042066,
+                    "compile_time": 0.000455,
+                    "planning_time": 0.062656,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.219875,
+                    "execution_time": 0.041806,
+                    "compile_time": 0.000465,
+                    "planning_time": 0.146104,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015469,
+                    "execution_time": 0.007021,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.0029
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051259,
+                    "execution_time": 0.007595,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.037924
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('CA', 'NY') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  )\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.132759,
+                    "execution_time": 0.042914,
+                    "compile_time": 0.00044,
+                    "planning_time": 0.059088,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.216694,
+                    "execution_time": 0.042239,
+                    "compile_time": 0.000445,
+                    "planning_time": 0.143132,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015866,
+                    "execution_time": 0.007378,
+                    "compile_time": 3.8e-05,
+                    "planning_time": 0.002894
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051086,
+                    "execution_time": 0.007345,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.03788
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN')) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n/*CURSOR_IDENTIFIER*/\n  )\n)\n",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.13515,
+                    "execution_time": 0.042452,
+                    "compile_time": 0.00044,
+                    "planning_time": 0.06169,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.217308,
+                    "execution_time": 0.043734,
+                    "compile_time": 0.000455,
+                    "planning_time": 0.141969,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015472,
+                    "execution_time": 0.006953,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.002914
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050919,
+                    "execution_time": 0.007114,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.037984
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n/*CURSOR_IDENTIFIER*/\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015772,
+                    "execution_time": 0.007427,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.002833
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050987,
+                    "execution_time": 0.007152,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.038058
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('KY', 'SC', 'GA')\n  and ss_net_profit between 200 and 4500\n  )\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'KY' , 'SC' , 'GA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 4500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 200 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'KY' , 'SC' , 'GA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 4500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 200 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.136722,
+                    "execution_time": 0.042983,
+                    "compile_time": 0.000473,
+                    "planning_time": 0.062538,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.217696,
+                    "execution_time": 0.041885,
+                    "compile_time": 0.000455,
+                    "planning_time": 0.144439,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01575,
+                    "execution_time": 0.007364,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.002928
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051449,
+                    "execution_time": 0.007552,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.038097
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('KY', 'SC', 'GA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 4500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 200) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n/*CURSOR_IDENTIFIER*/\n  )\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015671,
+                    "execution_time": 0.007262,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002887
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016167,
+                    "execution_time": 0.007238,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.003149
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n and\n  ss_addr_sk = ca_address_sk\n/*CURSOR_IDENTIFIER*/\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015259,
+                    "execution_time": 0.006943,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002764
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.015816,
+                    "execution_time": 0.006905,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.003137
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n/*CURSOR_IDENTIFIER*/\n  )\n)\n",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum(ss_quantity)\nfrom store_sales, store, customer_demographics, customer_address, date_dim\nwhere s_store_sk = ss_store_sk\nand ss_sold_date_sk = d_date_sk and d_year = 1999\nand\n(\n  (\n    cd_demo_sk = ss_cdemo_sk\n    and cd_marital_status = 'D'\n    and cd_education_status = 'Secondary'\n    and ss_sales_price between 100.00 and 150.00\n  )\n  or\n  (\n    cd_demo_sk = ss_cdemo_sk\n    and cd_marital_status = 'M'\n    and cd_education_status = '2 yr Degree'\n    and ss_sales_price between 50.00 and 100.00\n  )\n  or\n  (\n    cd_demo_sk = ss_cdemo_sk\n    and cd_marital_status = 'W'\n    and cd_education_status = '4 yr Degree'\n    and ss_sales_price between 150.00 and 200.00\n  )\n)\nand\n(\n  (\n    ss_addr_sk = ca_address_sk\n    and ca_country = 'United States'\n    and ca_state in ('IN', 'WV', 'VA')\n    and ss_net_profit between 0 and 2000\n  )\n  or\n  (\n    ss_addr_sk = ca_address_sk\n    and ca_country = 'United States'\n    and ca_state in ('TX', 'ND', 'MN')\n    and ss_net_profit between 150 and 3000\n  )\n  or\n  (\n    ss_addr_sk = ca_address_sk\n    and ca_country = 'United States'\n    and ca_state in ('MI', 'WA', 'GA')\n    and ss_net_profit between 100 and 2500\n    /*CURSOR_IDENTIFIER*/ \n  )\n)",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'MI' , 'WA' , 'GA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 100 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'MI' , 'WA' , 'GA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 100 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.135164,
+                    "execution_time": 0.04155,
+                    "compile_time": 0.000471,
+                    "planning_time": 0.062984,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.217904,
+                    "execution_time": 0.042191,
+                    "compile_time": 0.000466,
+                    "planning_time": 0.144654,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016021,
+                    "execution_time": 0.007469,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.003014
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.0513,
+                    "execution_time": 0.007771,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.037905
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('MI', 'WA', 'GA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 100) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('SD', 'GA', 'CO')\n  and ss_net_profit between 100 and 500  )\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 100 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 100 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.136339,
+                    "execution_time": 0.04278,
+                    "compile_time": 0.00045,
+                    "planning_time": 0.062122,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.22268,
+                    "execution_time": 0.04205,
+                    "compile_time": 0.000467,
+                    "planning_time": 0.144939,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015844,
+                    "execution_time": 0.007321,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.002993
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050999,
+                    "execution_time": 0.007246,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.037992
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('SD', 'GA', 'CO') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 500 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 100) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('SD', 'GA', 'CO')\n  and ss_net_profit between 50 and 25000 \n  )\n)\n\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50 AND \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.136302,
+                    "execution_time": 0.041776,
+                    "compile_time": 0.000452,
+                    "planning_time": 0.063574,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.218266,
+                    "execution_time": 0.041695,
+                    "compile_time": 0.000449,
+                    "planning_time": 0.145925,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015649,
+                    "execution_time": 0.006834,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.003088
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051366,
+                    "execution_time": 0.007418,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.038241
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('SD', 'GA', 'CO') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\""
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('SD', 'GA', 'CO')\n  and ss_net_profit between 50 and 25000 \n  )\n\n  )\n/*CURSOR_IDENTIFIER*/\n",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('SD', 'GA', 'CO') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_11\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('SD', 'GA', 'CO')\n  and ss_net_profit between 50 and 25000 \n  )\n )\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('SD', 'GA', 'CO') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_11\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query48.tpl query 74 in stream 0\nselect /* TPC-DS query48.tpl 0.74 */ sum (ss_quantity)\n from store_sales, store, customer_demographics, customer_address, date_dim\n where s_store_sk = ss_store_sk\n and  ss_sold_date_sk = d_date_sk and d_year = 1999\n and  \n (\n  (\n   cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'D'\n   and \n   cd_education_status = 'Secondary'\n   and \n   ss_sales_price between 100.00 and 150.00  \n   )\n or\n  (\n  cd_demo_sk = ss_cdemo_sk\n   and \n   cd_marital_status = 'M'\n   and \n   cd_education_status = '2 yr Degree'\n   and \n   ss_sales_price between 50.00 and 100.00   \n  )\n or \n (\n  cd_demo_sk = ss_cdemo_sk\n  and \n   cd_marital_status = 'W'\n   and \n   cd_education_status = '4 yr Degree'\n   and \n   ss_sales_price between 150.00 and 200.00  \n )\n )\n and\n (\n  (\n  ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('IN', 'WV', 'VA')\n  and ss_net_profit between 0 and 2000  \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('TX', 'ND', 'MN')\n  and ss_net_profit between 150 and 3000 \n  )\n or\n  (ss_addr_sk = ca_address_sk\n  and\n  ca_country = 'United States'\n  and\n  ca_state in ('SD', 'GA', 'CO')\n  and ss_net_profit between 50 and 25000 \n  )\n )\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'IN' , 'WV' , 'VA' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'SD' , 'GA' , 'CO' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50 ) OR ( \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ( 'TX' , 'ND' , 'MN' ) AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150 ) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00 ) OR ( \"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00 ) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" LIMIT 21",
+                "preview": "\n/*  _col_0\n0   None*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015599,
+                    "execution_time": 0.006946,
+                    "compile_time": 3.9e-05,
+                    "planning_time": 0.003043
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.015678,
+                    "execution_time": 0.006858,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.002949
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('IN', 'WV', 'VA') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 2000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 0) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('SD', 'GA', 'CO') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 25000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 50) OR (\"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" = 'United States' AND \"CUSTOMER_ADDRESS\".\"CA_STATE\" IN ('TX', 'ND', 'MN') AND \"STORE_SALES\".\"SS_NET_PROFIT\" <= 3000 AND \"STORE_SALES\".\"SS_NET_PROFIT\" >= 150) JOIN \"CUSTOMER_DEMOGRAPHICS\" AS \"CUSTOMER_DEMOGRAPHICS\" ON (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '2 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'M' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 100.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 50.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = '4 yr Degree' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'W' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 200.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 150.00) OR (\"CUSTOMER_DEMOGRAPHICS\".\"CD_DEMO_SK\" = \"STORE_SALES\".\"SS_CDEMO_SK\" AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_EDUCATION_STATUS\" = 'Secondary' AND \"CUSTOMER_DEMOGRAPHICS\".\"CD_MARITAL_STATUS\" = 'D' AND \"STORE_SALES\".\"SS_SALES_PRICE\" <= 150.00 AND \"STORE_SALES\".\"SS_SALES_PRICE\" >= 100.00) JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 1999 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" LIMIT 100"
+            }
+        ],
+        "preview": "\n/*  _col_0\n0   None*/"
+    }
+]

@@ -1,0 +1,891 @@
+[
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id as brand_id, i_brand as brand,\n  time_sk / 3600 as t_hour, time_sk % 3600 / 60 as t_minute,\n \tsum(ext_price) as ext_price\nfrom item, (select ws_ext_sales_price as ext_price, \n                    ws_sold_date_sk as sold_date_sk,\n                    ws_item_sk as sold_item_sk,\n                    ws_sold_time_sk as time_sk  \n             from web_sales, date_dim\n             where d_date_sk = ws_sold_date_sk\n               and d_moy = 12\n               and d_year = 2001\n             union all\n             select cs_ext_sales_price as ext_price,\n                    cs_sold_date_sk as sold_date_sk,\n                    cs_item_sk as sold_item_sk,\n                    cs_sold_time_sk as time_sk\n             from catalog_sales, date_dim\n             where d_date_sk = cs_sold_date_sk\n               and d_moy = 12\n               and d_year = 2001\n            ) sales\nwhere item.i_item_sk = sales.sold_item_sk\ngroup by i_brand_id, i_brand, t_hour, t_minute\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , CAST ( \"SALES\".\"TIME_SK\" / 3600 AS BIGINT ) AS \"T_HOUR\" , \"SALES\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT ) AS \"T_MINUTE\" , SUM ( \"SALES\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES\" AS \"SALES\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , CAST ( \"SALES\".\"TIME_SK\" / 3600 AS BIGINT ) , \"SALES\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT )"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.082431,
+                    "execution_time": 0.031446,
+                    "compile_time": 0.000237,
+                    "planning_time": 0.026343,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.14452,
+                    "execution_time": 0.031859,
+                    "compile_time": 0.00024,
+                    "planning_time": 0.087791,
+                    "create_size": 6
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.793366,
+                    "execution_time": 1.494711,
+                    "compile_time": 0.000435,
+                    "planning_time": 0.039926,
+                    "create_size": 1920
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.747881,
+                    "execution_time": 3.359279,
+                    "compile_time": 0.005904,
+                    "planning_time": 0.122924,
+                    "create_size": 1920
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT ) AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_2\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_2\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) , \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.51385,
+                    "execution_time": 3.086214,
+                    "compile_time": 0.000489,
+                    "planning_time": 0.028982,
+                    "create_size": 1408
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.465556,
+                    "execution_time": 3.752212,
+                    "compile_time": 0.228075,
+                    "planning_time": 0.095293,
+                    "create_size": 1408
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_3\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*    brand_id                 brand  t_hour  t_minute   ext_price\n0    7007002         brandbrand #2      22        16    55875.60\n1    3002002     importoexporti #2      17        20  3263326.91\n2   10016001     corpamalgamalg #1      22        16    12602.00\n3   10005003   scholarunivamalg #3      16        35    29060.56\n4   10003013  exportiunivamalg #13      19         4    50438.63\n5    3002001     importoexporti #2      19         4    35870.80\n6    1003001   edu packnameless #6      19         4     1569.15\n7    6009001   edu packedu pack #2      16        35     3457.10\n8    8004001     importoscholar #2      19         4    14016.60\n9    5002001    importonameless #8      16        35    11121.51\n10   5004002    edu packscholar #2       1        30  1073081.38\n11   2001002       amalgimporto #2       1        30  1035965.53\n12   3001002       amalgexporti #2       1        30  1013383.32\n13   1003002       exportiamalg #2      13        22  2650388.32\n14   7007003   edu packedu pack #2      11        39     1870.29\n15   7009010         maxibrand #10      12        50   138701.39\n16   6001004          amalgcorp #4       8        36   206459.78\n17   5003002     exportischolar #2       8        36  2268601.78\n18   8009007     corpamalgamalg #5       7        13      321.44\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017243,
+                    "execution_time": 0.007537,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.003677
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.056387,
+                    "execution_time": 0.007937,
+                    "compile_time": 0.001125,
+                    "planning_time": 0.038871
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT ) AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_2\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_2\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) , \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT )",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_3\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*    brand_id                 brand  t_hour  t_minute   ext_price\n0    7007002         brandbrand #2      22        16    55875.60\n1    3002002     importoexporti #2      17        20  3263326.91\n2   10016001     corpamalgamalg #1      22        16    12602.00\n3   10005003   scholarunivamalg #3      16        35    29060.56\n4   10003013  exportiunivamalg #13      19         4    50438.63\n5    3002001     importoexporti #2      19         4    35870.80\n6    1003001   edu packnameless #6      19         4     1569.15\n7    6009001   edu packedu pack #2      16        35     3457.10\n8    8004001     importoscholar #2      19         4    14016.60\n9    5002001    importonameless #8      16        35    11121.51\n10   5004002    edu packscholar #2       1        30  1073081.38\n11   2001002       amalgimporto #2       1        30  1035965.53\n12   3001002       amalgexporti #2       1        30  1013383.32\n13   1003002       exportiamalg #2      13        22  2650388.32\n14   7007003   edu packedu pack #2      11        39     1870.29\n15   7009010         maxibrand #10      12        50   138701.39\n16   6001004          amalgcorp #4       8        36   206459.78\n17   5003002     exportischolar #2       8        36  2268601.78\n18   8009007     corpamalgamalg #5       7        13      321.44\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,time_sk / 3600 as t_hour, time_sk % 3600 / 60 as t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n/*CURSOR_IDENTIFIER*/\n) sales\nwhere item.i_item_sk = sales.sold_item_sk\ngroup by i_brand_id, i_brand, t_hour, t_minute",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , CAST ( \"SALES\".\"TIME_SK\" / 3600 AS BIGINT ) AS \"T_HOUR\" , \"SALES\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT ) AS \"T_MINUTE\" , SUM ( \"SALES\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES\" AS \"SALES\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , CAST ( \"SALES\".\"TIME_SK\" / 3600 AS BIGINT ) , \"SALES\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT )"
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT ) AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_2\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_2\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) , \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" % CAST ( 3600 / 60 AS BIGINT )",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand, \n    (sales_data.time_sk / 3600) % 24 as t_hour, (sales_data.time_sk / 60) % 60 as t_minute,\n    sum(ext_price) ext_price\nfrom item\njoin (\n    select ws_ext_sales_price as ext_price, \n                 ws_sold_date_sk as sold_date_sk,\n                 ws_item_sk as sold_item_sk,\n                 ws_sold_time_sk as time_sk  \n             from web_sales, date_dim\n             where d_date_sk = ws_sold_date_sk\n               and d_moy = 12\n               and d_year = 2001\n             union all\n             select cs_ext_sales_price as ext_price,\n                    cs_sold_date_sk as sold_date_sk,\n                    cs_item_sk as sold_item_sk,\n                    cs_sold_time_sk as time_sk\n             from catalog_sales, date_dim\n             where d_date_sk = cs_sold_date_sk\n               and d_moy = 12\n               and d_year = 2001\n) as sales_data on item.i_item_sk = sales_data.sold_item_sk\ngroup by i_brand_id, i_brand, t_hour, t_minute\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES_DATA\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , ( CAST ( \"SALES_DATA\".\"TIME_SK\" / 3600 AS BIGINT ) ) % 24 AS \"T_HOUR\" , ( CAST ( \"SALES_DATA\".\"TIME_SK\" / 60 AS BIGINT ) ) % 60 AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , ( CAST ( \"SALES_DATA\".\"TIME_SK\" / 3600 AS BIGINT ) ) % 24 , ( CAST ( \"SALES_DATA\".\"TIME_SK\" / 60 AS BIGINT ) ) % 60"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) ) % 24 AS \"T_HOUR\" , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 60 AS BIGINT ) ) % 60 AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_2\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_2\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) ) % 24 , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 60 AS BIGINT ) ) % 60",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.48824,
+                    "execution_time": 3.077635,
+                    "compile_time": 0.000489,
+                    "planning_time": 0.028842,
+                    "create_size": 1408
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.580971,
+                    "execution_time": 2.973911,
+                    "compile_time": 0.123674,
+                    "planning_time": 0.091537,
+                    "create_size": 1408
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_4\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_4\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_4\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_4\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" LIMIT 21",
+                "preview": "\n/*    brand_id                brand  t_hour  t_minute   ext_price\n0    7015001        amalgamalg #2      20        28     1454.14\n1    9002006       importomaxi #6      17        19   134159.73\n2    5003002    exportischolar #2      13        46  2486120.16\n3    6009008          maxicorp #8      12        49   182492.21\n4    1002002      importoamalg #2      13        46  2703167.59\n5    6002002       importocorp #2      13        46   139590.69\n6    8001006     amalgnameless #6      16        27   112120.81\n7    7004005   edu packimporto #2      15         3     7181.60\n8    9001010        amalgmaxi #10      18        41   114003.51\n9    6005008       scholarcorp #8      18        41   176594.94\n10   9008005  exportiunivamalg #6      17        44      341.10\n11   3004002   edu packexporti #2       2        24  1006026.89\n12  10003006  exportiunivamalg #6      12        11    25151.47\n13   7016009          corpcorp #8      10        17     6046.48\n14   6009006          maxicorp #6      20        36   175566.06\n15  10016007    corpamalgamalg #7      20        36    37610.48\n16   9016006     corpunivamalg #6      11        43    73876.81\n17   7015006   scholarnameless #6       9        59   100799.35\n18   5004001   edu packimporto #2       9        59    18558.99\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018004,
+                    "execution_time": 0.008286,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.003544
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.055221,
+                    "execution_time": 0.007862,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.038763
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) ) % 24 AS \"T_HOUR\" , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 60 AS BIGINT ) ) % 60 AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_2\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_2\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 3600 AS BIGINT ) ) % 24 , ( CAST ( \"SPEQLITE_TEMP_TABLE_2\".\"TIME_SK\" / 60 AS BIGINT ) ) % 60",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_4\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_4\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_4\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_4\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": "\n/*    brand_id                brand  t_hour  t_minute   ext_price\n0    7015001        amalgamalg #2      20        28     1454.14\n1    9002006       importomaxi #6      17        19   134159.73\n2    5003002    exportischolar #2      13        46  2486120.16\n3    6009008          maxicorp #8      12        49   182492.21\n4    1002002      importoamalg #2      13        46  2703167.59\n5    6002002       importocorp #2      13        46   139590.69\n6    8001006     amalgnameless #6      16        27   112120.81\n7    7004005   edu packimporto #2      15         3     7181.60\n8    9001010        amalgmaxi #10      18        41   114003.51\n9    6005008       scholarcorp #8      18        41   176594.94\n10   9008005  exportiunivamalg #6      17        44      341.10\n11   3004002   edu packexporti #2       2        24  1006026.89\n12  10003006  exportiunivamalg #6      12        11    25151.47\n13   7016009          corpcorp #8      10        17     6046.48\n14   6009006          maxicorp #6      20        36   175566.06\n15  10016007    corpamalgamalg #7      20        36    37610.48\n16   9016006     corpunivamalg #6      11        43    73876.81\n17   7015006   scholarnameless #6       9        59   100799.35\n18   5004001   edu packimporto #2       9        59    18558.99\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id as brand_id, i_brand as brand, t_hour, t_minute,\n    sum(ext_price) as ext_price\nfrom item, \n(\n    select ws_ext_sales_price as ext_price, \n           ws_sold_date_sk as sold_date_sk,\n           ws_item_sk as sold_item_sk,\n           ws_sold_time_sk as time_sk\n    from web_sales, date_dim, time_dim\n    where d_date_sk = ws_sold_date_sk\n      and ws_sold_time_sk = time_sk\n      and d_moy = 12\n      and d_year = 2001\n    union all\n    select cs_ext_sales_price as ext_price,\n           cs_sold_date_sk as sold_date_sk,\n           cs_item_sk as sold_item_sk,\n           cs_sold_time_sk as time_sk\n    from catalog_sales, date_dim, time_dim\n    where d_date_sk = cs_sold_date_sk\n      and cs_sold_time_sk = time_sk\n      and d_moy = 12\n      and d_year = 2001\n    union all\n    select ss_ext_sales_price as ext_price,\n           ss_sold_date_sk as sold_date_sk,\n           ss_item_sk as sold_item_sk,\n           ss_sold_time_sk as time_sk\n    from store_sales, date_dim, time_dim\n    where d_date_sk = ss_sold_date_sk\n      and ss_sold_time_sk = time_sk\n      and d_moy = 12\n      and d_year = 2001\n/*CURSOR_IDENTIFIER*/\n) sales, time_dim\nwhere i_item_sk = sold_item_sk\n  and time_sk = t_time_sk\ngroup by i_brand_id, i_brand, t_hour, t_minute\norder by i_brand_id, i_brand, t_hour, t_minute;",
+        "optimize": [
+            "WITH \"TIME_DIM_2\" AS ( SELECT 1 AS \"_\" FROM \"TIME_DIM\" AS \"TIME_DIM\" ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"TIME_DIM_2\" AS \"TIME_DIM\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SOLD_TIME_SK\" = \"WEB_SALES\".\"WS_SOLD_TIME_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"TIME_DIM_2\" AS \"TIME_DIM\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" = \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"TIME_DIM_2\" AS \"TIME_DIM\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_SOLD_TIME_SK\" = \"STORE_SALES\".\"SS_SOLD_TIME_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES\" AS \"SALES\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"SALES\".\"TIME_SK\" = \"TIME_DIM\".\"T_TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"BRAND_ID\" NULLS LAST , \"BRAND\" NULLS LAST , \"T_HOUR\" NULLS LAST , \"T_MINUTE\" NULLS LAST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT 1 AS \"_\" FROM \"TIME_DIM\" AS \"TIME_DIM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.092127,
+                    "execution_time": 0.037919,
+                    "compile_time": 0.000219,
+                    "planning_time": 0.022523,
+                    "create_size": 464
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.361747,
+                    "execution_time": 0.039965,
+                    "compile_time": 0.197165,
+                    "planning_time": 0.090579,
+                    "create_size": 464
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SOLD_TIME_SK\" = \"WEB_SALES\".\"WS_SOLD_TIME_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" = \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_SOLD_TIME_SK\" = \"STORE_SALES\".\"SS_SOLD_TIME_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SOLD_TIME_SK\" = \"WEB_SALES\".\"WS_SOLD_TIME_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" = \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_SOLD_TIME_SK\" = \"STORE_SALES\".\"SS_SOLD_TIME_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES\" AS \"SALES\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"SALES\".\"TIME_SK\" = \"TIME_DIM\".\"T_TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"BRAND_ID\" , \"BRAND\" , \"T_HOUR\" , \"T_MINUTE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SOLD_TIME_SK\" = \"WEB_SALES\".\"WS_SOLD_TIME_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" = \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_SOLD_TIME_SK\" = \"STORE_SALES\".\"SS_SOLD_TIME_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES\" AS \"SALES\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"SALES\".\"TIME_SK\" = \"TIME_DIM\".\"T_TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"BRAND_ID\" NULLS LAST , \"BRAND\" NULLS LAST , \"T_HOUR\" NULLS LAST , \"T_MINUTE\" NULLS LAST",
+                "rewrite": "WITH SALES AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SOLD_TIME_SK\" = \"WEB_SALES\".\"WS_SOLD_TIME_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" = \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_SOLD_TIME_SK\" = \"STORE_SALES\".\"SS_SOLD_TIME_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES\" AS \"SALES\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"SALES\".\"TIME_SK\" = \"TIME_DIM\".\"T_TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"BRAND_ID\" NULLS LAST , \"BRAND\" NULLS LAST , \"T_HOUR\" NULLS LAST , \"T_MINUTE\" NULLS LAST"
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id as brand_id, i_brand as brand, \n       t_hour, t_minute,\n       sum(ext_price) as ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        (ws_sold_time_sk / 10000) % 100 as t_hour,\n                        (ws_sold_time_sk / 100) % 100 as t_minute   \n                 from web_sales, date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy = 12\n                   and d_year = 2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        (cs_sold_time_sk / 10000) % 100 as t_hour,\n                        (cs_sold_time_sk / 100) % 100 as t_minute\n                 from catalog_sales, date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy = 12\n                   and d_year = 2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        (ss_sold_time_sk / 10000) % 100 as t_hour,\n                        (ss_sold_time_sk / 100) % 100 as t_minute\n                 from store_sales, date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy = 12\n                   and d_year = 2001) as sales_data\n where i_item_sk = sold_item_sk\n group by i_brand_id, i_brand, t_hour, t_minute\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES_DATA\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SALES_DATA\".\"T_HOUR\" AS \"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SALES_DATA\".\"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 4.360395,
+                    "execution_time": 4.023277,
+                    "compile_time": 0.000507,
+                    "planning_time": 0.051143,
+                    "create_size": 5248
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.144741,
+                    "execution_time": 5.69824,
+                    "compile_time": 0.027862,
+                    "planning_time": 0.153834,
+                    "create_size": 5248
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_6\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 7.93384,
+                    "execution_time": 7.518597,
+                    "compile_time": 0.000482,
+                    "planning_time": 0.026813,
+                    "create_size": 1408
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.813929,
+                    "execution_time": 7.341686,
+                    "compile_time": 0.001588,
+                    "planning_time": 0.087638,
+                    "create_size": 1408
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_7\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_7\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_7\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*    brand_id                  brand  t_hour  t_minute    ext_price\n0    1004002       edu packamalg #2       3        71  13340178.42\n1   10012006   importoamalgamalg #6       1        92     44856.80\n2   10010005      univamalgamalg #5       0        41     50629.94\n3    5001001      univunivamalg #10       3        71     16990.64\n4    8006010       corpnameless #10       3        71    653810.18\n5    1001001      importoscholar #2       1        72     13954.25\n6    6007006           brandcorp #6       1        72    185084.57\n7    2004001        amalgexporti #2       2        79     39968.81\n8    9005008         scholarmaxi #8       1        72    132649.30\n9   10002008    importounivamalg #8       3        86    201245.80\n10   8016001       edu packamalg #2       3         7      6982.19\n11   7016008        corpnameless #8       6        51    788840.78\n12   5001001       edu packamalg #2       6        51    136285.07\n13   5002002      importoscholar #2       7        79   3823325.22\n14   8002005  importoamalgamalg #11       7        29     12719.55\n15   3004001      amalgunivamalg #6       4        48     21926.07\n16   5002001          amalgamalg #2       7        29     40827.62\n17   3001001      amalgnameless #10       3        59     12684.94\n18   8011003                              2        36      2305.47\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01772,
+                    "execution_time": 0.008082,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.003582
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054986,
+                    "execution_time": 0.007857,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.038625
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_6\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_7\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_7\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_7\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*    brand_id                  brand  t_hour  t_minute    ext_price\n0    1004002       edu packamalg #2       3        71  13340178.42\n1   10012006   importoamalgamalg #6       1        92     44856.80\n2   10010005      univamalgamalg #5       0        41     50629.94\n3    5001001      univunivamalg #10       3        71     16990.64\n4    8006010       corpnameless #10       3        71    653810.18\n5    1001001      importoscholar #2       1        72     13954.25\n6    6007006           brandcorp #6       1        72    185084.57\n7    2004001        amalgexporti #2       2        79     39968.81\n8    9005008         scholarmaxi #8       1        72    132649.30\n9   10002008    importounivamalg #8       3        86    201245.80\n10   8016001       edu packamalg #2       3         7      6982.19\n11   7016008        corpnameless #8       6        51    788840.78\n12   5001001       edu packamalg #2       6        51    136285.07\n13   5002002      importoscholar #2       7        79   3823325.22\n14   8002005  importoamalgamalg #11       7        29     12719.55\n15   3004001      amalgunivamalg #6       4        48     21926.07\n16   5002001          amalgamalg #2       7        29     40827.62\n17   3001001      amalgnameless #10       3        59     12684.94\n18   8011003                              2        36      2305.47\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select  ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        (ws_sold_time_sk / 10000) % 100 as t_hour, (ws_sold_time_sk / 100) % 100 as t_minute  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        (cs_sold_time_sk / 10000) % 100 as t_hour, (cs_sold_time_sk / 100) % 100 as t_minute\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        (ss_sold_time_sk / 10000) % 100 as t_hour, (ss_sold_time_sk / 100) % 100 as t_minute\n                 from store_sales, date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy = 12\n                   and d_year = 2001\n) as sales_data\nwhere i_item_sk = sold_item_sk\ngroup by i_brand_id, i_brand, t_hour, t_minute\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES_DATA\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SALES_DATA\".\"T_HOUR\" AS \"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SALES_DATA\".\"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_6\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_6\".\"T_MINUTE\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        (ws_sold_time_sk / 10000) % 100 as t_hour, (ws_sold_time_sk / 100) % 100 as t_minute  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        (cs_sold_time_sk / 10000) % 100 as t_hour, (cs_sold_time_sk / 100) % 100 as t_minute\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        (ss_sold_time_sk / 10000) % 100 as t_hour, (ss_sold_time_sk / 100) % 100 as t_minute\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n/*CURSOR_IDENTIFIER*/\n                 ) as sales_data\n where i_item_sk = sold_item_sk\n group by i_brand_id, i_brand, t_hour, t_minute\n",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"SALES_DATA\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SALES_DATA\".\"T_HOUR\" AS \"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SALES_DATA\".\"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES_DATA AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SALES_DATA\".\"T_HOUR\" AS \"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SALES_DATA\".\"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES_DATA AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SALES_DATA\".\"T_HOUR\" AS \"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SALES_DATA\".\"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\"",
+                "rewrite": "WITH SALES_DATA AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"WEB_SALES\".\"WS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"SALES_DATA\".\"T_HOUR\" AS \"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SALES_DATA\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SALES_DATA\" AS \"SALES_DATA\" ON \"ITEM\".\"I_ITEM_SK\" = \"SALES_DATA\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"SALES_DATA\".\"T_HOUR\" , \"SALES_DATA\".\"T_MINUTE\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        (ws_sold_time_sk / 10000) % 100 as t_hour, (ws_sold_time_sk / 100) % 100 as t_minute  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        (cs_sold_time_sk / 10000) % 100 as t_hour, (cs_sold_time_sk / 100) % 100 as t_minute\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        (ss_sold_time_sk / 10000) % 100 as t_hour, (ss_sold_time_sk / 100) % 100 as t_minute\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n/*CURSOR_IDENTIFIER*/\n                   and d_year=2001\n                 ) as sales_data\n where i_item_sk = sold_item_sk\n group by i_brand_id, i_brand, t_hour, t_minute\n",
+        "optimize": [
+            "SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT ) ) % 100 AS \"T_HOUR\" , ( CAST ( \"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT ) ) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.097613,
+                    "execution_time": 2.729345,
+                    "compile_time": 0.000428,
+                    "planning_time": 0.036621,
+                    "create_size": 3584
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.287819,
+                    "execution_time": 2.832363,
+                    "compile_time": 0.003769,
+                    "planning_time": 0.106453,
+                    "create_size": 3584
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"EXT_PRICE\" AS \"EXT_PRICE\" , \"SPEQLITE_TEMP_TABLE_8\".\"SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"SOLD_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_8\".\"T_MINUTE\" AS \"T_MINUTE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*    ext_price  sold_date_sk  sold_item_sk  t_hour  t_minute\n0      812.86       2452245        176165     4.0      44.0\n1      207.00       2452245        145769     5.0      26.0\n2     2643.84       2452245        280187     3.0      76.0\n3      241.90       2452245         49099     5.0      26.0\n4       73.61       2452245        231545     3.0      76.0\n5     5936.40       2452245        247499     5.0      26.0\n6     2855.19       2452245        120315     3.0      76.0\n7     4251.03       2452245        240807     5.0      26.0\n8     2196.35       2452245        184261     3.0      76.0\n9        0.00       2452245        198971     5.0      26.0\n10        NaN       2452245         56629     NaN       NaN\n11     303.59       2452245        142947     5.0      26.0\n12    4007.50       2452245        154159     3.0      76.0\n13    1298.22       2452245         22589     5.0      26.0\n14    1934.52       2452245        252215     3.0      76.0\n15     432.63       2452245        176907     5.0      26.0\n16    7507.89       2452245        283623     3.0      76.0\n17     330.32       2452245         42347     5.0      26.0\n18    2229.04       2452245        198499     3.0      76.0\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017664,
+                    "execution_time": 0.007576,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.003788
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.398129,
+                    "execution_time": 0.008086,
+                    "compile_time": 0.341586,
+                    "planning_time": 0.039434
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\", \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SOLD_DATE_SK\", \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\", (CAST(\"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 10000 AS BIGINT)) % 100 AS \"T_HOUR\", (CAST(\"STORE_SALES\".\"SS_SOLD_TIME_SK\" / 100 AS BIGINT)) % 100 AS \"T_MINUTE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"EXT_PRICE\" AS \"EXT_PRICE\" , \"SPEQLITE_TEMP_TABLE_8\".\"SOLD_DATE_SK\" AS \"SOLD_DATE_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"SOLD_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_8\".\"T_MINUTE\" AS \"T_MINUTE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*    ext_price  sold_date_sk  sold_item_sk  t_hour  t_minute\n0      812.86       2452245        176165     4.0      44.0\n1      207.00       2452245        145769     5.0      26.0\n2     2643.84       2452245        280187     3.0      76.0\n3      241.90       2452245         49099     5.0      26.0\n4       73.61       2452245        231545     3.0      76.0\n5     5936.40       2452245        247499     5.0      26.0\n6     2855.19       2452245        120315     3.0      76.0\n7     4251.03       2452245        240807     5.0      26.0\n8     2196.35       2452245        184261     3.0      76.0\n9        0.00       2452245        198971     5.0      26.0\n10        NaN       2452245         56629     NaN       NaN\n11     303.59       2452245        142947     5.0      26.0\n12    4007.50       2452245        154159     3.0      76.0\n13    1298.22       2452245         22589     5.0      26.0\n14    1934.52       2452245        252215     3.0      76.0\n15     432.63       2452245        176907     5.0      26.0\n16    7507.89       2452245        283623     3.0      76.0\n17     330.32       2452245         42347     5.0      26.0\n18    2229.04       2452245        198499     3.0      76.0\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where /*CURSOR_IDENTIFIER*/ t_time_sk = time_sk and i_item_sk = sold_item_sk group by i_brand_id, i_brand, t_hour, t_minute",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.479467,
+                    "execution_time": 3.162469,
+                    "compile_time": 0.000563,
+                    "planning_time": 0.053237,
+                    "create_size": 3456
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.818888,
+                    "execution_time": 3.391932,
+                    "compile_time": 0.000556,
+                    "planning_time": 0.163672,
+                    "create_size": 3456
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 8.577752,
+                    "execution_time": 8.157792,
+                    "compile_time": 0.000598,
+                    "planning_time": 0.034997,
+                    "create_size": 1664
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 8.606711,
+                    "execution_time": 8.109951,
+                    "compile_time": 0.005319,
+                    "planning_time": 0.098482,
+                    "create_size": 1664
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_10\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_10\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_10\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_10\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\" LIMIT 21",
+                "preview": "\n/*    brand_id                  brand  t_hour  t_minute   ext_price\n0   10009017     edu packscholar #2      16        20        0.00\n1   10002016   importounivamalg #16      18        47   160568.11\n2    3002002      importoexporti #2      16        20  4887480.84\n3    7003004        exportibrand #4      16        20   195807.75\n4    9009003        amalgscholar #2      20         8     6568.78\n5    9016008       corpunivamalg #8      11         3   318757.27\n6    7012002     importonameless #2      20        43   292863.65\n7   10013008        namelesscorp #4       5        56     4131.85\n8    9012004    importounivamalg #4      20        13   237539.17\n9    7008009   importoamalgamalg #3      18        13     5238.08\n10   2001002        amalgimporto #2       5        20  1626341.27\n11  10012016     edu packexporti #2      12        52     2897.31\n12   8001002       amalgnameless #2      12        52   299190.45\n13   9014010  edu packunivamalg #10      12        52   263489.82\n14   9012005        scholarbrand #6      10        45     1353.50\n15   6003002         exporticorp #2       8        26   254615.24\n16   7009002           maxibrand #2       8        26   205802.47\n17   4001002       amalgedu pack #2      13         0  6871983.70\n18   4002002     importoedu pack #2      10        23  8009418.95\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018506,
+                    "execution_time": 0.008223,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.003833
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.056494,
+                    "execution_time": 0.007823,
+                    "compile_time": 0.001162,
+                    "planning_time": 0.038974
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_10\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_10\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_10\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_10\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\""
+            }
+        ],
+        "preview": "\n/*    brand_id                  brand  t_hour  t_minute   ext_price\n0   10009017     edu packscholar #2      16        20        0.00\n1   10002016   importounivamalg #16      18        47   160568.11\n2    3002002      importoexporti #2      16        20  4887480.84\n3    7003004        exportibrand #4      16        20   195807.75\n4    9009003        amalgscholar #2      20         8     6568.78\n5    9016008       corpunivamalg #8      11         3   318757.27\n6    7012002     importonameless #2      20        43   292863.65\n7   10013008        namelesscorp #4       5        56     4131.85\n8    9012004    importounivamalg #4      20        13   237539.17\n9    7008009   importoamalgamalg #3      18        13     5238.08\n10   2001002        amalgimporto #2       5        20  1626341.27\n11  10012016     edu packexporti #2      12        52     2897.31\n12   8001002       amalgnameless #2      12        52   299190.45\n13   9014010  edu packunivamalg #10      12        52   263489.82\n14   9012005        scholarbrand #6      10        45     1353.50\n15   6003002         exporticorp #2       8        26   254615.24\n16   7009002           maxibrand #2       8        26   205802.47\n17   4001002       amalgedu pack #2      13         0  6871983.70\n18   4002002     importoedu pack #2      10        23  8009418.95\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n/*CURSOR_IDENTIFIER*/\ngroup by i_brand_id, i_brand, t_hour, t_minute",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.769509,
+                    "execution_time": 2.505639,
+                    "compile_time": 0.000506,
+                    "planning_time": 0.049461,
+                    "create_size": 2688
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 2.97068,
+                    "execution_time": 2.595402,
+                    "compile_time": 0.005831,
+                    "planning_time": 0.155897,
+                    "create_size": 2688
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand, t_hour, t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales, date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales, date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales, date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp, time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id = 1\n group by i_brand_id, i_brand, t_hour, t_minute\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" CROSS JOIN \"TIME_DIM\" AS \"TIME_DIM\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_11\".\"SOLD_ITEM_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price, i_brand_id, i_brand, t_hour, t_minute\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id=1\n   and time_sk = t_time_sk\n/*CURSOR_IDENTIFIER*/\ngroup by i_brand_id, i_brand, t_hour, t_minute",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" , \"ITEM\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" , \"ITEM\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR_COL_7\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE_COL_8\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.589406,
+                    "execution_time": 0.912255,
+                    "compile_time": 0.045046,
+                    "planning_time": 0.036181,
+                    "create_size": 1536
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.911105,
+                    "execution_time": 0.919687,
+                    "compile_time": 3.278229,
+                    "planning_time": 0.100919,
+                    "create_size": 1536
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_12\".\"EXT_PRICE\" AS \"EXT_PRICE\" , \"SPEQLITE_TEMP_TABLE_12\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_HOUR_COL_7\" AS \"T_HOUR_COL_7\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_MINUTE_COL_8\" AS \"T_MINUTE_COL_8\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*    brand_id                 brand  t_hour  t_minute  ext_price  i_brand_id               i_brand  t_hour_col_7  t_minute_col_8\n0   10010012    univamalgamalg #12      14        29   18094.87    10010012    univamalgamalg #12            14              29\n1    7003008       exportibrand #8      14        36   13828.61     7003008       exportibrand #8            14              36\n2    2001002       amalgimporto #2       9        52  154198.36     2001002       amalgimporto #2             9              52\n3    4004002   edu packedu pack #2      10        42  147440.82     4004002   edu packedu pack #2            10              42\n4    8016004           corpmaxi #4       9        49    5836.82     8016004           corpmaxi #4             9              49\n5    4003002    exportiedu pack #2      16        23   72705.81     4003002    exportiedu pack #2            16              23\n6    2004001  edu packunivamalg #8       9        34    3841.10     2004001  edu packunivamalg #8             9              34\n7    1004002      edu packamalg #2      10        42  194999.54     1004002      edu packamalg #2            10              42\n8    3003002     exportiexporti #2      10        37  181389.94     3003002     exportiexporti #2            10              37\n9    7004008      edu packbrand #8      14        32   12974.51     7004008      edu packbrand #8            14              32\n10   1004002      edu packamalg #2      11         3  106112.17     1004002      edu packamalg #2            11               3\n11   5001002       amalgscholar #2      10        20  260259.37     5001002       amalgscholar #2            10              20\n12   9001003     importoexporti #2      16        15    3357.36     9001003     importoexporti #2            16              15\n13   8003004    exportinameless #4      11        52    1879.24     8003004    exportinameless #4            11              52\n14   8008005  scholarunivamalg #16      20         0    1109.64     8008005  scholarunivamalg #16            20               0\n15   7001007   exportiunivamalg #3      20         0    9396.31     7001007   exportiunivamalg #3            20               0\n16   1001001       importomaxi #10      14        40     723.51     1001001       importomaxi #10            14              40\n17  10005010  scholarunivamalg #10      13        47   17688.64    10005010  scholarunivamalg #10            13              47\n18   7013002    exportinameless #2      11        17   26950.95     7013002    exportinameless #2            11              17\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018436,
+                    "execution_time": 0.007758,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.004257
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.05919,
+                    "execution_time": 0.008459,
+                    "compile_time": 0.001092,
+                    "planning_time": 0.040577
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" , \"ITEM\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_12\".\"EXT_PRICE\" AS \"EXT_PRICE\" , \"SPEQLITE_TEMP_TABLE_12\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_HOUR_COL_7\" AS \"T_HOUR_COL_7\" , \"SPEQLITE_TEMP_TABLE_12\".\"T_MINUTE_COL_8\" AS \"T_MINUTE_COL_8\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*    brand_id                 brand  t_hour  t_minute  ext_price  i_brand_id               i_brand  t_hour_col_7  t_minute_col_8\n0   10010012    univamalgamalg #12      14        29   18094.87    10010012    univamalgamalg #12            14              29\n1    7003008       exportibrand #8      14        36   13828.61     7003008       exportibrand #8            14              36\n2    2001002       amalgimporto #2       9        52  154198.36     2001002       amalgimporto #2             9              52\n3    4004002   edu packedu pack #2      10        42  147440.82     4004002   edu packedu pack #2            10              42\n4    8016004           corpmaxi #4       9        49    5836.82     8016004           corpmaxi #4             9              49\n5    4003002    exportiedu pack #2      16        23   72705.81     4003002    exportiedu pack #2            16              23\n6    2004001  edu packunivamalg #8       9        34    3841.10     2004001  edu packunivamalg #8             9              34\n7    1004002      edu packamalg #2      10        42  194999.54     1004002      edu packamalg #2            10              42\n8    3003002     exportiexporti #2      10        37  181389.94     3003002     exportiexporti #2            10              37\n9    7004008      edu packbrand #8      14        32   12974.51     7004008      edu packbrand #8            14              32\n10   1004002      edu packamalg #2      11         3  106112.17     1004002      edu packamalg #2            11               3\n11   5001002       amalgscholar #2      10        20  260259.37     5001002       amalgscholar #2            10              20\n12   9001003     importoexporti #2      16        15    3357.36     9001003     importoexporti #2            16              15\n13   8003004    exportinameless #4      11        52    1879.24     8003004    exportinameless #4            11              52\n14   8008005  scholarunivamalg #16      20         0    1109.64     8008005  scholarunivamalg #16            20               0\n15   7001007   exportiunivamalg #3      20         0    9396.31     7001007   exportiunivamalg #3            20               0\n16   1001001       importomaxi #10      14        40     723.51     1001001       importomaxi #10            14              40\n17  10005010  scholarunivamalg #10      13        47   17688.64    10005010  scholarunivamalg #10            13              47\n18   7013002    exportinameless #2      11        17   26950.95     7013002    exportinameless #2            11              17\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price, i_brand_id, i_brand, t_hour, t_minute\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id=1\n   and time_sk = t_time_sk\n   and (t_meal_time = 'breakfast' or t_meal_time = 'dinner')\n/*CURSOR_IDENTIFIER*/\ngroup by i_brand_id, i_brand, t_hour, t_minute",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" , \"ITEM\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_13\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" , \"ITEM\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR_COL_7\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE_COL_8\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.183279,
+                    "execution_time": 0.569512,
+                    "compile_time": 0.000655,
+                    "planning_time": 0.035344,
+                    "create_size": 1536
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 1.501407,
+                    "execution_time": 0.731779,
+                    "compile_time": 0.079841,
+                    "planning_time": 0.101801,
+                    "create_size": 1536
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_13\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_13\".\"EXT_PRICE\" AS \"EXT_PRICE\" , \"SPEQLITE_TEMP_TABLE_13\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_13\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_HOUR_COL_7\" AS \"T_HOUR_COL_7\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_MINUTE_COL_8\" AS \"T_MINUTE_COL_8\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" LIMIT 21",
+                "preview": "\n/*    brand_id                  brand  t_hour  t_minute  ext_price  i_brand_id                i_brand  t_hour_col_7  t_minute_col_8\n0    4002002     importoedu pack #2      17        27  208748.96     4002002     importoedu pack #2            17              27\n1    2004002     edu packimporto #2      18        17  170617.27     2004002     edu packimporto #2            18              17\n2    4003002     exportiedu pack #2       8        42  101406.11     4003002     exportiedu pack #2             8              42\n3   10015013  scholaramalgamalg #13      18        13    9986.18    10015013  scholaramalgamalg #13            18              13\n4    4002002     importoedu pack #2      17         9  127794.14     4002002     importoedu pack #2            17               9\n5    9013011          amalgamalg #2      18        10    3286.83     9013011          amalgamalg #2            18              10\n6    9002004         importomaxi #4      19         8    5252.72     9002004         importomaxi #4            19               8\n7    7011004       amalgnameless #4       9        48   12131.37     7011004       amalgnameless #4             9              48\n8    1004002       edu packamalg #2       9        48  127778.86     1004002       edu packamalg #2             9              48\n9    8006009    edu packedu pack #2      18        38    6951.78     8006009    edu packedu pack #2            18              38\n10   6007007   scholaramalgamalg #7      18         7   15340.88     6007007   scholaramalgamalg #7            18               7\n11   5004002     edu packscholar #2      17        42   87628.01     5004002     edu packscholar #2            17              42\n12   1001002          amalgamalg #2      18        21  234957.91     1001002          amalgamalg #2            18              21\n13   9015012   scholarunivamalg #12       7        16   11610.69     9015012   scholarunivamalg #12             7              16\n14   6016005     importoedu pack #2      19         8    5305.95     6016005     importoedu pack #2            19               8\n15   6011005          amalgamalg #2      18        58    6474.45     6011005          amalgamalg #2            18              58\n16   9007008           brandmaxi #8      19        33    8298.81     9007008           brandmaxi #8            19              33\n17   1004002       edu packamalg #2      18        50  154705.62     1004002       edu packamalg #2            18              50\n18   7016008        corpnameless #8      19        11   24096.92     7016008        corpnameless #8            19              11\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.019247,
+                    "execution_time": 0.00836,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.004356
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.057232,
+                    "execution_time": 0.00833,
+                    "compile_time": 5.2e-05,
+                    "planning_time": 0.039771
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" , \"ITEM\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND_ID\" , \"ITEM\".\"I_BRAND\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_13\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_13\".\"EXT_PRICE\" AS \"EXT_PRICE\" , \"SPEQLITE_TEMP_TABLE_13\".\"I_BRAND_ID\" AS \"I_BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_13\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_HOUR_COL_7\" AS \"T_HOUR_COL_7\" , \"SPEQLITE_TEMP_TABLE_13\".\"T_MINUTE_COL_8\" AS \"T_MINUTE_COL_8\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\""
+            }
+        ],
+        "preview": "\n/*    brand_id                  brand  t_hour  t_minute  ext_price  i_brand_id                i_brand  t_hour_col_7  t_minute_col_8\n0    4002002     importoedu pack #2      17        27  208748.96     4002002     importoedu pack #2            17              27\n1    2004002     edu packimporto #2      18        17  170617.27     2004002     edu packimporto #2            18              17\n2    4003002     exportiedu pack #2       8        42  101406.11     4003002     exportiedu pack #2             8              42\n3   10015013  scholaramalgamalg #13      18        13    9986.18    10015013  scholaramalgamalg #13            18              13\n4    4002002     importoedu pack #2      17         9  127794.14     4002002     importoedu pack #2            17               9\n5    9013011          amalgamalg #2      18        10    3286.83     9013011          amalgamalg #2            18              10\n6    9002004         importomaxi #4      19         8    5252.72     9002004         importomaxi #4            19               8\n7    7011004       amalgnameless #4       9        48   12131.37     7011004       amalgnameless #4             9              48\n8    1004002       edu packamalg #2       9        48  127778.86     1004002       edu packamalg #2             9              48\n9    8006009    edu packedu pack #2      18        38    6951.78     8006009    edu packedu pack #2            18              38\n10   6007007   scholaramalgamalg #7      18         7   15340.88     6007007   scholaramalgamalg #7            18               7\n11   5004002     edu packscholar #2      17        42   87628.01     5004002     edu packscholar #2            17              42\n12   1001002          amalgamalg #2      18        21  234957.91     1001002          amalgamalg #2            18              21\n13   9015012   scholarunivamalg #12       7        16   11610.69     9015012   scholarunivamalg #12             7              16\n14   6016005     importoedu pack #2      19         8    5305.95     6016005     importoedu pack #2            19               8\n15   6011005          amalgamalg #2      18        58    6474.45     6011005          amalgamalg #2            18              58\n16   9007008           brandmaxi #8      19        33    8298.81     9007008           brandmaxi #8            19              33\n17   1004002       edu packamalg #2      18        50  154705.62     1004002       edu packamalg #2            18              50\n18   7016008        corpnameless #8      19        11   24096.92     7016008        corpnameless #8            19              11\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id=1\n   and time_sk = t_time_sk\n   and (t_meal_time = 'breakfast' or t_meal_time = 'dinner')\n group by i_brand, i_brand_id,t_hour,t_minute\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_14\" AS SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.874844,
+                    "execution_time": 0.45992,
+                    "compile_time": 0.000549,
+                    "planning_time": 0.036016,
+                    "create_size": 1024
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.959403,
+                    "execution_time": 0.468973,
+                    "compile_time": 0.000541,
+                    "planning_time": 0.108457,
+                    "create_size": 1024
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" LIMIT 21",
+                "preview": "\n/*    brand_id                  brand  t_hour  t_minute  ext_price\n0    5004001       amalgedu pack #2       9        26    9510.27\n1    3003002      exportiexporti #2      18         8  135766.72\n2    7012010    importonameless #10       9        39    3201.96\n3    9011008      amalgunivamalg #8      17        46   39605.36\n4   10004017  edu packunivamalg #17       8        54    1889.91\n5    7008005        namelessmaxi #4      17        29     112.03\n6    9007011      importoexporti #2      19        50    4162.52\n7    9004009        importoamalg #2      17         1     424.59\n8    6014004       edu packbrand #4      17        40   18517.65\n9    7008004       namelessbrand #4      18         1   16389.54\n10   6002006         importocorp #6       8        56    2905.64\n11   8012005     exportiedu pack #2      17        12    1464.90\n12  10003011   exportiunivamalg #11       8        17    2877.88\n13   7011003       amalgedu pack #2      17        21    5406.39\n14   1002001        importobrand #8       9        58    3484.61\n15   7008006       namelessbrand #6       8         4   20645.21\n16   7014002    edu packnameless #2      19        59    5878.91\n17  10016003      corpamalgamalg #3      19        26    3717.61\n18   8015001            maxicorp #2       8        22    2960.80\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017119,
+                    "execution_time": 0.007562,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.003411
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.05556,
+                    "execution_time": 0.008257,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.038767
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\""
+            }
+        ],
+        "preview": "\n/*    brand_id                  brand  t_hour  t_minute  ext_price\n0    5004001       amalgedu pack #2       9        26    9510.27\n1    3003002      exportiexporti #2      18         8  135766.72\n2    7012010    importonameless #10       9        39    3201.96\n3    9011008      amalgunivamalg #8      17        46   39605.36\n4   10004017  edu packunivamalg #17       8        54    1889.91\n5    7008005        namelessmaxi #4      17        29     112.03\n6    9007011      importoexporti #2      19        50    4162.52\n7    9004009        importoamalg #2      17         1     424.59\n8    6014004       edu packbrand #4      17        40   18517.65\n9    7008004       namelessbrand #4      18         1   16389.54\n10   6002006         importocorp #6       8        56    2905.64\n11   8012005     exportiedu pack #2      17        12    1464.90\n12  10003011   exportiunivamalg #11       8        17    2877.88\n13   7011003       amalgedu pack #2      17        21    5406.39\n14   1002001        importobrand #8       9        58    3484.61\n15   7008006       namelessbrand #6       8         4   20645.21\n16   7014002    edu packnameless #2      19        59    5878.91\n17  10016003      corpamalgamalg #3      19        26    3717.61\n18   8015001            maxicorp #2       8        22    2960.80\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id=1\n   and time_sk = t_time_sk\n   and (t_meal_time = 'breakfast' or t_meal_time = 'dinner')\n group by i_brand, i_brand_id,t_hour,t_minute\n order by ext_price desc, i_brand_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ORDER BY \"EXT_PRICE\" DESC , \"BRAND_ID\" LIMIT 21",
+                "preview": "\n/*    brand_id                 brand  t_hour  t_minute ext_price\n0    1001001    scholarnameless #2       7         8      None\n1    1001001  namelessnameless #10       9        34      None\n2    1001001       amalgscholar #2       9        24      None\n3    1001001           maxicorp #6      19        10      None\n4    1001001        importomaxi #4      17        41      None\n5    1001001   edu packnameless #8       8        37      None\n6    1001001    amalgunivamalg #13       8         3      None\n7    1001001    edu packexporti #2       8         6      None\n8    1001001       amalgscholar #2      17        38      None\n9    1001001  namelessunivamalg #4       9        50      None\n10   1001001      brandnameless #8      19        21      None\n11   1001001   edu packnameless #8       8         3      None\n12   1001001       amalgexporti #2       8        54      None\n13   1001001     importoimporto #2      19         7      None\n14   1001001     exportiexporti #2      18        56      None\n15   1001001     amalgunivamalg #6       8        20      None\n16   1002001       amalgscholar #2       8        28      None\n17   1002001  exportiunivamalg #10       8        29      None\n18   1002001    edu packscholar #2      17        49      None\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.020336,
+                    "execution_time": 0.010393,
+                    "compile_time": 7.4e-05,
+                    "planning_time": 0.003903
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.058363,
+                    "execution_time": 0.010219,
+                    "compile_time": 0.001982,
+                    "planning_time": 0.03933
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    brand_id                 brand  t_hour  t_minute ext_price\n0    1001001    scholarnameless #2       7         8      None\n1    1001001  namelessnameless #10       9        34      None\n2    1001001       amalgscholar #2       9        24      None\n3    1001001           maxicorp #6      19        10      None\n4    1001001        importomaxi #4      17        41      None\n5    1001001   edu packnameless #8       8        37      None\n6    1001001    amalgunivamalg #13       8         3      None\n7    1001001    edu packexporti #2       8         6      None\n8    1001001       amalgscholar #2      17        38      None\n9    1001001  namelessunivamalg #4       9        50      None\n10   1001001      brandnameless #8      19        21      None\n11   1001001   edu packnameless #8       8         3      None\n12   1001001       amalgexporti #2       8        54      None\n13   1001001     importoimporto #2      19         7      None\n14   1001001     exportiexporti #2      18        56      None\n15   1001001     amalgunivamalg #6       8        20      None\n16   1002001       amalgscholar #2       8        28      None\n17   1002001  exportiunivamalg #10       8        29      None\n18   1002001    edu packscholar #2      17        49      None\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id=1\n   and time_sk = t_time_sk\n   and (t_meal_time = 'breakfast' or t_meal_time = 'dinner')\n group by i_brand, i_brand_id,t_hour,t_minute\n order by ext_price desc, i_brand_id\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ORDER BY \"EXT_PRICE\" DESC , \"BRAND_ID\" LIMIT 21",
+                "preview": "\n/*    brand_id                 brand  t_hour  t_minute ext_price\n0    1001001    scholarnameless #2       7         8      None\n1    1001001  namelessnameless #10       9        34      None\n2    1001001       amalgscholar #2       9        24      None\n3    1001001           maxicorp #6      19        10      None\n4    1001001        importomaxi #4      17        41      None\n5    1001001   edu packnameless #8       8        37      None\n6    1001001    amalgunivamalg #13       8         3      None\n7    1001001    edu packexporti #2       8         6      None\n8    1001001       amalgscholar #2      17        38      None\n9    1001001  namelessunivamalg #4       9        50      None\n10   1001001      brandnameless #8      19        21      None\n11   1001001   edu packnameless #8       8         3      None\n12   1001001       amalgexporti #2       8        54      None\n13   1001001     importoimporto #2      19         7      None\n14   1001001     exportiexporti #2      18        56      None\n15   1001001     amalgunivamalg #6       8        20      None\n16   1002001       amalgscholar #2       8        28      None\n17   1002001  exportiunivamalg #10       8        29      None\n18   1002001    edu packscholar #2      17        49      None\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01996,
+                    "execution_time": 0.010105,
+                    "compile_time": 7.2e-05,
+                    "planning_time": 0.00385
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.020217,
+                    "execution_time": 0.009963,
+                    "compile_time": 7.2e-05,
+                    "planning_time": 0.004063
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*    brand_id                 brand  t_hour  t_minute ext_price\n0    1001001    scholarnameless #2       7         8      None\n1    1001001  namelessnameless #10       9        34      None\n2    1001001       amalgscholar #2       9        24      None\n3    1001001           maxicorp #6      19        10      None\n4    1001001        importomaxi #4      17        41      None\n5    1001001   edu packnameless #8       8        37      None\n6    1001001    amalgunivamalg #13       8         3      None\n7    1001001    edu packexporti #2       8         6      None\n8    1001001       amalgscholar #2      17        38      None\n9    1001001  namelessunivamalg #4       9        50      None\n10   1001001      brandnameless #8      19        21      None\n11   1001001   edu packnameless #8       8         3      None\n12   1001001       amalgexporti #2       8        54      None\n13   1001001     importoimporto #2      19         7      None\n14   1001001     exportiexporti #2      18        56      None\n15   1001001     amalgunivamalg #6       8        20      None\n16   1002001       amalgscholar #2       8        28      None\n17   1002001  exportiunivamalg #10       8        29      None\n18   1002001    edu packscholar #2      17        49      None\n...*/"
+    },
+    {
+        "input": "-- start template query71.tpl query 72 in stream 0\nselect /* TPC-DS query71.tpl 0.72 */ i_brand_id brand_id, i_brand brand,t_hour,t_minute,\n \tsum(ext_price) ext_price\n from item, (select ws_ext_sales_price as ext_price, \n                        ws_sold_date_sk as sold_date_sk,\n                        ws_item_sk as sold_item_sk,\n                        ws_sold_time_sk as time_sk  \n                 from web_sales,date_dim\n                 where d_date_sk = ws_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select cs_ext_sales_price as ext_price,\n                        cs_sold_date_sk as sold_date_sk,\n                        cs_item_sk as sold_item_sk,\n                        cs_sold_time_sk as time_sk\n                 from catalog_sales,date_dim\n                 where d_date_sk = cs_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 union all\n                 select ss_ext_sales_price as ext_price,\n                        ss_sold_date_sk as sold_date_sk,\n                        ss_item_sk as sold_item_sk,\n                        ss_sold_time_sk as time_sk\n                 from store_sales,date_dim\n                 where d_date_sk = ss_sold_date_sk\n                   and d_moy=12\n                   and d_year=2001\n                 ) tmp,time_dim\n where\n   sold_item_sk = i_item_sk\n   and i_manager_id=1\n   and time_sk = t_time_sk\n   and (t_meal_time = 'breakfast' or t_meal_time = 'dinner')\n group by i_brand, i_brand_id,t_hour,t_minute\n order by ext_price desc, i_brand_id\nlimit 100\n \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 12 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"TMP\" AS ( SELECT \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"WEB_SALES\".\"WS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"WEB_SALES\".\"WS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" UNION ALL SELECT \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"CATALOG_SALES\".\"CS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"CATALOG_SALES\".\"CS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" UNION ALL SELECT \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_PRICE\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SOLD_ITEM_SK\" , \"STORE_SALES\".\"SS_SOLD_TIME_SK\" AS \"TIME_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"TMP\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"TMP\" AS \"TMP\" ON \"ITEM\".\"I_ITEM_SK\" = \"TMP\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"TMP\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ORDER BY \"EXT_PRICE\" DESC , \"BRAND_ID\" LIMIT 21",
+                "preview": "\n/*    brand_id                 brand  t_hour  t_minute ext_price\n0    1001001    scholarnameless #2       7         8      None\n1    1001001  namelessnameless #10       9        34      None\n2    1001001       amalgscholar #2       9        24      None\n3    1001001           maxicorp #6      19        10      None\n4    1001001        importomaxi #4      17        41      None\n5    1001001   edu packnameless #8       8        37      None\n6    1001001    amalgunivamalg #13       8         3      None\n7    1001001    edu packexporti #2       8         6      None\n8    1001001       amalgscholar #2      17        38      None\n9    1001001  namelessunivamalg #4       9        50      None\n10   1001001      brandnameless #8      19        21      None\n11   1001001   edu packnameless #8       8         3      None\n12   1001001       amalgexporti #2       8        54      None\n13   1001001     importoimporto #2      19         7      None\n14   1001001     exportiexporti #2      18        56      None\n15   1001001     amalgunivamalg #6       8        20      None\n16   1002001       amalgscholar #2       8        28      None\n17   1002001  exportiunivamalg #10       8        29      None\n18   1002001    edu packscholar #2      17        49      None\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.021378,
+                    "execution_time": 0.011034,
+                    "compile_time": 7.5e-05,
+                    "planning_time": 0.004067
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.021163,
+                    "execution_time": 0.01083,
+                    "compile_time": 7.7e-05,
+                    "planning_time": 0.003984
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"ITEM\".\"I_BRAND_ID\" AS \"BRAND_ID\" , \"ITEM\".\"I_BRAND\" AS \"BRAND\" , \"TIME_DIM\".\"T_HOUR\" AS \"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" AS \"T_MINUTE\" , SUM ( \"SPEQLITE_TEMP_TABLE_9\".\"EXT_PRICE\" ) AS \"EXT_PRICE\" FROM \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"ITEM\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SOLD_ITEM_SK\" JOIN \"TIME_DIM\" AS \"TIME_DIM\" ON ( \"TIME_DIM\".\"T_MEAL_TIME\" = 'breakfast' OR \"TIME_DIM\".\"T_MEAL_TIME\" = 'dinner' ) AND \"TIME_DIM\".\"T_TIME_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"TIME_SK\" WHERE \"ITEM\".\"I_MANAGER_ID\" = 1 GROUP BY \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_BRAND_ID\" , \"TIME_DIM\".\"T_HOUR\" , \"TIME_DIM\".\"T_MINUTE\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_14\".\"BRAND_ID\" AS \"BRAND_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"BRAND\" AS \"BRAND\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_HOUR\" AS \"T_HOUR\" , \"SPEQLITE_TEMP_TABLE_14\".\"T_MINUTE\" AS \"T_MINUTE\" , \"SPEQLITE_TEMP_TABLE_14\".\"EXT_PRICE\" AS \"EXT_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ORDER BY \"EXT_PRICE\" DESC NULLS FIRST , \"BRAND_ID\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*    brand_id                 brand  t_hour  t_minute ext_price\n0    1001001    scholarnameless #2       7         8      None\n1    1001001  namelessnameless #10       9        34      None\n2    1001001       amalgscholar #2       9        24      None\n3    1001001           maxicorp #6      19        10      None\n4    1001001        importomaxi #4      17        41      None\n5    1001001   edu packnameless #8       8        37      None\n6    1001001    amalgunivamalg #13       8         3      None\n7    1001001    edu packexporti #2       8         6      None\n8    1001001       amalgscholar #2      17        38      None\n9    1001001  namelessunivamalg #4       9        50      None\n10   1001001      brandnameless #8      19        21      None\n11   1001001   edu packnameless #8       8         3      None\n12   1001001       amalgexporti #2       8        54      None\n13   1001001     importoimporto #2      19         7      None\n14   1001001     exportiexporti #2      18        56      None\n15   1001001     amalgunivamalg #6       8        20      None\n16   1002001       amalgscholar #2       8        28      None\n17   1002001  exportiunivamalg #10       8        29      None\n18   1002001    edu packscholar #2      17        49      None\n...*/"
+    }
+]

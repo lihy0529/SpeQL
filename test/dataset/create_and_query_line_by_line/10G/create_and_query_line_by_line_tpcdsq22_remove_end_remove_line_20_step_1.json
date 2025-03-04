@@ -1,0 +1,326 @@
+[
+    {
+        "input": "-- start template query22a.tpl query 55 in stream 0\nwith /* TPC-DS query22a.tpl 0.55 */ results as \n(select  i_product_name\n             ,i_brand\n             ,i_class\n             ,i_category\n             ,avg(INV_QUANTITY_ON_HAND) qoh\n       from inventory\n           ,date_dim\n           ,item\n--         ,warehouse\n       where  INV_DATE_SK=d_date_sk\n              and INV_ITEM_SK=i_item_sk\n--            and inv_warehouse_sk = w_warehouse_sk\n              and d_month_seq between 1183 and 1183 + 11\n       group by i_product_name,i_brand,i_class,i_category),\nresults_rollup as \n(select i_product_name, i_brand, i_class, i_category, avg(qoh) qoh \nfrom results \ngroup by i_product_name, i_brand, i_class, i_category)\nselect * from results_rollup\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"RESULTS\" AS ( SELECT \"ITEM\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"ITEM\".\"I_CLASS\" AS \"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"QOH\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1194 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1183 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" GROUP BY \"ITEM\".\"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" ) SELECT \"RESULTS_ROLLUP\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS_ROLLUP\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS_ROLLUP\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS_ROLLUP\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"RESULTS_ROLLUP\".\"QOH\" AS \"QOH\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"ITEM\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"ITEM\".\"I_CLASS\" AS \"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"QOH\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1194 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1183 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" GROUP BY \"ITEM\".\"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_CLASS\" , \"ITEM\".\"I_CATEGORY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.693988,
+                    "execution_time": 0.540063,
+                    "compile_time": 0.000431,
+                    "planning_time": 0.039803,
+                    "create_size": 536
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.77501,
+                    "execution_time": 0.617569,
+                    "compile_time": 0.000431,
+                    "planning_time": 0.038854,
+                    "create_size": 536
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"SPEQLITE_TEMP_TABLE_1\".\"QOH\" ) AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" GROUP BY \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CATEGORY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.172916,
+                    "execution_time": 0.05834,
+                    "compile_time": 0.000313,
+                    "planning_time": 0.004977,
+                    "create_size": 568
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.473979,
+                    "execution_time": 0.057593,
+                    "compile_time": 0.000305,
+                    "planning_time": 0.30503,
+                    "create_size": 568
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_2\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*             i_product_name                i_brand          i_class   i_category  qoh\n0    oughteingcallyableanti            univmaxi #2            pools       Sports  509\n1      eingbarationableanti       amalgnameless #9   athletic shoes       Sports  511\n2   ationoughtationableanti     edu packscholar #2        classical        Music  486\n3    eingoughtationableanti      importoexporti #1          infants     Children  495\n4        barprin steinganti   exportiunivamalg #11        self-help        Books  500\n5       eseantin steinganti         importocorp #3         diamonds      Jewelry  487\n6     n stcallyn steinganti     edu packexporti #2  school-uniforms     Children  505\n7     antiationn steinganti     edu packimporto #2   sports-apparel          Men  512\n8       prin stn steinganti        importoamalg #2       fragrances        Women  496\n9        eingbarbarn stanti            corpcorp #1            rings      Jewelry  502\n10     callyablebarn stanti     importonameless #7            paint         Home  498\n11       antipribarn stanti     edu packexporti #2  school-uniforms     Children  513\n12       eingpribarn stanti      importoexporti #1          infants     Children  515\n13     ablecallybarn stanti    edu packedu pack #1         athletic        Shoes  487\n14     anticallybarn stanti     scholarnameless #6          fitness       Sports  480\n15    callycallybarn stanti        exportiamalg #1        maternity        Women  489\n16     eingcallybarn stanti  exportiamalgamalg #11           stereo  Electronics  510\n17     ableationbarn stanti       edu packamalg #1         swimwear        Women  485\n18    callyantipriantically       amalgnameless #7           accent         Home  522\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016901,
+                    "execution_time": 0.007093,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.003665
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.055394,
+                    "execution_time": 0.008416,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.039204
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_2\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_2\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_2\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*             i_product_name                i_brand          i_class   i_category  qoh\n0    oughteingcallyableanti            univmaxi #2            pools       Sports  509\n1      eingbarationableanti       amalgnameless #9   athletic shoes       Sports  511\n2   ationoughtationableanti     edu packscholar #2        classical        Music  486\n3    eingoughtationableanti      importoexporti #1          infants     Children  495\n4        barprin steinganti   exportiunivamalg #11        self-help        Books  500\n5       eseantin steinganti         importocorp #3         diamonds      Jewelry  487\n6     n stcallyn steinganti     edu packexporti #2  school-uniforms     Children  505\n7     antiationn steinganti     edu packimporto #2   sports-apparel          Men  512\n8       prin stn steinganti        importoamalg #2       fragrances        Women  496\n9        eingbarbarn stanti            corpcorp #1            rings      Jewelry  502\n10     callyablebarn stanti     importonameless #7            paint         Home  498\n11       antipribarn stanti     edu packexporti #2  school-uniforms     Children  513\n12       eingpribarn stanti      importoexporti #1          infants     Children  515\n13     ablecallybarn stanti    edu packedu pack #1         athletic        Shoes  487\n14     anticallybarn stanti     scholarnameless #6          fitness       Sports  480\n15    callycallybarn stanti        exportiamalg #1        maternity        Women  489\n16     eingcallybarn stanti  exportiamalgamalg #11           stereo  Electronics  510\n17     ableationbarn stanti       edu packamalg #1         swimwear        Women  485\n18    callyantipriantically       amalgnameless #7           accent         Home  522\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query22a.tpl query 55 in stream 0\nwith /* TPC-DS query22a.tpl 0.55 */ results as \n(select  i_product_name\n             ,i_brand\n             ,i_class\n             ,i_category\n             ,avg(inv_quantity_on_hand) qoh\n       from inventory\n           ,date_dim\n           ,item\n--         ,warehouse\n       where  inv_date_sk=d_date_sk\n              and inv_item_sk=i_item_sk\n--            and inv_warehouse_sk = w_warehouse_sk\n              and d_month_seq between 1183 and 1183 + 11\n       group by i_product_name,i_brand,i_class,i_category),\nresults_rollup as \n(select i_product_name, i_brand, i_class, i_category,avg(qoh) qoh \nfrom results \ngroup by i_product_name,i_brand,i_class,i_category\nunion all \nselect i_product_name, i_brand, i_class, null i_category,avg(qoh) qoh \nfrom results\ngroup by i_product_name,i_brand,i_class\nunion all \nselect i_product_name, i_brand, null i_class, null i_category,avg(qoh) qoh \nfrom results\ngroup by i_product_name,i_brand\nunion all \nselect i_product_name, null i_brand, null i_class, null i_category,avg(qoh)  qoh \nfrom results\ngroup by i_product_name\nunion all \nselect null i_product_name, null i_brand, null i_class, null i_category,avg(qoh) qoh \nfrom results)\n select  i_product_name, i_brand, i_class, i_category,qoh\n      from results_rollup\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"RESULTS\" AS ( SELECT \"ITEM\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"ITEM\".\"I_CLASS\" AS \"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"QOH\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1194 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1183 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" GROUP BY \"ITEM\".\"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" UNION ALL SELECT NULL AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS_ROLLUP\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS_ROLLUP\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS_ROLLUP\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"RESULTS_ROLLUP\".\"QOH\" AS \"QOH\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"SPEQLITE_TEMP_TABLE_1\".\"QOH\" ) AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" GROUP BY \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CATEGORY\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CLASS\" AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"SPEQLITE_TEMP_TABLE_1\".\"QOH\" ) AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" GROUP BY \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_CLASS\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"SPEQLITE_TEMP_TABLE_1\".\"QOH\" ) AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" GROUP BY \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"I_BRAND\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"SPEQLITE_TEMP_TABLE_1\".\"QOH\" ) AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" GROUP BY \"SPEQLITE_TEMP_TABLE_1\".\"I_PRODUCT_NAME\" UNION ALL SELECT NULL AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"SPEQLITE_TEMP_TABLE_1\".\"QOH\" ) AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.475227,
+                    "execution_time": 0.146239,
+                    "compile_time": 0.000822,
+                    "planning_time": 0.01667,
+                    "create_size": 1024
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.501894,
+                    "execution_time": 0.137661,
+                    "compile_time": 0.000842,
+                    "planning_time": 0.058894,
+                    "create_size": 1024
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*             i_product_name               i_brand         i_class   i_category  qoh\n0     ableantiationprically  importoamalgamalg #3        monitors  Electronics  473\n1     n stn stationprically       importomaxi #10            guns       Sports  495\n2       antibareingprically      amalgnameless #6          accent         Home  510\n3        barprieingprically      amalgnameless #1  athletic shoes       Sports  504\n4      n stantieingprically     importoexporti #2         infants     Children  503\n5    oughtationeingprically      edu packamalg #2        swimwear        Women  498\n6     eingationeingprically       importoamalg #1      fragrances        Women  500\n7      oughtbarn stprically     exportischolar #2             pop        Music  499\n8       ablebarn stprically          maxibrand #3      mattresses         Home  524\n9        esebarn stprically       importobrand #5         bedding         Home  511\n10      barablen stprically       edu packmaxi #9  entertainments        Books  514\n11      barprioughtbaration       exportiamalg #1       maternity        Women  500\n12  oughtationoughtbaration     exportiexporti #2        toddlers     Children  495\n13  ationationoughtbaration      edu packamalg #2        swimwear        Women  493\n14   callyeingoughtbaration      amalgedu pack #1          womens        Shoes  531\n15     barn stoughtbaration         amalgbrand #7   semi-precious      Jewelry  502\n16      ablebarablebaration     exportischolar #1             pop        Music  487\n17    n stoughtablebaration     importoexporti #2         infants     Children  486\n18     callyeseablebaration    edu packscholar #1       classical        Music  494\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017707,
+                    "execution_time": 0.007393,
+                    "compile_time": 5.4e-05,
+                    "planning_time": 0.003867
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053826,
+                    "execution_time": 0.007469,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.03869
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*             i_product_name               i_brand         i_class   i_category  qoh\n0     ableantiationprically  importoamalgamalg #3        monitors  Electronics  473\n1     n stn stationprically       importomaxi #10            guns       Sports  495\n2       antibareingprically      amalgnameless #6          accent         Home  510\n3        barprieingprically      amalgnameless #1  athletic shoes       Sports  504\n4      n stantieingprically     importoexporti #2         infants     Children  503\n5    oughtationeingprically      edu packamalg #2        swimwear        Women  498\n6     eingationeingprically       importoamalg #1      fragrances        Women  500\n7      oughtbarn stprically     exportischolar #2             pop        Music  499\n8       ablebarn stprically          maxibrand #3      mattresses         Home  524\n9        esebarn stprically       importobrand #5         bedding         Home  511\n10      barablen stprically       edu packmaxi #9  entertainments        Books  514\n11      barprioughtbaration       exportiamalg #1       maternity        Women  500\n12  oughtationoughtbaration     exportiexporti #2        toddlers     Children  495\n13  ationationoughtbaration      edu packamalg #2        swimwear        Women  493\n14   callyeingoughtbaration      amalgedu pack #1          womens        Shoes  531\n15     barn stoughtbaration         amalgbrand #7   semi-precious      Jewelry  502\n16      ablebarablebaration     exportischolar #1             pop        Music  487\n17    n stoughtablebaration     importoexporti #2         infants     Children  486\n18     callyeseablebaration    edu packscholar #1       classical        Music  494\n...*/"
+    },
+    {
+        "input": "-- start template query22a.tpl query 55 in stream 0\nwith /* TPC-DS query22a.tpl 0.55 */ results as \n(select  i_product_name\n             ,i_brand\n             ,i_class\n             ,i_category\n             ,avg(inv_quantity_on_hand) qoh\n       from inventory\n           ,date_dim\n           ,item\n--         ,warehouse\n       where  inv_date_sk=d_date_sk\n              and inv_item_sk=i_item_sk\n--            and inv_warehouse_sk = w_warehouse_sk\n              and d_month_seq between 1183 and 1183 + 11\n       group by i_product_name,i_brand,i_class,i_category),\nresults_rollup as \n(select i_product_name, i_brand, i_class, i_category,avg(qoh) qoh \nfrom results \ngroup by i_product_name,i_brand,i_class,i_category\nunion all \nselect i_product_name, i_brand, i_class, null i_category,avg(qoh) qoh \nfrom results\ngroup by i_product_name,i_brand,i_class\nunion all \nselect i_product_name, i_brand, null i_class, null i_category,avg(qoh) qoh \nfrom results\ngroup by i_product_name,i_brand\nunion all \nselect i_product_name, null i_brand, null i_class, null i_category,avg(qoh)  qoh \nfrom results\ngroup by i_product_name\nunion all \nselect null i_product_name, null i_brand, null i_class, null i_category,avg(qoh) qoh \nfrom results)\n select  i_product_name, i_brand, i_class, i_category,qoh\n      from results_rollup\n      order by qoh, i_product_name, i_brand, i_class, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"RESULTS\" AS ( SELECT \"ITEM\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"ITEM\".\"I_CLASS\" AS \"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"QOH\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1194 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1183 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" GROUP BY \"ITEM\".\"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" UNION ALL SELECT NULL AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS_ROLLUP\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS_ROLLUP\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS_ROLLUP\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"RESULTS_ROLLUP\".\"QOH\" AS \"QOH\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"QOH\" NULLS LAST , \"I_PRODUCT_NAME\" NULLS LAST , \"I_BRAND\" NULLS LAST , \"I_CLASS\" NULLS LAST , \"I_CATEGORY\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ORDER BY \"QOH\" , \"I_PRODUCT_NAME\" , \"I_BRAND\" , \"I_CLASS\" , \"I_CATEGORY\" LIMIT 21",
+                "preview": "\n/*             i_product_name            i_brand      i_class   i_category  qoh\n0     ationn stantiesecally    namelesscorp #6   mens watch      Jewelry  444\n1     ationn stantiesecally    namelesscorp #6   mens watch         None  444\n2     ationn stantiesecally    namelesscorp #6         None         None  444\n3     ationn stantiesecally               None         None         None  444\n4       eingantiablen stese   edu packamalg #1     swimwear        Women  447\n5       eingantiablen stese   edu packamalg #1     swimwear         None  447\n6       eingantiablen stese   edu packamalg #1         None         None  447\n7       eingantiablen stese               None         None         None  447\n8      n stcallyeingablepri       brandmaxi #2    reference        Books  449\n9      n stcallyeingablepri       brandmaxi #2    reference         None  449\n10     n stcallyeingablepri       brandmaxi #2         None         None  449\n11     n stcallyeingablepri               None         None         None  449\n12         barpripriantipri  brandunivamalg #5     personal  Electronics  451\n13         barpripriantipri  brandunivamalg #5     personal         None  451\n14         barpripriantipri  brandunivamalg #5         None         None  451\n15         barpripriantipri               None         None         None  451\n16  callyeingn stationought       corpbrand #3  consignment      Jewelry  451\n17  callyeingn stationought       corpbrand #3  consignment         None  451\n18  callyeingn stationought       corpbrand #3         None         None  451\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.020639,
+                    "execution_time": 0.010247,
+                    "compile_time": 7.4e-05,
+                    "planning_time": 0.004211
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.060845,
+                    "execution_time": 0.011662,
+                    "compile_time": 7.6e-05,
+                    "planning_time": 0.039465
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ORDER BY \"QOH\" NULLS LAST , \"I_PRODUCT_NAME\" NULLS LAST , \"I_BRAND\" NULLS LAST , \"I_CLASS\" NULLS LAST , \"I_CATEGORY\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ORDER BY \"QOH\" NULLS LAST , \"I_PRODUCT_NAME\" NULLS LAST , \"I_BRAND\" NULLS LAST , \"I_CLASS\" NULLS LAST , \"I_CATEGORY\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*             i_product_name            i_brand      i_class   i_category  qoh\n0     ationn stantiesecally    namelesscorp #6   mens watch      Jewelry  444\n1     ationn stantiesecally    namelesscorp #6   mens watch         None  444\n2     ationn stantiesecally    namelesscorp #6         None         None  444\n3     ationn stantiesecally               None         None         None  444\n4       eingantiablen stese   edu packamalg #1     swimwear        Women  447\n5       eingantiablen stese   edu packamalg #1     swimwear         None  447\n6       eingantiablen stese   edu packamalg #1         None         None  447\n7       eingantiablen stese               None         None         None  447\n8      n stcallyeingablepri       brandmaxi #2    reference        Books  449\n9      n stcallyeingablepri       brandmaxi #2    reference         None  449\n10     n stcallyeingablepri       brandmaxi #2         None         None  449\n11     n stcallyeingablepri               None         None         None  449\n12         barpripriantipri  brandunivamalg #5     personal  Electronics  451\n13         barpripriantipri  brandunivamalg #5     personal         None  451\n14         barpripriantipri  brandunivamalg #5         None         None  451\n15         barpripriantipri               None         None         None  451\n16  callyeingn stationought       corpbrand #3  consignment      Jewelry  451\n17  callyeingn stationought       corpbrand #3  consignment         None  451\n18  callyeingn stationought       corpbrand #3         None         None  451\n...*/"
+    },
+    {
+        "input": "-- start template query22a.tpl query 55 in stream 0\nwith /* TPC-DS query22a.tpl 0.55 */ results as \n(select  i_product_name\n             ,i_brand\n             ,i_class\n             ,i_category\n             ,avg(inv_quantity_on_hand) qoh\n       from inventory\n           ,date_dim\n           ,item\n--         ,warehouse\n       where  inv_date_sk=d_date_sk\n              and inv_item_sk=i_item_sk\n--            and inv_warehouse_sk = w_warehouse_sk\n              and d_month_seq between 1183 and 1183 + 11\n       group by i_product_name,i_brand,i_class,i_category),\nresults_rollup as \n(select i_product_name, i_brand, i_class, i_category,avg(qoh) qoh \nfrom results \ngroup by i_product_name,i_brand,i_class,i_category\nunion all \nselect i_product_name, i_brand, i_class, null i_category,avg(qoh) qoh \nfrom results\ngroup by i_product_name,i_brand,i_class\nunion all \nselect i_product_name, i_brand, null i_class, null i_category,avg(qoh) qoh \nfrom results\ngroup by i_product_name,i_brand\nunion all \nselect i_product_name, null i_brand, null i_class, null i_category,avg(qoh)  qoh \nfrom results\ngroup by i_product_name\nunion all \nselect null i_product_name, null i_brand, null i_class, null i_category,avg(qoh) qoh \nfrom results)\n select  i_product_name, i_brand, i_class, i_category,qoh\n      from results_rollup\n      order by qoh, i_product_name, i_brand, i_class, i_category\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"RESULTS\" AS ( SELECT \"ITEM\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" AS \"I_BRAND\" , \"ITEM\".\"I_CLASS\" AS \"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"QOH\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1194 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1183 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" GROUP BY \"ITEM\".\"I_PRODUCT_NAME\" , \"ITEM\".\"I_BRAND\" , \"ITEM\".\"I_CLASS\" , \"ITEM\".\"I_CATEGORY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" , \"RESULTS\".\"I_CATEGORY\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS\".\"I_CLASS\" AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" , \"RESULTS\".\"I_CLASS\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" , \"RESULTS\".\"I_BRAND\" UNION ALL SELECT \"RESULTS\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"I_PRODUCT_NAME\" UNION ALL SELECT NULL AS \"I_PRODUCT_NAME\" , NULL AS \"I_BRAND\" , NULL AS \"I_CLASS\" , NULL AS \"I_CATEGORY\" , AVG ( \"RESULTS\".\"QOH\" ) AS \"QOH\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"RESULTS_ROLLUP\".\"I_BRAND\" AS \"I_BRAND\" , \"RESULTS_ROLLUP\".\"I_CLASS\" AS \"I_CLASS\" , \"RESULTS_ROLLUP\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"RESULTS_ROLLUP\".\"QOH\" AS \"QOH\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"QOH\" NULLS LAST , \"I_PRODUCT_NAME\" NULLS LAST , \"I_BRAND\" NULLS LAST , \"I_CLASS\" NULLS LAST , \"I_CATEGORY\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ORDER BY \"QOH\" , \"I_PRODUCT_NAME\" , \"I_BRAND\" , \"I_CLASS\" , \"I_CATEGORY\" LIMIT 21",
+                "preview": "\n/*             i_product_name            i_brand      i_class   i_category  qoh\n0     ationn stantiesecally    namelesscorp #6   mens watch      Jewelry  444\n1     ationn stantiesecally    namelesscorp #6   mens watch         None  444\n2     ationn stantiesecally    namelesscorp #6         None         None  444\n3     ationn stantiesecally               None         None         None  444\n4       eingantiablen stese   edu packamalg #1     swimwear        Women  447\n5       eingantiablen stese   edu packamalg #1     swimwear         None  447\n6       eingantiablen stese   edu packamalg #1         None         None  447\n7       eingantiablen stese               None         None         None  447\n8      n stcallyeingablepri       brandmaxi #2    reference        Books  449\n9      n stcallyeingablepri       brandmaxi #2    reference         None  449\n10     n stcallyeingablepri       brandmaxi #2         None         None  449\n11     n stcallyeingablepri               None         None         None  449\n12         barpripriantipri  brandunivamalg #5     personal  Electronics  451\n13         barpripriantipri  brandunivamalg #5     personal         None  451\n14         barpripriantipri  brandunivamalg #5         None         None  451\n15         barpripriantipri               None         None         None  451\n16  callyeingn stationought       corpbrand #3  consignment      Jewelry  451\n17  callyeingn stationought       corpbrand #3  consignment         None  451\n18  callyeingn stationought       corpbrand #3         None         None  451\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.020434,
+                    "execution_time": 0.010043,
+                    "compile_time": 7.6e-05,
+                    "planning_time": 0.004188
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.020887,
+                    "execution_time": 0.010254,
+                    "compile_time": 7.8e-05,
+                    "planning_time": 0.00437
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ORDER BY \"QOH\" NULLS LAST , \"I_PRODUCT_NAME\" NULLS LAST , \"I_BRAND\" NULLS LAST , \"I_CLASS\" NULLS LAST , \"I_CATEGORY\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"I_PRODUCT_NAME\" AS \"I_PRODUCT_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_BRAND\" AS \"I_BRAND\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CLASS\" AS \"I_CLASS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_3\".\"QOH\" AS \"QOH\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" ORDER BY \"QOH\" NULLS LAST , \"I_PRODUCT_NAME\" NULLS LAST , \"I_BRAND\" NULLS LAST , \"I_CLASS\" NULLS LAST , \"I_CATEGORY\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*             i_product_name            i_brand      i_class   i_category  qoh\n0     ationn stantiesecally    namelesscorp #6   mens watch      Jewelry  444\n1     ationn stantiesecally    namelesscorp #6   mens watch         None  444\n2     ationn stantiesecally    namelesscorp #6         None         None  444\n3     ationn stantiesecally               None         None         None  444\n4       eingantiablen stese   edu packamalg #1     swimwear        Women  447\n5       eingantiablen stese   edu packamalg #1     swimwear         None  447\n6       eingantiablen stese   edu packamalg #1         None         None  447\n7       eingantiablen stese               None         None         None  447\n8      n stcallyeingablepri       brandmaxi #2    reference        Books  449\n9      n stcallyeingablepri       brandmaxi #2    reference         None  449\n10     n stcallyeingablepri       brandmaxi #2         None         None  449\n11     n stcallyeingablepri               None         None         None  449\n12         barpripriantipri  brandunivamalg #5     personal  Electronics  451\n13         barpripriantipri  brandunivamalg #5     personal         None  451\n14         barpripriantipri  brandunivamalg #5         None         None  451\n15         barpripriantipri               None         None         None  451\n16  callyeingn stationought       corpbrand #3  consignment      Jewelry  451\n17  callyeingn stationought       corpbrand #3  consignment         None  451\n18  callyeingn stationought       corpbrand #3         None         None  451\n...*/"
+    }
+]

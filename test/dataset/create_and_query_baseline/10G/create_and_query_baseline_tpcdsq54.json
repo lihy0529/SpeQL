@@ -1,0 +1,23 @@
+{
+    "input": "-- start template query54.tpl query 81 in stream 0\nwith /* TPC-DS query54.tpl 0.81 */ my_customers as (\n select distinct c_customer_sk\n        , c_current_addr_sk\n from   \n        ( select cs_sold_date_sk sold_date_sk,\n                 cs_bill_customer_sk customer_sk,\n                 cs_item_sk item_sk\n          from   catalog_sales\n          union all\n          select ws_sold_date_sk sold_date_sk,\n                 ws_bill_customer_sk customer_sk,\n                 ws_item_sk item_sk\n          from   web_sales\n         ) cs_or_ws_sales,\n         item,\n         date_dim,\n         customer\n where   sold_date_sk = d_date_sk\n         and item_sk = i_item_sk\n         and i_category = 'Jewelry'\n         and i_class = 'rings'\n         and c_customer_sk = cs_or_ws_sales.customer_sk\n         and d_moy = 6\n         and d_year = 1998\n )\n , my_revenue as (\n select c_customer_sk,\n        sum(ss_ext_sales_price) as revenue\n from   my_customers,\n        store_sales,\n        customer_address,\n        store,\n        date_dim\n where  c_current_addr_sk = ca_address_sk\n        and ca_county = s_county\n        and ca_state = s_state\n        and ss_sold_date_sk = d_date_sk\n        and c_customer_sk = ss_customer_sk\n        and d_month_seq between (select distinct d_month_seq+1\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n                           and  (select distinct d_month_seq+3\n                                 from   date_dim where d_year = 1998 and d_moy = 6)\n group by c_customer_sk\n )\n , segments as\n (select cast((revenue/50) as int) as segment\n  from   my_revenue\n )\n  select  segment, count(*) as num_customers, segment*50 as segment_base\n from segments\n group by segment\n order by segment, num_customers\n limit 100",
+    "query": [
+        {
+            "query": "/* START TEMPLATE QUERY54.TPL QUERY 81 IN STREAM 0 */ /* TPC-DS QUERY54.TPL 0.81 */ WITH MY_CUSTOMERS AS ( SELECT DISTINCT C_CUSTOMER_SK , C_CURRENT_ADDR_SK FROM ( SELECT CS_SOLD_DATE_SK AS SOLD_DATE_SK , CS_BILL_CUSTOMER_SK AS CUSTOMER_SK , CS_ITEM_SK AS ITEM_SK FROM CATALOG_SALES UNION ALL SELECT WS_SOLD_DATE_SK AS SOLD_DATE_SK , WS_BILL_CUSTOMER_SK AS CUSTOMER_SK , WS_ITEM_SK AS ITEM_SK FROM WEB_SALES ) AS CS_OR_WS_SALES , ITEM , DATE_DIM , CUSTOMER WHERE SOLD_DATE_SK = D_DATE_SK AND ITEM_SK = I_ITEM_SK AND I_CATEGORY = 'Jewelry' AND I_CLASS = 'rings' AND C_CUSTOMER_SK = CS_OR_WS_SALES.CUSTOMER_SK AND D_MOY = 6 AND D_YEAR = 1998 ) , MY_REVENUE AS ( SELECT C_CUSTOMER_SK , SUM ( SS_EXT_SALES_PRICE ) AS REVENUE FROM MY_CUSTOMERS , STORE_SALES , CUSTOMER_ADDRESS , STORE , DATE_DIM WHERE C_CURRENT_ADDR_SK = CA_ADDRESS_SK AND CA_COUNTY = S_COUNTY AND CA_STATE = S_STATE AND SS_SOLD_DATE_SK = D_DATE_SK AND C_CUSTOMER_SK = SS_CUSTOMER_SK AND D_MONTH_SEQ BETWEEN ( SELECT DISTINCT D_MONTH_SEQ + 1 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) AND ( SELECT DISTINCT D_MONTH_SEQ + 3 FROM DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 6 ) GROUP BY C_CUSTOMER_SK ) , SEGMENTS AS ( SELECT CAST ( ( REVENUE / 50 ) AS INTEGER ) AS SEGMENT FROM MY_REVENUE ) SELECT SEGMENT , COUNT ( * ) AS NUM_CUSTOMERS , SEGMENT * 50 AS SEGMENT_BASE FROM SEGMENTS GROUP BY SEGMENT ORDER BY SEGMENT NULLS FIRST , NUM_CUSTOMERS NULLS FIRST LIMIT 21",
+            "preview": "\n/*   segment  num_customers  segment_base\n0    19016              1        950800*/",
+            "retry_time": 0,
+            "query_metrics": {
+                "elapsed_time": 0.243218,
+                "execution_time": 0.070981,
+                "compile_time": 0.040655,
+                "planning_time": 0.097266
+            },
+            "query_metrics_warm_up": {
+                "elapsed_time": 3.367148,
+                "execution_time": 0.071707,
+                "compile_time": 3.064142,
+                "planning_time": 0.194297
+            }
+        }
+    ],
+    "preview": "\n/*   segment  num_customers  segment_base\n0    19016              1        950800*/"
+}

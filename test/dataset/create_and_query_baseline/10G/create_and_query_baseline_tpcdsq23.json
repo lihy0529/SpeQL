@@ -1,0 +1,23 @@
+{
+    "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk \n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) \n limit 100",
+    "query": [
+        {
+            "query": "/* START TEMPLATE QUERY23.TPL QUERY 68 IN STREAM 0 */ /* TPC-DS QUERY23.TPL 0.68 */ WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+            "preview": "\n/*    sum\n0  None*/",
+            "retry_time": 0,
+            "query_metrics": {
+                "elapsed_time": 1.919978,
+                "execution_time": 1.666093,
+                "compile_time": 0.001484,
+                "planning_time": 1.842668
+            },
+            "query_metrics_warm_up": {
+                "elapsed_time": 1.993443,
+                "execution_time": 1.644031,
+                "compile_time": 0.001491,
+                "planning_time": 1.913866
+            }
+        }
+    ],
+    "preview": "\n/*    sum\n0  None*/"
+}

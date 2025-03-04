@@ -1,0 +1,881 @@
+[
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' as col_name, d_year, d_qoy, i_category, ss_ext_sales_price as ext_sales_price\n         FROM store_sales, item, date_dim\n/*CURSOR_IDENTIFIER*/\n) as derived_table\nGROUP BY channel, col_name, d_year, d_qoy, i_category",
+        "optimize": [
+            "SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" GROUP BY 'store' , 'ss_addr_sk' , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT CHANNEL , COL_NAME , D_YEAR , D_QOY , I_CATEGORY , COUNT ( * ) AS SALES_CNT , SUM ( EXT_SALES_PRICE ) AS SALES_AMT FROM ( SELECT 'store' AS CHANNEL , 'ss_addr_sk' AS COL_NAME , D_YEAR , D_QOY , I_CATEGORY , SS_EXT_SALES_PRICE AS EXT_SALES_PRICE FROM STORE_SALES , ITEM , DATE_DIM ) AS DERIVED_TABLE GROUP BY CHANNEL , COL_NAME , D_YEAR , D_QOY , I_CATEGORY LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT 'store' AS \"CHANNEL\", 'ss_addr_sk' AS \"COL_NAME\", \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\", \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\", \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\", COUNT(*) AS \"SALES_CNT\", SUM(\"STORE_SALES\".\"SS_EXT_SALES_PRICE\") AS \"SALES_AMT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" GROUP BY 'store', 'ss_addr_sk', \"DATE_DIM\".\"D_YEAR\", \"DATE_DIM\".\"D_QOY\", \"ITEM\".\"I_CATEGORY\"",
+                "rewrite": null
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n         GROUP BY channel, col_name, d_year, d_qoy, i_category, ss_ext_sales_price\n/*CURSOR_IDENTIFIER*/ ) subquery\nGROUP BY channel, col_name, d_year, d_qoy, i_category;",
+        "optimize": [
+            "WITH \"SUBQUERY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 1 , 2 , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) SELECT \"SUBQUERY\".\"CHANNEL\" AS \"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" AS \"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" AS \"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" AS \"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SUBQUERY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SUBQUERY\" AS \"SUBQUERY\" GROUP BY \"SUBQUERY\".\"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 1 , 2 , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SUBQUERY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 1 , 2 , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) SELECT \"SUBQUERY\".\"CHANNEL\" AS \"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" AS \"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" AS \"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" AS \"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SUBQUERY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SUBQUERY\" AS \"SUBQUERY\" GROUP BY \"SUBQUERY\".\"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SUBQUERY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 1 , 2 , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) SELECT \"SUBQUERY\".\"CHANNEL\" AS \"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" AS \"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" AS \"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" AS \"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SUBQUERY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SUBQUERY\" AS \"SUBQUERY\" GROUP BY \"SUBQUERY\".\"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\"",
+                "rewrite": "WITH SUBQUERY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 1 , 2 , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) SELECT \"SUBQUERY\".\"CHANNEL\" AS \"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" AS \"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" AS \"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" AS \"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SUBQUERY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SUBQUERY\" AS \"SUBQUERY\" GROUP BY \"SUBQUERY\".\"CHANNEL\" , \"SUBQUERY\".\"COL_NAME\" , \"SUBQUERY\".\"D_YEAR\" , \"SUBQUERY\".\"D_QOY\" , \"SUBQUERY\".\"I_CATEGORY\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n) subquery\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 'store' , 'ss_addr_sk' , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT CHANNEL , COL_NAME , D_YEAR , D_QOY , I_CATEGORY , COUNT ( * ) AS SALES_CNT , SUM ( EXT_SALES_PRICE ) AS SALES_AMT FROM ( SELECT 'store' AS CHANNEL , 'ss_addr_sk' AS COL_NAME , D_YEAR , D_QOY , I_CATEGORY , SS_EXT_SALES_PRICE AS EXT_SALES_PRICE FROM STORE_SALES , ITEM , DATE_DIM WHERE SS_ADDR_SK IS NULL AND SS_SOLD_DATE_SK = D_DATE_SK ) AS SUBQUERY GROUP BY CHANNEL , COL_NAME , D_YEAR , D_QOY , I_CATEGORY LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT 'store' AS \"CHANNEL\", 'ss_addr_sk' AS \"COL_NAME\", \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\", \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\", \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\", COUNT(*) AS \"SALES_CNT\", SUM(\"STORE_SALES\".\"SS_EXT_SALES_PRICE\") AS \"SALES_AMT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 'store', 'ss_addr_sk', \"DATE_DIM\".\"D_YEAR\", \"DATE_DIM\".\"D_QOY\", \"ITEM\".\"I_CATEGORY\"",
+                "rewrite": null
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n) as sales_data\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/;",
+        "optimize": [
+            "SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 'store' , 'ss_addr_sk' , \"DATE_DIM\".\"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" , \"ITEM\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT CHANNEL , COL_NAME , D_YEAR , D_QOY , I_CATEGORY , COUNT ( * ) AS SALES_CNT , SUM ( EXT_SALES_PRICE ) AS SALES_AMT FROM ( SELECT 'store' AS CHANNEL , 'ss_addr_sk' AS COL_NAME , D_YEAR , D_QOY , I_CATEGORY , SS_EXT_SALES_PRICE AS EXT_SALES_PRICE FROM STORE_SALES , ITEM , DATE_DIM WHERE SS_ADDR_SK IS NULL AND SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK ) AS SALES_DATA GROUP BY CHANNEL , COL_NAME , D_YEAR , D_QOY , I_CATEGORY LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    2000      4          Men      57325  54790569.01\n1    store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n2    store  ss_addr_sk    2001      2        Books      18489  18066884.48\n3    store  ss_addr_sk    2001      2                     453    512095.75\n4    store  ss_addr_sk    2001      3          Men      34280  32573565.06\n5    store  ss_addr_sk    2001      4        Shoes      57301  54407113.58\n6    store  ss_addr_sk    2001      4        Music      56986  54829803.39\n7    store  ss_addr_sk    2002      1        Music      19785  19230522.22\n8    store  ss_addr_sk    2002      1        Shoes      19510  18739866.14\n9    store  ss_addr_sk    2002      1         Home      19717  19131782.69\n10   store  ss_addr_sk    2002      2  Electronics      18951  18464607.81\n11   store  ss_addr_sk    2002      2       Sports      18610  17341126.35\n12   store  ss_addr_sk    2002      3        Shoes      34826  33318610.93\n13   store  ss_addr_sk    2002      3                     838    843364.59\n14   store  ss_addr_sk    2002      4        Women      56265  54024000.26\n15   store  ss_addr_sk    2002      4          Men      55444  53323142.64\n16   store  ss_addr_sk    2002      4      Jewelry      57008  54422657.27\n17   store  ss_addr_sk    2003      1                      32     42229.90\n18   store  ss_addr_sk    1998      2     Children      18327  17239214.92\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 1.306527,
+                    "execution_time": 1.215075,
+                    "compile_time": 0.035071,
+                    "planning_time": 0.041702
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 4.895305,
+                    "execution_time": 1.268474,
+                    "compile_time": 3.499711,
+                    "planning_time": 0.107273
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT 'store' AS \"CHANNEL\", 'ss_addr_sk' AS \"COL_NAME\", \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\", \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\", \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\", COUNT(*) AS \"SALES_CNT\", SUM(\"STORE_SALES\".\"SS_EXT_SALES_PRICE\") AS \"SALES_AMT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL GROUP BY 'store', 'ss_addr_sk', \"DATE_DIM\".\"D_YEAR\", \"DATE_DIM\".\"D_QOY\", \"ITEM\".\"I_CATEGORY\"",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    2000      4          Men      57325  54790569.01\n1    store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n2    store  ss_addr_sk    2001      2        Books      18489  18066884.48\n3    store  ss_addr_sk    2001      2                     453    512095.75\n4    store  ss_addr_sk    2001      3          Men      34280  32573565.06\n5    store  ss_addr_sk    2001      4        Shoes      57301  54407113.58\n6    store  ss_addr_sk    2001      4        Music      56986  54829803.39\n7    store  ss_addr_sk    2002      1        Music      19785  19230522.22\n8    store  ss_addr_sk    2002      1        Shoes      19510  18739866.14\n9    store  ss_addr_sk    2002      1         Home      19717  19131782.69\n10   store  ss_addr_sk    2002      2  Electronics      18951  18464607.81\n11   store  ss_addr_sk    2002      2       Sports      18610  17341126.35\n12   store  ss_addr_sk    2002      3        Shoes      34826  33318610.93\n13   store  ss_addr_sk    2002      3                     838    843364.59\n14   store  ss_addr_sk    2002      4        Women      56265  54024000.26\n15   store  ss_addr_sk    2002      4          Men      55444  53323142.64\n16   store  ss_addr_sk    2002      4      Jewelry      57008  54422657.27\n17   store  ss_addr_sk    2003      1                      32     42229.90\n18   store  ss_addr_sk    1998      2     Children      18327  17239214.92\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n         SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" AS \"SS_ADDR_SK\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"SS_EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" UNION ALL SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" AS \"SS_ADDR_SK\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"SS_EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.817117,
+                    "execution_time": 0.632393,
+                    "compile_time": 0.000279,
+                    "planning_time": 0.024239,
+                    "create_size": 896
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.910915,
+                    "execution_time": 0.621544,
+                    "compile_time": 3.037701,
+                    "planning_time": 0.084904,
+                    "create_size": 896
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.115531,
+                    "execution_time": 0.042071,
+                    "compile_time": 0.000239,
+                    "planning_time": 0.023817,
+                    "create_size": 576
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.307863,
+                    "execution_time": 0.041003,
+                    "compile_time": 0.130348,
+                    "planning_time": 0.086818,
+                    "create_size": 576
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.234877,
+                    "execution_time": 0.052788,
+                    "compile_time": 0.033085,
+                    "planning_time": 0.023285,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.467953,
+                    "execution_time": 0.05445,
+                    "compile_time": 3.195329,
+                    "planning_time": 0.084536,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" UNION ALL SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.596284,
+                    "execution_time": 1.594737,
+                    "compile_time": 0.36559,
+                    "planning_time": 1.254041,
+                    "create_size": 1408
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 17.46918,
+                    "execution_time": 3.481037,
+                    "compile_time": 13.320231,
+                    "planning_time": 11.589728,
+                    "create_size": 1408
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"SPEQLITE_TEMP_TABLE_4\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_4\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_4\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_4\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" GROUP BY \"SPEQLITE_TEMP_TABLE_4\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_4\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_4\".\"I_CATEGORY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.393621,
+                    "execution_time": 0.134356,
+                    "compile_time": 0.224078,
+                    "planning_time": 0.005577,
+                    "create_size": 10
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.973626,
+                    "execution_time": 0.766747,
+                    "compile_time": 7.09331,
+                    "planning_time": 0.073976,
+                    "create_size": 10
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_5\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_5\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_5\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_5\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt     sales_amt\n0    store  ss_addr_sk    1998      1  Electronics      36398  3.505872e+07\n1    store  ss_addr_sk    1998      2          Men      36674  3.485714e+07\n2    store  ss_addr_sk    2001      2         Home      37388  3.542515e+07\n3    store  ss_addr_sk    2001      2  Electronics      37082  3.571119e+07\n4    store  ss_addr_sk    1998      3      Jewelry      67984  6.530677e+07\n5    store  ss_addr_sk    1999      3          Men      68316  6.543446e+07\n6    store  ss_addr_sk    1998      4     Children     112310  1.075793e+08\n7    store  ss_addr_sk    2002      1     Children      39110  3.819013e+07\n8    store  ss_addr_sk    2002      1        Books      38806  3.770485e+07\n9    store  ss_addr_sk    2002      3       Sports      69380  6.674044e+07\n10   store  ss_addr_sk    1999      4       Sports     115440  1.105214e+08\n11   store  ss_addr_sk    1999      4        Women     112388  1.075186e+08\n12   store  ss_addr_sk    2002      4     Children     113334  1.078512e+08\n13   store  ss_addr_sk    2000      1     Children      39642  3.769510e+07\n14   store  ss_addr_sk    2000      2     Children      37216  3.640331e+07\n15   store  ss_addr_sk    2002      2  Electronics      37902  3.692922e+07\n16   store  ss_addr_sk    2002      2        Shoes      37222  3.453660e+07\n17   store  ss_addr_sk    2002      2        Music      36776  3.524052e+07\n18   store  ss_addr_sk    2002      2         Home      37468  3.624001e+07\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.050076,
+                    "execution_time": 0.007585,
+                    "compile_time": 0.031724,
+                    "planning_time": 0.004138
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.327028,
+                    "execution_time": 0.007913,
+                    "compile_time": 3.268443,
+                    "planning_time": 0.039571
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_4\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_4\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_4\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" GROUP BY \"SPEQLITE_TEMP_TABLE_4\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_4\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_4\".\"I_CATEGORY\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_5\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_5\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_5\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_5\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\""
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt     sales_amt\n0    store  ss_addr_sk    1998      1  Electronics      36398  3.505872e+07\n1    store  ss_addr_sk    1998      2          Men      36674  3.485714e+07\n2    store  ss_addr_sk    2001      2         Home      37388  3.542515e+07\n3    store  ss_addr_sk    2001      2  Electronics      37082  3.571119e+07\n4    store  ss_addr_sk    1998      3      Jewelry      67984  6.530677e+07\n5    store  ss_addr_sk    1999      3          Men      68316  6.543446e+07\n6    store  ss_addr_sk    1998      4     Children     112310  1.075793e+08\n7    store  ss_addr_sk    2002      1     Children      39110  3.819013e+07\n8    store  ss_addr_sk    2002      1        Books      38806  3.770485e+07\n9    store  ss_addr_sk    2002      3       Sports      69380  6.674044e+07\n10   store  ss_addr_sk    1999      4       Sports     115440  1.105214e+08\n11   store  ss_addr_sk    1999      4        Women     112388  1.075186e+08\n12   store  ss_addr_sk    2002      4     Children     113334  1.078512e+08\n13   store  ss_addr_sk    2000      1     Children      39642  3.769510e+07\n14   store  ss_addr_sk    2000      2     Children      37216  3.640331e+07\n15   store  ss_addr_sk    2002      2  Electronics      37902  3.692922e+07\n16   store  ss_addr_sk    2002      2        Shoes      37222  3.453660e+07\n17   store  ss_addr_sk    2002      2        Music      36776  3.524052e+07\n18   store  ss_addr_sk    2002      2         Home      37468  3.624001e+07\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price FROM web_sales, item, date_dim WHERE ws_ship_cdemo_sk IS NULL AND ws_sold_date_sk=d_date_sk AND ws_item_sk=i_item_sk\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.812259,
+                    "execution_time": 1.310716,
+                    "compile_time": 0.142384,
+                    "planning_time": 0.042798,
+                    "create_size": 1152
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 14.478081,
+                    "execution_time": 3.251343,
+                    "compile_time": 11.699417,
+                    "planning_time": 0.125741,
+                    "create_size": 1152
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.226446,
+                    "execution_time": 0.086792,
+                    "compile_time": 0.105253,
+                    "planning_time": 0.005191,
+                    "create_size": 10
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.879318,
+                    "execution_time": 0.406571,
+                    "compile_time": 6.372278,
+                    "planning_time": 0.061829,
+                    "create_size": 10
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_7\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_7\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_7\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1  Electronics      18199  17529358.15\n1    store  ss_addr_sk    1998      1                     467    454086.07\n2    store  ss_addr_sk    1998      2          Men      18337  17428569.26\n3    store  ss_addr_sk    1998      3      Jewelry      33992  32653383.83\n4    store  ss_addr_sk    1998      4     Children      56155  53789626.15\n5    store  ss_addr_sk    1999      4        Women      56194  53759288.21\n6    store  ss_addr_sk    1999      4       Sports      57720  55260678.80\n7    store  ss_addr_sk    2000      1        Women      19803  18993727.26\n8    store  ss_addr_sk    2000      1     Children      19821  18847548.24\n9    store  ss_addr_sk    2001      1        Women      18853  18069350.70\n10   store  ss_addr_sk    1999      3          Men      34158  32717232.01\n11   store  ss_addr_sk    2001      2  Electronics      18541  17855597.37\n12   store  ss_addr_sk    2001      2         Home      18694  17712575.08\n13   store  ss_addr_sk    2002      1        Books      19403  18852427.32\n14   store  ss_addr_sk    2002      1     Children      19555  19095065.97\n15   store  ss_addr_sk    2002      2         Home      18734  18120004.05\n16   store  ss_addr_sk    2002      2  Electronics      18951  18464607.81\n17   store  ss_addr_sk    2002      2        Shoes      18611  17268297.88\n18   store  ss_addr_sk    2002      2        Music      18388  17620262.25\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.049859,
+                    "execution_time": 0.00759,
+                    "compile_time": 0.031845,
+                    "planning_time": 0.003933
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.147117,
+                    "execution_time": 0.008291,
+                    "compile_time": 3.08897,
+                    "planning_time": 0.039522
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_7\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_7\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_7\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1  Electronics      18199  17529358.15\n1    store  ss_addr_sk    1998      1                     467    454086.07\n2    store  ss_addr_sk    1998      2          Men      18337  17428569.26\n3    store  ss_addr_sk    1998      3      Jewelry      33992  32653383.83\n4    store  ss_addr_sk    1998      4     Children      56155  53789626.15\n5    store  ss_addr_sk    1999      4        Women      56194  53759288.21\n6    store  ss_addr_sk    1999      4       Sports      57720  55260678.80\n7    store  ss_addr_sk    2000      1        Women      19803  18993727.26\n8    store  ss_addr_sk    2000      1     Children      19821  18847548.24\n9    store  ss_addr_sk    2001      1        Women      18853  18069350.70\n10   store  ss_addr_sk    1999      3          Men      34158  32717232.01\n11   store  ss_addr_sk    2001      2  Electronics      18541  17855597.37\n12   store  ss_addr_sk    2001      2         Home      18694  17712575.08\n13   store  ss_addr_sk    2002      1        Books      19403  18852427.32\n14   store  ss_addr_sk    2002      1     Children      19555  19095065.97\n15   store  ss_addr_sk    2002      2         Home      18734  18120004.05\n16   store  ss_addr_sk    2002      2  Electronics      18951  18464607.81\n17   store  ss_addr_sk    2002      2        Shoes      18611  17268297.88\n18   store  ss_addr_sk    2002      2        Music      18388  17620262.25\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\"",
+                "rewrite": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\"",
+                "rewrite": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" LIMIT 21",
+                "preview": "\n/*   channel          col_name  d_year  d_qoy   i_category  sales_cnt     sales_amt\n0    store        ss_addr_sk    2002      2        Books      18187  1.698386e+07\n1    store        ss_addr_sk    2002      4        Music      56024  5.366918e+07\n2    store        ss_addr_sk    1998      3        Music      34844  3.363169e+07\n3      web  ws_ship_cdemo_sk    1999      1        Women    6101270  8.238333e+09\n4      web  ws_ship_cdemo_sk    2002      3        Women   10013380  1.235140e+10\n5      web  ws_ship_cdemo_sk    2002      4        Books   15445350  1.961383e+10\n6      web  ws_ship_cdemo_sk    2000      4        Music   15348424  1.908107e+10\n7      web  ws_ship_cdemo_sk    2001      2        Shoes    5399375  7.147686e+09\n8      web  ws_ship_cdemo_sk    2001      4         Home   15955968  1.914435e+10\n9    store        ss_addr_sk    2001      2       Sports      18643  1.787061e+07\n10   store        ss_addr_sk    1998      3          Men      34051  3.294977e+07\n11   store        ss_addr_sk    1998      4        Music      56986  5.544140e+07\n12   store        ss_addr_sk    2000      2        Shoes      18532  1.770673e+07\n13     web  ws_ship_cdemo_sk    2002      4  Electronics   15632010  1.985086e+10\n14     web  ws_ship_cdemo_sk    1998      3          Men    9162944  1.200922e+10\n15     web  ws_ship_cdemo_sk    2001      4          Men   15893248  1.906910e+10\n16     web  ws_ship_cdemo_sk    2002      1          Men    5534256  7.925074e+09\n17     web  ws_ship_cdemo_sk    1999      2        Books    6501180  8.150570e+09\n18     web  ws_ship_cdemo_sk    2001      2       Sports    5438065  7.198903e+09\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 6.556234,
+                    "execution_time": 6.477119,
+                    "compile_time": 0.000525,
+                    "planning_time": 0.055827
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 13.957127,
+                    "execution_time": 6.518766,
+                    "compile_time": 7.28708,
+                    "planning_time": 0.127814
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\"",
+                "rewrite": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+            }
+        ],
+        "preview": "\n/*   channel          col_name  d_year  d_qoy   i_category  sales_cnt     sales_amt\n0    store        ss_addr_sk    2002      2        Books      18187  1.698386e+07\n1    store        ss_addr_sk    2002      4        Music      56024  5.366918e+07\n2    store        ss_addr_sk    1998      3        Music      34844  3.363169e+07\n3      web  ws_ship_cdemo_sk    1999      1        Women    6101270  8.238333e+09\n4      web  ws_ship_cdemo_sk    2002      3        Women   10013380  1.235140e+10\n5      web  ws_ship_cdemo_sk    2002      4        Books   15445350  1.961383e+10\n6      web  ws_ship_cdemo_sk    2000      4        Music   15348424  1.908107e+10\n7      web  ws_ship_cdemo_sk    2001      2        Shoes    5399375  7.147686e+09\n8      web  ws_ship_cdemo_sk    2001      4         Home   15955968  1.914435e+10\n9    store        ss_addr_sk    2001      2       Sports      18643  1.787061e+07\n10   store        ss_addr_sk    1998      3          Men      34051  3.294977e+07\n11   store        ss_addr_sk    1998      4        Music      56986  5.544140e+07\n12   store        ss_addr_sk    2000      2        Shoes      18532  1.770673e+07\n13     web  ws_ship_cdemo_sk    2002      4  Electronics   15632010  1.985086e+10\n14     web  ws_ship_cdemo_sk    1998      3          Men    9162944  1.200922e+10\n15     web  ws_ship_cdemo_sk    2001      4          Men   15893248  1.906910e+10\n16     web  ws_ship_cdemo_sk    2002      1          Men    5534256  7.925074e+09\n17     web  ws_ship_cdemo_sk    1999      2        Books    6501180  8.150570e+09\n18     web  ws_ship_cdemo_sk    2001      2       Sports    5438065  7.198903e+09\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n/*CURSOR_IDENTIFIER*/\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category;",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_6\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_CATEGORY\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, D_YEAR, D_QOY, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, D_YEAR, D_QOY, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=D_DATE_SK\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, D_YEAR, D_QOY, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=D_DATE_SK\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, D_YEAR, D_QOY, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n         WHERE cs_bill_customer_sk IS NULL\n           AND cs_sold_date_sk=D_DATE_SK\n           AND cs_item_sk=i_item_sk\n) sales_data\nGROUP BY channel, col_name, D_YEAR, D_QOY, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_DATA\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"SALES_DATA\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" AS \"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_DATA\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_DATA\" AS \"SALES_DATA\" GROUP BY \"SALES_DATA\".\"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.652745,
+                    "execution_time": 1.105824,
+                    "compile_time": 0.169398,
+                    "planning_time": 0.057185,
+                    "create_size": 1152
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 15.134263,
+                    "execution_time": 2.52907,
+                    "compile_time": 12.11314,
+                    "planning_time": 0.158937,
+                    "create_size": 1152
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.248521,
+                    "execution_time": 0.0908,
+                    "compile_time": 0.122858,
+                    "planning_time": 0.005241,
+                    "create_size": 10
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.070187,
+                    "execution_time": 0.433692,
+                    "compile_time": 6.535128,
+                    "planning_time": 0.064789,
+                    "create_size": 10
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_9\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.032107,
+                    "execution_time": 0.007497,
+                    "compile_time": 0.014739,
+                    "planning_time": 0.003814
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.171004,
+                    "execution_time": 0.008021,
+                    "compile_time": 3.10845,
+                    "planning_time": 0.039535
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_9\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, d_year, d_qoy, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n) as sales_summary\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_SUMMARY\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\"",
+                "rewrite": "WITH SALES_SUMMARY AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"ITEM\" AS \"ITEM\" ) SELECT \"SALES_SUMMARY\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" AS \"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_SUMMARY\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_SUMMARY\" AS \"SALES_SUMMARY\" GROUP BY \"SALES_SUMMARY\".\"CHANNEL\" , \"SALES_SUMMARY\".\"COL_NAME\" , \"SALES_SUMMARY\".\"D_YEAR\" , \"SALES_SUMMARY\".\"D_QOY\" , \"SALES_SUMMARY\".\"I_CATEGORY\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, d_year, d_qoy, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n         WHERE cs_bill_customer_sk IS NULL\n           AND cs_sold_date_sk=d_date_sk\n           AND cs_item_sk=i_item_sk\n) as sales_data\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_DATA\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"SALES_DATA\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" AS \"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_DATA\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_DATA\" AS \"SALES_DATA\" GROUP BY \"SALES_DATA\".\"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017576,
+                    "execution_time": 0.007797,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.003702
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.164636,
+                    "execution_time": 0.007519,
+                    "compile_time": 0.100421,
+                    "planning_time": 0.039039
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, d_year, d_qoy, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n         WHERE cs_bill_customer_sk IS NULL\n           AND cs_sold_date_sk=d_date_sk\n) as sales_data\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"SALES_DATA\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"SALES_DATA\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" AS \"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_DATA\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_DATA\" AS \"SALES_DATA\" GROUP BY \"SALES_DATA\".\"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SALES_DATA AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"SALES_DATA\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" AS \"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_DATA\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_DATA\" AS \"SALES_DATA\" GROUP BY \"SALES_DATA\".\"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SALES_DATA AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"SALES_DATA\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" AS \"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_DATA\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_DATA\" AS \"SALES_DATA\" GROUP BY \"SALES_DATA\".\"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\"",
+                "rewrite": "WITH SALES_DATA AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"SALES_DATA\".\"CHANNEL\" AS \"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" AS \"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" AS \"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" AS \"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SALES_DATA\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SALES_DATA\" AS \"SALES_DATA\" GROUP BY \"SALES_DATA\".\"CHANNEL\" , \"SALES_DATA\".\"COL_NAME\" , \"SALES_DATA\".\"D_YEAR\" , \"SALES_DATA\".\"D_QOY\" , \"SALES_DATA\".\"I_CATEGORY\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "select /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt \nFROM (\n    SELECT 'store' as channel, 'ss_addr_sk' col_name, D_YEAR as d_year, D_QOY as d_qoy, i_category, ss_ext_sales_price as ext_sales_price\n    FROM store_sales, item, date_dim\n    WHERE ss_addr_sk IS NULL\n      AND ss_sold_date_sk = D_DATE_SK\n      AND ss_item_sk = i_item_sk\n    UNION ALL\n    SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, D_YEAR as d_year, D_QOY as d_qoy, i_category, ws_ext_sales_price as ext_sales_price\n    FROM web_sales, item, date_dim\n    WHERE ws_ship_cdemo_sk IS NULL\n      AND ws_sold_date_sk = D_DATE_SK\n      AND ws_item_sk = i_item_sk\n    UNION ALL\n    SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, D_YEAR as d_year, D_QOY as d_qoy, i_category, cs_ext_sales_price as ext_sales_price\n    FROM catalog_sales, item, date_dim\n    WHERE cs_bill_customer_sk IS NULL\n      AND cs_sold_date_sk = D_DATE_SK\n      AND cs_item_sk = i_item_sk\n) foo\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"FOO\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"FOO\".\"CHANNEL\" AS \"CHANNEL\" , \"FOO\".\"COL_NAME\" AS \"COL_NAME\" , \"FOO\".\"D_YEAR\" AS \"D_YEAR\" , \"FOO\".\"D_QOY\" AS \"D_QOY\" , \"FOO\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"FOO\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"FOO\" AS \"FOO\" GROUP BY \"FOO\".\"CHANNEL\" , \"FOO\".\"COL_NAME\" , \"FOO\".\"D_YEAR\" , \"FOO\".\"D_QOY\" , \"FOO\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017725,
+                    "execution_time": 0.007791,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.003886
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018517,
+                    "execution_time": 0.007536,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.004276
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, d_year, d_qoy, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n         WHERE cs_bill_customer_sk IS NULL\n           AND cs_sold_date_sk=d_date_sk\n           AND cs_item_sk=i_item_sk) foo\nGROUP BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"FOO\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"FOO\".\"CHANNEL\" AS \"CHANNEL\" , \"FOO\".\"COL_NAME\" AS \"COL_NAME\" , \"FOO\".\"D_YEAR\" AS \"D_YEAR\" , \"FOO\".\"D_QOY\" AS \"D_QOY\" , \"FOO\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"FOO\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"FOO\" AS \"FOO\" GROUP BY \"FOO\".\"CHANNEL\" , \"FOO\".\"COL_NAME\" , \"FOO\".\"D_YEAR\" , \"FOO\".\"D_QOY\" , \"FOO\".\"I_CATEGORY\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017279,
+                    "execution_time": 0.007444,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.003806
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.017611,
+                    "execution_time": 0.007303,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.004024
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*   channel    col_name  d_year  d_qoy   i_category  sales_cnt    sales_amt\n0    store  ss_addr_sk    1998      1      Jewelry      17895  17213488.64\n1    store  ss_addr_sk    1998      1          Men      18052  17176238.60\n2    store  ss_addr_sk    1998      3       Sports      35188  33912417.16\n3    store  ss_addr_sk    1998      3     Children      34290  31913421.74\n4    store  ss_addr_sk    1998      3        Women      34480  33315575.02\n5    store  ss_addr_sk    1998      3        Books      34012  32612104.71\n6    store  ss_addr_sk    1998      4        Books      56444  53333920.20\n7    store  ss_addr_sk    1998      4         Home      56475  53592763.13\n8    store  ss_addr_sk    1999      1  Electronics      19614  18645041.48\n9    store  ss_addr_sk    1999      2        Women      18718  17922158.84\n10   store  ss_addr_sk    1999      2          Men      18372  17407673.42\n11   store  ss_addr_sk    1999      4  Electronics      56858  53857280.61\n12   store  ss_addr_sk    1999      4        Books      56100  53295355.27\n13   store  ss_addr_sk    1999      4                    1463   1421404.39\n14   store  ss_addr_sk    1998      2       Sports      19054  18332974.68\n15   store  ss_addr_sk    1998      2      Jewelry      18589  17596871.10\n16   store  ss_addr_sk    1998      2        Women      18796  17948143.98\n17   store  ss_addr_sk    2000      4     Children      57107  54903746.33\n18   store  ss_addr_sk    2001      1  Electronics      18906  18423428.19\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, d_year, d_qoy, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n         WHERE cs_bill_customer_sk IS NULL\n           AND cs_sold_date_sk=d_date_sk\n           AND cs_item_sk=i_item_sk) foo\nGROUP BY channel, col_name, d_year, d_qoy, i_category\nORDER BY channel, col_name, d_year, d_qoy, i_category\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"FOO\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"FOO\".\"CHANNEL\" AS \"CHANNEL\" , \"FOO\".\"COL_NAME\" AS \"COL_NAME\" , \"FOO\".\"D_YEAR\" AS \"D_YEAR\" , \"FOO\".\"D_QOY\" AS \"D_QOY\" , \"FOO\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"FOO\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"FOO\" AS \"FOO\" GROUP BY \"FOO\".\"CHANNEL\" , \"FOO\".\"COL_NAME\" , \"FOO\".\"D_YEAR\" , \"FOO\".\"D_QOY\" , \"FOO\".\"I_CATEGORY\" ORDER BY \"CHANNEL\" NULLS LAST , \"COL_NAME\" NULLS LAST , \"D_YEAR\" NULLS LAST , \"D_QOY\" NULLS LAST , \"I_CATEGORY\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_9\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"CHANNEL\" , \"COL_NAME\" , \"D_YEAR\" , \"D_QOY\" , \"I_CATEGORY\" LIMIT 21",
+                "preview": "\n/*    channel             col_name  d_year  d_qoy   i_category  sales_cnt   sales_amt\n0   catalog  cs_bill_customer_sk    1998      1                      27    49551.94\n1   catalog  cs_bill_customer_sk    1998      1        Books       1012  1353267.20\n2   catalog  cs_bill_customer_sk    1998      1     Children        958  1200131.01\n3   catalog  cs_bill_customer_sk    1998      1  Electronics       1059  1250975.64\n4   catalog  cs_bill_customer_sk    1998      1         Home        986  1267718.16\n5   catalog  cs_bill_customer_sk    1998      1      Jewelry       1024  1339380.21\n6   catalog  cs_bill_customer_sk    1998      1          Men       1043  1339499.02\n7   catalog  cs_bill_customer_sk    1998      1        Music       1028  1293090.13\n8   catalog  cs_bill_customer_sk    1998      1        Shoes        996  1164171.83\n9   catalog  cs_bill_customer_sk    1998      1       Sports       1019  1434558.32\n10  catalog  cs_bill_customer_sk    1998      1        Women       1004  1322180.93\n11  catalog  cs_bill_customer_sk    1998      2                      17    34680.88\n12  catalog  cs_bill_customer_sk    1998      2        Books       1057  1327097.50\n13  catalog  cs_bill_customer_sk    1998      2     Children       1007  1238671.67\n14  catalog  cs_bill_customer_sk    1998      2  Electronics        994  1270058.72\n15  catalog  cs_bill_customer_sk    1998      2         Home       1063  1418531.07\n16  catalog  cs_bill_customer_sk    1998      2      Jewelry       1057  1239230.00\n17  catalog  cs_bill_customer_sk    1998      2          Men       1008  1232163.78\n18  catalog  cs_bill_customer_sk    1998      2        Music        996  1288759.62\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.037146,
+                    "execution_time": 0.008833,
+                    "compile_time": 0.017324,
+                    "planning_time": 0.004554
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 5.275918,
+                    "execution_time": 0.009373,
+                    "compile_time": 5.22125,
+                    "planning_time": 0.039832
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" ORDER BY \"CHANNEL\" NULLS LAST , \"COL_NAME\" NULLS LAST , \"D_YEAR\" NULLS LAST , \"D_QOY\" NULLS LAST , \"I_CATEGORY\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_9\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"CHANNEL\" NULLS LAST , \"COL_NAME\" NULLS LAST , \"D_YEAR\" NULLS LAST , \"D_QOY\" NULLS LAST , \"I_CATEGORY\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    channel             col_name  d_year  d_qoy   i_category  sales_cnt   sales_amt\n0   catalog  cs_bill_customer_sk    1998      1                      27    49551.94\n1   catalog  cs_bill_customer_sk    1998      1        Books       1012  1353267.20\n2   catalog  cs_bill_customer_sk    1998      1     Children        958  1200131.01\n3   catalog  cs_bill_customer_sk    1998      1  Electronics       1059  1250975.64\n4   catalog  cs_bill_customer_sk    1998      1         Home        986  1267718.16\n5   catalog  cs_bill_customer_sk    1998      1      Jewelry       1024  1339380.21\n6   catalog  cs_bill_customer_sk    1998      1          Men       1043  1339499.02\n7   catalog  cs_bill_customer_sk    1998      1        Music       1028  1293090.13\n8   catalog  cs_bill_customer_sk    1998      1        Shoes        996  1164171.83\n9   catalog  cs_bill_customer_sk    1998      1       Sports       1019  1434558.32\n10  catalog  cs_bill_customer_sk    1998      1        Women       1004  1322180.93\n11  catalog  cs_bill_customer_sk    1998      2                      17    34680.88\n12  catalog  cs_bill_customer_sk    1998      2        Books       1057  1327097.50\n13  catalog  cs_bill_customer_sk    1998      2     Children       1007  1238671.67\n14  catalog  cs_bill_customer_sk    1998      2  Electronics        994  1270058.72\n15  catalog  cs_bill_customer_sk    1998      2         Home       1063  1418531.07\n16  catalog  cs_bill_customer_sk    1998      2      Jewelry       1057  1239230.00\n17  catalog  cs_bill_customer_sk    1998      2          Men       1008  1232163.78\n18  catalog  cs_bill_customer_sk    1998      2        Music        996  1288759.62\n...*/"
+    },
+    {
+        "input": "-- start template query76.tpl query 99 in stream 0\nselect /* TPC-DS query76.tpl 0.99 */  channel, col_name, d_year, d_qoy, i_category, COUNT(*) sales_cnt, SUM(ext_sales_price) sales_amt FROM (\n        SELECT 'store' as channel, 'ss_addr_sk' col_name, d_year, d_qoy, i_category, ss_ext_sales_price ext_sales_price\n         FROM store_sales, item, date_dim\n         WHERE ss_addr_sk IS NULL\n           AND ss_sold_date_sk=d_date_sk\n           AND ss_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'web' as channel, 'ws_ship_cdemo_sk' col_name, d_year, d_qoy, i_category, ws_ext_sales_price ext_sales_price\n         FROM web_sales, item, date_dim\n         WHERE ws_ship_cdemo_sk IS NULL\n           AND ws_sold_date_sk=d_date_sk\n           AND ws_item_sk=i_item_sk\n        UNION ALL\n        SELECT 'catalog' as channel, 'cs_bill_customer_sk' col_name, d_year, d_qoy, i_category, cs_ext_sales_price ext_sales_price\n         FROM catalog_sales, item, date_dim\n         WHERE cs_bill_customer_sk IS NULL\n           AND cs_sold_date_sk=d_date_sk\n           AND cs_item_sk=i_item_sk) foo\nGROUP BY channel, col_name, d_year, d_qoy, i_category\nORDER BY channel, col_name, d_year, d_qoy, i_category\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" ) , \"FOO\" AS ( SELECT 'store' AS \"CHANNEL\" , 'ss_addr_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" WHERE \"STORE_SALES\".\"SS_ADDR_SK\" IS NULL UNION ALL SELECT 'web' AS \"CHANNEL\" , 'ws_ship_cdemo_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" WHERE \"WEB_SALES\".\"WS_SHIP_CDEMO_SK\" IS NULL UNION ALL SELECT 'catalog' AS \"CHANNEL\" , 'cs_bill_customer_sk' AS \"COL_NAME\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_QOY\" AS \"D_QOY\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" AS \"EXT_SALES_PRICE\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" WHERE \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" IS NULL ) SELECT \"FOO\".\"CHANNEL\" AS \"CHANNEL\" , \"FOO\".\"COL_NAME\" AS \"COL_NAME\" , \"FOO\".\"D_YEAR\" AS \"D_YEAR\" , \"FOO\".\"D_QOY\" AS \"D_QOY\" , \"FOO\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"FOO\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"FOO\" AS \"FOO\" GROUP BY \"FOO\".\"CHANNEL\" , \"FOO\".\"COL_NAME\" , \"FOO\".\"D_YEAR\" , \"FOO\".\"D_QOY\" , \"FOO\".\"I_CATEGORY\" ORDER BY \"CHANNEL\" NULLS LAST , \"COL_NAME\" NULLS LAST , \"D_YEAR\" NULLS LAST , \"D_QOY\" NULLS LAST , \"I_CATEGORY\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_9\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"CHANNEL\" , \"COL_NAME\" , \"D_YEAR\" , \"D_QOY\" , \"I_CATEGORY\" LIMIT 21",
+                "preview": "\n/*    channel             col_name  d_year  d_qoy   i_category  sales_cnt   sales_amt\n0   catalog  cs_bill_customer_sk    1998      1                      27    49551.94\n1   catalog  cs_bill_customer_sk    1998      1        Books       1012  1353267.20\n2   catalog  cs_bill_customer_sk    1998      1     Children        958  1200131.01\n3   catalog  cs_bill_customer_sk    1998      1  Electronics       1059  1250975.64\n4   catalog  cs_bill_customer_sk    1998      1         Home        986  1267718.16\n5   catalog  cs_bill_customer_sk    1998      1      Jewelry       1024  1339380.21\n6   catalog  cs_bill_customer_sk    1998      1          Men       1043  1339499.02\n7   catalog  cs_bill_customer_sk    1998      1        Music       1028  1293090.13\n8   catalog  cs_bill_customer_sk    1998      1        Shoes        996  1164171.83\n9   catalog  cs_bill_customer_sk    1998      1       Sports       1019  1434558.32\n10  catalog  cs_bill_customer_sk    1998      1        Women       1004  1322180.93\n11  catalog  cs_bill_customer_sk    1998      2                      17    34680.88\n12  catalog  cs_bill_customer_sk    1998      2        Books       1057  1327097.50\n13  catalog  cs_bill_customer_sk    1998      2     Children       1007  1238671.67\n14  catalog  cs_bill_customer_sk    1998      2  Electronics        994  1270058.72\n15  catalog  cs_bill_customer_sk    1998      2         Home       1063  1418531.07\n16  catalog  cs_bill_customer_sk    1998      2      Jewelry       1057  1239230.00\n17  catalog  cs_bill_customer_sk    1998      2          Men       1008  1232163.78\n18  catalog  cs_bill_customer_sk    1998      2        Music        996  1288759.62\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.020248,
+                    "execution_time": 0.008827,
+                    "compile_time": 8.3e-05,
+                    "planning_time": 0.004692
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.02022,
+                    "execution_time": 0.008643,
+                    "compile_time": 8.5e-05,
+                    "planning_time": 0.004703
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" AS \"I_CATEGORY\" , COUNT ( * ) AS \"SALES_CNT\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"EXT_SALES_PRICE\" ) AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_8\".\"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_QOY\" , \"SPEQLITE_TEMP_TABLE_8\".\"I_CATEGORY\" ORDER BY \"CHANNEL\" NULLS LAST , \"COL_NAME\" NULLS LAST , \"D_YEAR\" NULLS LAST , \"D_QOY\" NULLS LAST , \"I_CATEGORY\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"CHANNEL\" AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_9\".\"COL_NAME\" AS \"COL_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_YEAR\" AS \"D_YEAR\" , \"SPEQLITE_TEMP_TABLE_9\".\"D_QOY\" AS \"D_QOY\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_CATEGORY\" AS \"I_CATEGORY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_CNT\" AS \"SALES_CNT\" , \"SPEQLITE_TEMP_TABLE_9\".\"SALES_AMT\" AS \"SALES_AMT\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"CHANNEL\" NULLS LAST , \"COL_NAME\" NULLS LAST , \"D_YEAR\" NULLS LAST , \"D_QOY\" NULLS LAST , \"I_CATEGORY\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*    channel             col_name  d_year  d_qoy   i_category  sales_cnt   sales_amt\n0   catalog  cs_bill_customer_sk    1998      1                      27    49551.94\n1   catalog  cs_bill_customer_sk    1998      1        Books       1012  1353267.20\n2   catalog  cs_bill_customer_sk    1998      1     Children        958  1200131.01\n3   catalog  cs_bill_customer_sk    1998      1  Electronics       1059  1250975.64\n4   catalog  cs_bill_customer_sk    1998      1         Home        986  1267718.16\n5   catalog  cs_bill_customer_sk    1998      1      Jewelry       1024  1339380.21\n6   catalog  cs_bill_customer_sk    1998      1          Men       1043  1339499.02\n7   catalog  cs_bill_customer_sk    1998      1        Music       1028  1293090.13\n8   catalog  cs_bill_customer_sk    1998      1        Shoes        996  1164171.83\n9   catalog  cs_bill_customer_sk    1998      1       Sports       1019  1434558.32\n10  catalog  cs_bill_customer_sk    1998      1        Women       1004  1322180.93\n11  catalog  cs_bill_customer_sk    1998      2                      17    34680.88\n12  catalog  cs_bill_customer_sk    1998      2        Books       1057  1327097.50\n13  catalog  cs_bill_customer_sk    1998      2     Children       1007  1238671.67\n14  catalog  cs_bill_customer_sk    1998      2  Electronics        994  1270058.72\n15  catalog  cs_bill_customer_sk    1998      2         Home       1063  1418531.07\n16  catalog  cs_bill_customer_sk    1998      2      Jewelry       1057  1239230.00\n17  catalog  cs_bill_customer_sk    1998      2          Men       1008  1232163.78\n18  catalog  cs_bill_customer_sk    1998      2        Music        996  1288759.62\n...*/"
+    }
+]

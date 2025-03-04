@@ -1,0 +1,1423 @@
+[
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,(select sum(ss_ext_sales_price) from store_sales) as total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n) as subquery /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SUBQUERY\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"_U_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) SELECT \"SUBQUERY\".\"PROMOTIONS\" AS \"PROMOTIONS\" , ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) AS \"TOTAL\" , \"SUBQUERY\".\"PROMOTIONS\" / \"_U_0\".\"_COL_0\" * 100 AS \"_COL_2\" FROM \"SUBQUERY\" AS \"SUBQUERY\" CROSS JOIN \"_U_0\" AS \"_U_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.507283,
+                    "execution_time": 2.297299,
+                    "compile_time": 0.091442,
+                    "planning_time": 0.081679,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 11.226955,
+                    "execution_time": 6.7153,
+                    "compile_time": 4.291095,
+                    "planning_time": 0.178845,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"PROMOTIONS\" AS \"PROMOTIONS\" , ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_1\".\"PROMOTIONS\" / \"STORE_SALES\".\"_COL_0\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" CROSS JOIN \"STORE_SALES\" AS \"STORE_SALES\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"PROMOTIONS\" AS \"PROMOTIONS\" , ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_1\".\"PROMOTIONS\" / \"STORE_SALES\".\"_COL_0\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" CROSS JOIN \"STORE_SALES\" AS \"STORE_SALES\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions, total, cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) as promotions\n   from store_sales\n   where ss_sold_date_sk is not null\n   and ss_store_sk is not null\n   and ss_promo_sk is not null\n   and ss_customer_sk is not null\n   and ss_item_sk is not null) promotional_sales\n/*CURSOR_IDENTIFIER*/,\n  (select sum(ss_ext_sales_price) as total\n   from store_sales\n   where ss_sold_date_sk is not null\n   and ss_store_sk is not null\n   and ss_promo_sk is not null\n   and ss_customer_sk is not null\n   and ss_item_sk is not null) total_sales",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_STORE_SK\" IS NULL ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_STORE_SK\" IS NULL ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 19.658569,
+                    "execution_time": 19.606666,
+                    "compile_time": 0.000292,
+                    "planning_time": 0.02614,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 19.522895,
+                    "execution_time": 19.241677,
+                    "compile_time": 0.150853,
+                    "planning_time": 0.090661,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT PROMOTIONS , TOTAL , CAST ( PROMOTIONS AS DECIMAL ( 15 , 4 ) ) / CAST ( TOTAL AS DECIMAL ( 15 , 4 ) ) * 100 FROM ( SELECT SUM ( SS_EXT_SALES_PRICE ) AS PROMOTIONS FROM STORE_SALES WHERE NOT SS_SOLD_DATE_SK IS NULL AND NOT SS_STORE_SK IS NULL AND NOT SS_PROMO_SK IS NULL AND NOT SS_CUSTOMER_SK IS NULL AND NOT SS_ITEM_SK IS NULL ) AS PROMOTIONAL_SALES , ( SELECT SUM ( SS_EXT_SALES_PRICE ) AS TOTAL FROM STORE_SALES WHERE NOT SS_SOLD_DATE_SK IS NULL AND NOT SS_STORE_SK IS NULL AND NOT SS_PROMO_SK IS NULL AND NOT SS_CUSTOMER_SK IS NULL AND NOT SS_ITEM_SK IS NULL ) AS TOTAL_SALES LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n   where ss_store_sk IS NOT NULL\n   and   ss_promo_sk IS NOT NULL\n   and   ss_sold_date_sk IS NOT NULL\n   and   ss_item_sk IS NOT NULL\n   and   ss_customer_sk IS NOT NULL\n   ) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from store_sales) total_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_STORE_SK\" IS NULL ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"SPEQLITE_TEMP_TABLE_2\".\"PROMOTIONS\" AS \"PROMOTIONS\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.061276,
+                    "execution_time": 0.034719,
+                    "compile_time": 0.000236,
+                    "planning_time": 0.002855,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.12992,
+                    "execution_time": 0.034989,
+                    "compile_time": 0.000242,
+                    "planning_time": 0.070101,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"STORE_SALES\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_3\".\"PROMOTIONS\" / \"STORE_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" CROSS JOIN \"STORE_SALES\" AS \"STORE_SALES\"",
+                "rewrite": null
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n  ) total_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"PROMOTIONS\" AS \"PROMOTIONS\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_MOY\" = 11",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.098171,
+                    "execution_time": 0.040014,
+                    "compile_time": 0.000258,
+                    "planning_time": 0.032406,
+                    "create_size": 48
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.510318,
+                    "execution_time": 0.247298,
+                    "compile_time": 0.209447,
+                    "planning_time": 0.033086,
+                    "create_size": 48
+                }
+            }
+        ],
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"STORE_SALES\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"STORE_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"STORE_SALES\" AS \"STORE_SALES\"",
+                "rewrite": null
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n   join store on ss_store_sk = s_store_sk\n   join promotion on ss_promo_sk = p_promo_sk\n   join date_dim on ss_sold_date_sk = d_date_sk\n   join customer_address on ca_address_sk = ss_addr_sk\n   join customer on ss_customer_sk = c_customer_sk\n   join item on ss_item_sk = i_item_sk\n   where ca_gmt_offset = -6\n   and i_category = 'Books'\n   and (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and s_gmt_offset = -6\n   and d_year = 2000\n   and d_moy = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n   where ss_store_sk in (select s_store_sk from store where s_gmt_offset = -6)\n/*CURSOR_IDENTIFIER*/) total_sales",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) , \"_U_0\" AS ( SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 GROUP BY \"STORE\".\"S_STORE_SK\" ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE NOT \"_U_0\".\"S_STORE_SK\" IS NULL ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.799626,
+                    "execution_time": 0.670423,
+                    "compile_time": 0.000682,
+                    "planning_time": 0.089568,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 13.658757,
+                    "execution_time": 2.355668,
+                    "compile_time": 11.062643,
+                    "planning_time": 0.192721,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 GROUP BY \"STORE\".\"S_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.086804,
+                    "execution_time": 0.031767,
+                    "compile_time": 0.000242,
+                    "planning_time": 0.030544,
+                    "create_size": 16
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.25831,
+                    "execution_time": 0.03051,
+                    "compile_time": 0.099783,
+                    "planning_time": 0.099027,
+                    "create_size": 16
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ON \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE NOT \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 4.042766,
+                    "execution_time": 3.982964,
+                    "compile_time": 0.000355,
+                    "planning_time": 0.032227,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.245497,
+                    "execution_time": 4.114021,
+                    "compile_time": 0.001461,
+                    "planning_time": 0.100397,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_5\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_5\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.071728,
+                    "execution_time": 0.045053,
+                    "compile_time": 0.000286,
+                    "planning_time": 0.004264,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.137765,
+                    "execution_time": 0.044526,
+                    "compile_time": 0.002163,
+                    "planning_time": 0.066429,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_8\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.419754e+09  1.988716e+12    0.07*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016093,
+                    "execution_time": 0.006925,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.00332
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054357,
+                    "execution_time": 0.007461,
+                    "compile_time": 0.001006,
+                    "planning_time": 0.038337
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_5\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_8\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.419754e+09  1.988716e+12    0.07*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from store_sales\n   where ss_sold_date_sk IS NOT NULL\n   and ss_store_sk IS NOT NULL\n   and ss_promo_sk IS NOT NULL) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from store_sales\n   where ss_sold_date_sk IS NOT NULL) total_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_STORE_SK\" IS NULL ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 10.223035,
+                    "execution_time": 10.165704,
+                    "compile_time": 0.000299,
+                    "planning_time": 0.031682,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 10.709239,
+                    "execution_time": 10.431179,
+                    "compile_time": 0.152183,
+                    "planning_time": 0.098034,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 6.28896,
+                    "execution_time": 6.233207,
+                    "compile_time": 0.000301,
+                    "planning_time": 0.030249,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.193027,
+                    "execution_time": 6.938263,
+                    "compile_time": 0.130466,
+                    "planning_time": 0.097012,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT \"SPEQLITE_TEMP_TABLE_9\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_9\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.071698,
+                    "execution_time": 0.045748,
+                    "compile_time": 0.000273,
+                    "planning_time": 0.004203,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.330595,
+                    "execution_time": 0.044753,
+                    "compile_time": 0.195558,
+                    "planning_time": 0.067106,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_11\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  5.073909e+12  5.135823e+12   98.79*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016286,
+                    "execution_time": 0.007225,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.003197
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051366,
+                    "execution_time": 0.006983,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.038368
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_9\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_11\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  5.073909e+12  5.135823e+12   98.79*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ) total_sales\n        /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"STORE\" AS \"STORE\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"STORE\" AS \"STORE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH TOTAL_SALES AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"STORE\" AS \"STORE\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH TOTAL_SALES AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"STORE\" AS \"STORE\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\"",
+                "rewrite": "WITH TOTAL_SALES AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" CROSS JOIN \"STORE\" AS \"STORE\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_customer_sk = c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,date_dim\n        ,customer\n        ,customer_address\n   where ss_sold_date_sk = d_date_sk\n   and   ss_customer_sk = c_customer_sk\n   and   ca_address_sk = c_current_addr_sk) total_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.484869,
+                    "execution_time": 0.345437,
+                    "compile_time": 0.000238,
+                    "planning_time": 0.026591,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.606177,
+                    "execution_time": 0.375353,
+                    "compile_time": 0.00025,
+                    "planning_time": 0.113747,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_13\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.784595,
+                    "execution_time": 0.690676,
+                    "compile_time": 0.000553,
+                    "planning_time": 0.058128,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.654425,
+                    "execution_time": 0.814223,
+                    "compile_time": 3.701176,
+                    "planning_time": 0.137928,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_14\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 18.948553,
+                    "execution_time": 18.869249,
+                    "compile_time": 0.000469,
+                    "planning_time": 0.046767,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 20.025879,
+                    "execution_time": 19.861893,
+                    "compile_time": 0.002791,
+                    "planning_time": 0.124856,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_15\" AS SELECT \"SPEQLITE_TEMP_TABLE_13\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_14\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_13\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_14\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.0701,
+                    "execution_time": 0.043453,
+                    "compile_time": 0.000283,
+                    "planning_time": 0.004247,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.132354,
+                    "execution_time": 0.043751,
+                    "compile_time": 0.000271,
+                    "planning_time": 0.06626,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_15\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_15\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_15\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  7.222463e+09  5.073834e+12    0.14*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01566,
+                    "execution_time": 0.006662,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003176
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.05198,
+                    "execution_time": 0.007757,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.038297
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_14\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_13\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_14\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_15\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_15\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_15\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  7.222463e+09  5.073834e+12    0.14*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions, total, cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from store_sales\n   where ss_item_sk IS NOT NULL\n   and   ss_sold_date_sk IS NOT NULL\n   and   ss_promo_sk IS NOT NULL\n   and   ss_customer_sk IS NOT NULL) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from store_sales\n   where ss_item_sk IS NOT NULL\n   and   ss_sold_date_sk IS NOT NULL\n   and   ss_promo_sk IS NOT NULL\n   and   ss_customer_sk IS NOT NULL\n   ) total_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL ) , \"TOTAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"TOTAL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"TOTAL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"TOTAL_SALES\" AS \"TOTAL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_16\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE NOT \"STORE_SALES\".\"SS_CUSTOMER_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.59918,
+                    "execution_time": 2.542882,
+                    "compile_time": 0.000318,
+                    "planning_time": 0.030644,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.361459,
+                    "execution_time": 7.235709,
+                    "compile_time": 0.001268,
+                    "planning_time": 0.09522,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_17\" AS SELECT \"SPEQLITE_TEMP_TABLE_2\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_2\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.070756,
+                    "execution_time": 0.043734,
+                    "compile_time": 0.000273,
+                    "planning_time": 0.004302,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.132497,
+                    "execution_time": 0.045101,
+                    "compile_time": 0.000281,
+                    "planning_time": 0.065326,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_17\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_17\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_17\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_17\" AS \"SPEQLITE_TEMP_TABLE_17\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  5.042900e+12  5.135819e+12   98.19*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015837,
+                    "execution_time": 0.006787,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003247
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051825,
+                    "execution_time": 0.007104,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.038649
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_2\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_17\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_17\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_17\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_17\" AS \"SPEQLITE_TEMP_TABLE_17\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  5.042900e+12  5.135819e+12   98.19*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" CROSS JOIN \"STORE\" AS \"STORE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" CROSS JOIN \"STORE\" AS \"STORE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" CROSS JOIN \"STORE\" AS \"STORE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" CROSS JOIN \"STORE\" AS \"STORE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\"",
+                "rewrite": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" CROSS JOIN \"STORE\" AS \"STORE\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\"",
+                "rewrite": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\"",
+                "rewrite": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_4\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n/*CURSOR_IDENTIFIER*/) ",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.772998,
+                    "execution_time": 0.596897,
+                    "compile_time": 0.053539,
+                    "planning_time": 0.084388,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 12.545349,
+                    "execution_time": 5.551543,
+                    "compile_time": 6.79154,
+                    "planning_time": 0.168784,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_19\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" CROSS JOIN \"_Q_0\" AS \"_Q_0\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" CROSS JOIN \"_Q_0\" AS \"_Q_0\"",
+                "rewrite": "WITH _Q_0 AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"ITEM\" AS \"ITEM\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_19\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 26.844192,
+                    "execution_time": 26.730331,
+                    "compile_time": 0.000562,
+                    "planning_time": 0.075805,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 43.039632,
+                    "execution_time": 38.848033,
+                    "compile_time": 3.993929,
+                    "planning_time": 0.155094,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_20\" AS SELECT \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.071037,
+                    "execution_time": 0.043596,
+                    "compile_time": 0.000273,
+                    "planning_time": 0.0043,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.131886,
+                    "execution_time": 0.043942,
+                    "compile_time": 0.00031,
+                    "planning_time": 0.064538,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_20\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_20\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_20\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_20\" AS \"SPEQLITE_TEMP_TABLE_20\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  5.042885e+12    0.02*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015959,
+                    "execution_time": 0.006661,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003402
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051431,
+                    "execution_time": 0.007005,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.038491
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_18\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_20\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_20\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_20\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_20\" AS \"SPEQLITE_TEMP_TABLE_20\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  5.042885e+12    0.02*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n/*CURSOR_IDENTIFIER*/) ",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_21\" AS SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.374478,
+                    "execution_time": 0.217863,
+                    "compile_time": 0.000251,
+                    "planning_time": 0.028744,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.443653,
+                    "execution_time": 0.222209,
+                    "compile_time": 0.000234,
+                    "planning_time": 0.091412,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_22\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_CATEGORY\" = 'Books' AND \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.752702,
+                    "execution_time": 0.583109,
+                    "compile_time": 0.056595,
+                    "planning_time": 0.074724,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.338461,
+                    "execution_time": 0.931366,
+                    "compile_time": 6.206318,
+                    "planning_time": 0.16188,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_23\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 26.49611,
+                    "execution_time": 26.396561,
+                    "compile_time": 0.000565,
+                    "planning_time": 0.058156,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 26.644215,
+                    "execution_time": 26.463298,
+                    "compile_time": 0.001598,
+                    "planning_time": 0.143296,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_24\" AS SELECT \"SPEQLITE_TEMP_TABLE_22\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_23\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_22\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_23\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_22\" AS \"SPEQLITE_TEMP_TABLE_22\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.070351,
+                    "execution_time": 0.043428,
+                    "compile_time": 0.000272,
+                    "planning_time": 0.004281,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.130334,
+                    "execution_time": 0.043633,
+                    "compile_time": 0.000274,
+                    "planning_time": 0.063566,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_24\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_24\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_24\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_24\" AS \"SPEQLITE_TEMP_TABLE_24\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.224955e+12    0.06*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015871,
+                    "execution_time": 0.006779,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003295
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051813,
+                    "execution_time": 0.007501,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.038383
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_22\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_23\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_22\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_23\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_22\" AS \"SPEQLITE_TEMP_TABLE_22\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_24\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_24\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_24\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_24\" AS \"SPEQLITE_TEMP_TABLE_24\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.224955e+12    0.06*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n/*CURSOR_IDENTIFIER*/) ",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books' ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_25\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books'",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.10669,
+                    "execution_time": 0.045217,
+                    "compile_time": 0.000238,
+                    "planning_time": 0.029124,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.313315,
+                    "execution_time": 0.047316,
+                    "compile_time": 0.13108,
+                    "planning_time": 0.098032,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_26\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"SPEQLITE_TEMP_TABLE_25\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_GMT_OFFSET\" = -6 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.652759,
+                    "execution_time": 0.508709,
+                    "compile_time": 0.040705,
+                    "planning_time": 0.064965,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 8.537426,
+                    "execution_time": 5.036361,
+                    "compile_time": 3.328292,
+                    "planning_time": 0.14519,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_27\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_25\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 26.404259,
+                    "execution_time": 26.313252,
+                    "compile_time": 0.00057,
+                    "planning_time": 0.052812,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30.254264,
+                    "execution_time": 26.158094,
+                    "compile_time": 3.923301,
+                    "planning_time": 0.132995,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_28\" AS SELECT \"SPEQLITE_TEMP_TABLE_26\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_27\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_26\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_27\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_26\" AS \"SPEQLITE_TEMP_TABLE_26\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_27\" AS \"SPEQLITE_TEMP_TABLE_27\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.070602,
+                    "execution_time": 0.043842,
+                    "compile_time": 0.000285,
+                    "planning_time": 0.004388,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.133213,
+                    "execution_time": 0.044377,
+                    "compile_time": 0.000291,
+                    "planning_time": 0.065425,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_28\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_28\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_28\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_28\" AS \"SPEQLITE_TEMP_TABLE_28\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.209332e+11    0.64*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016009,
+                    "execution_time": 0.006895,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.003277
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051918,
+                    "execution_time": 0.007595,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.038213
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_26\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_27\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_26\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_27\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_26\" AS \"SPEQLITE_TEMP_TABLE_26\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_27\" AS \"SPEQLITE_TEMP_TABLE_27\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_28\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_28\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_28\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_28\" AS \"SPEQLITE_TEMP_TABLE_28\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.209332e+11    0.64*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   s_gmt_offset = -6\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books' ) , \"STORE_2\" AS ( SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" , \"STORE\".\"S_GMT_OFFSET\" AS \"S_GMT_OFFSET\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_29\" AS SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" , \"STORE\".\"S_GMT_OFFSET\" AS \"S_GMT_OFFSET\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.082241,
+                    "execution_time": 0.030907,
+                    "compile_time": 0.000295,
+                    "planning_time": 0.027298,
+                    "create_size": 20
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.383705,
+                    "execution_time": 0.031015,
+                    "compile_time": 0.227498,
+                    "planning_time": 0.0979,
+                    "create_size": 20
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_30\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"SPEQLITE_TEMP_TABLE_25\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"SPEQLITE_TEMP_TABLE_29\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.623013,
+                    "execution_time": 3.493009,
+                    "compile_time": 0.037376,
+                    "planning_time": 0.054712,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.936005,
+                    "execution_time": 3.459875,
+                    "compile_time": 3.301953,
+                    "planning_time": 0.13221,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_31\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_25\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"SPEQLITE_TEMP_TABLE_29\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 26.433758,
+                    "execution_time": 26.343729,
+                    "compile_time": 0.000553,
+                    "planning_time": 0.043332,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30.215414,
+                    "execution_time": 26.087265,
+                    "compile_time": 3.969561,
+                    "planning_time": 0.118537,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_32\" AS SELECT \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_31\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_31\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_30\" AS \"SPEQLITE_TEMP_TABLE_30\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_31\" AS \"SPEQLITE_TEMP_TABLE_31\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.071209,
+                    "execution_time": 0.044267,
+                    "compile_time": 0.000267,
+                    "planning_time": 0.004291,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.130557,
+                    "execution_time": 0.044886,
+                    "compile_time": 0.000272,
+                    "planning_time": 0.062789,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_32\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_32\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_32\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_32\" AS \"SPEQLITE_TEMP_TABLE_32\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  8.555281e+10    1.66*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015882,
+                    "execution_time": 0.006813,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.003234
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.052058,
+                    "execution_time": 0.007326,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.03869
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_31\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_31\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_30\" AS \"SPEQLITE_TEMP_TABLE_30\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_31\" AS \"SPEQLITE_TEMP_TABLE_31\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_32\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_32\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_32\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_32\" AS \"SPEQLITE_TEMP_TABLE_32\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  8.555281e+10    1.66*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n/*CURSOR_IDENTIFIER*/)",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books' ) , \"STORE_2\" AS ( SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" , \"STORE\".\"S_GMT_OFFSET\" AS \"S_GMT_OFFSET\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"_Q_0\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"_Q_0\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_33\" AS SELECT \"SPEQLITE_TEMP_TABLE_31\".\"TOTAL\" AS \"TOTAL\" FROM \"SPEQLITE_TEMP_TABLE_31\" AS \"SPEQLITE_TEMP_TABLE_31\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_YEAR\" = 2000",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.095945,
+                    "execution_time": 0.039699,
+                    "compile_time": 0.00027,
+                    "planning_time": 0.032726,
+                    "create_size": 16
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.160862,
+                    "execution_time": 0.03868,
+                    "compile_time": 0.000284,
+                    "planning_time": 0.096574,
+                    "create_size": 16
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_34\" AS SELECT \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_33\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_33\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_30\" AS \"SPEQLITE_TEMP_TABLE_30\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_33\" AS \"SPEQLITE_TEMP_TABLE_33\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.071781,
+                    "execution_time": 0.044638,
+                    "compile_time": 0.000276,
+                    "planning_time": 0.00433,
+                    "create_size": 24
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.132185,
+                    "execution_time": 0.04393,
+                    "compile_time": 0.000281,
+                    "planning_time": 0.062874,
+                    "create_size": 24
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_34\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_34\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_34\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_34\" AS \"SPEQLITE_TEMP_TABLE_34\" LIMIT 21",
+                "preview": "\n/*      promotions         total  _col_2\n0   1.421274e+09  8.555281e+10    1.66\n1   1.421274e+09  8.555281e+10    1.66\n2   1.421274e+09  8.555281e+10    1.66\n3   1.421274e+09  8.555281e+10    1.66\n4   1.421274e+09  8.555281e+10    1.66\n5   1.421274e+09  8.555281e+10    1.66\n6   1.421274e+09  8.555281e+10    1.66\n7   1.421274e+09  8.555281e+10    1.66\n8   1.421274e+09  8.555281e+10    1.66\n9   1.421274e+09  8.555281e+10    1.66\n10  1.421274e+09  8.555281e+10    1.66\n11  1.421274e+09  8.555281e+10    1.66\n12  1.421274e+09  8.555281e+10    1.66\n13  1.421274e+09  8.555281e+10    1.66\n14  1.421274e+09  8.555281e+10    1.66\n15  1.421274e+09  8.555281e+10    1.66\n16  1.421274e+09  8.555281e+10    1.66\n17  1.421274e+09  8.555281e+10    1.66\n18  1.421274e+09  8.555281e+10    1.66\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016579,
+                    "execution_time": 0.007364,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003241
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053107,
+                    "execution_time": 0.007104,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.038479
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_33\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_30\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_33\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_30\" AS \"SPEQLITE_TEMP_TABLE_30\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_33\" AS \"SPEQLITE_TEMP_TABLE_33\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_34\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_34\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_34\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_34\" AS \"SPEQLITE_TEMP_TABLE_34\""
+            }
+        ],
+        "preview": "\n/*      promotions         total  _col_2\n0   1.421274e+09  8.555281e+10    1.66\n1   1.421274e+09  8.555281e+10    1.66\n2   1.421274e+09  8.555281e+10    1.66\n3   1.421274e+09  8.555281e+10    1.66\n4   1.421274e+09  8.555281e+10    1.66\n5   1.421274e+09  8.555281e+10    1.66\n6   1.421274e+09  8.555281e+10    1.66\n7   1.421274e+09  8.555281e+10    1.66\n8   1.421274e+09  8.555281e+10    1.66\n9   1.421274e+09  8.555281e+10    1.66\n10  1.421274e+09  8.555281e+10    1.66\n11  1.421274e+09  8.555281e+10    1.66\n12  1.421274e+09  8.555281e+10    1.66\n13  1.421274e+09  8.555281e+10    1.66\n14  1.421274e+09  8.555281e+10    1.66\n15  1.421274e+09  8.555281e+10    1.66\n16  1.421274e+09  8.555281e+10    1.66\n17  1.421274e+09  8.555281e+10    1.66\n18  1.421274e+09  8.555281e+10    1.66\n...*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) all_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books' ) , \"STORE_2\" AS ( SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" , \"STORE\".\"S_GMT_OFFSET\" AS \"S_GMT_OFFSET\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"ALL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"ALL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"ALL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"ALL_SALES\" AS \"ALL_SALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_35\" AS SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.083103,
+                    "execution_time": 0.030681,
+                    "compile_time": 0.000247,
+                    "planning_time": 0.028337,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.147291,
+                    "execution_time": 0.030958,
+                    "compile_time": 0.000242,
+                    "planning_time": 0.092158,
+                    "create_size": 6
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_36\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"SPEQLITE_TEMP_TABLE_35\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_25\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"SPEQLITE_TEMP_TABLE_29\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.689177,
+                    "execution_time": 2.568438,
+                    "compile_time": 0.038282,
+                    "planning_time": 0.045113,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.113713,
+                    "execution_time": 2.575619,
+                    "compile_time": 3.349755,
+                    "planning_time": 0.153825,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_37\" AS SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"SPEQLITE_TEMP_TABLE_35\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_25\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"SPEQLITE_TEMP_TABLE_29\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_21\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.534461,
+                    "execution_time": 2.40616,
+                    "compile_time": 0.029882,
+                    "planning_time": 0.062436,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 9.108179,
+                    "execution_time": 2.421295,
+                    "compile_time": 6.546152,
+                    "planning_time": 0.099248,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_38\" AS SELECT \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_36\" AS \"SPEQLITE_TEMP_TABLE_36\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_37\" AS \"SPEQLITE_TEMP_TABLE_37\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.072061,
+                    "execution_time": 0.045159,
+                    "compile_time": 0.00028,
+                    "planning_time": 0.004172,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.13075,
+                    "execution_time": 0.044374,
+                    "compile_time": 0.00028,
+                    "planning_time": 0.063097,
+                    "create_size": 6
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_38\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_38\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_38\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_38\" AS \"SPEQLITE_TEMP_TABLE_38\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.781738e+09   51.09*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016626,
+                    "execution_time": 0.007551,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.003283
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051606,
+                    "execution_time": 0.007079,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.038491
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_36\" AS \"SPEQLITE_TEMP_TABLE_36\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_37\" AS \"SPEQLITE_TEMP_TABLE_37\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_38\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_38\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_38\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_38\" AS \"SPEQLITE_TEMP_TABLE_38\""
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.781738e+09   51.09*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) all_sales\norder by promotions, total\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books' ) , \"STORE_2\" AS ( SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" , \"STORE\".\"S_GMT_OFFSET\" AS \"S_GMT_OFFSET\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"ALL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"ALL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"ALL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"ALL_SALES\" AS \"ALL_SALES\" ORDER BY \"PROMOTIONS\" NULLS LAST , \"TOTAL\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_38\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_38\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_38\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_38\" AS \"SPEQLITE_TEMP_TABLE_38\" ORDER BY \"PROMOTIONS\" , \"TOTAL\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.781738e+09   51.09*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017846,
+                    "execution_time": 0.008602,
+                    "compile_time": 6.5e-05,
+                    "planning_time": 0.003412
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.275996,
+                    "execution_time": 0.008611,
+                    "compile_time": 0.222484,
+                    "planning_time": 0.038395
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_36\" AS \"SPEQLITE_TEMP_TABLE_36\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_37\" AS \"SPEQLITE_TEMP_TABLE_37\" ORDER BY \"PROMOTIONS\" NULLS LAST , \"TOTAL\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_38\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_38\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_38\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_38\" AS \"SPEQLITE_TEMP_TABLE_38\" ORDER BY \"PROMOTIONS\" NULLS LAST , \"TOTAL\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.781738e+09   51.09*/"
+    },
+    {
+        "input": "-- start template query61.tpl query 97 in stream 0\nselect /* TPC-DS query61.tpl 0.97 */  promotions,total,cast(promotions as decimal(15,4))/cast(total as decimal(15,4))*100\nfrom\n  (select sum(ss_ext_sales_price) promotions\n   from  store_sales\n        ,store\n        ,promotion\n        ,date_dim\n        ,customer\n        ,customer_address \n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_promo_sk = p_promo_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk \n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   (p_channel_dmail = 'Y' or p_channel_email = 'Y' or p_channel_tv = 'Y')\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) promotional_sales,\n  (select sum(ss_ext_sales_price) total\n   from  store_sales\n        ,store\n        ,date_dim\n        ,customer\n        ,customer_address\n        ,item\n   where ss_sold_date_sk = d_date_sk\n   and   ss_store_sk = s_store_sk\n   and   ss_customer_sk= c_customer_sk\n   and   ca_address_sk = c_current_addr_sk\n   and   ss_item_sk = i_item_sk\n   and   ca_gmt_offset = -6\n   and   i_category = 'Books'\n   and   s_gmt_offset = -6\n   and   d_year = 2000\n   and   d_moy  = 11) all_sales\norder by promotions, total\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" , \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AS \"C_CURRENT_ADDR_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 11 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_CATEGORY\" AS \"I_CATEGORY\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" = 'Books' ) , \"STORE_2\" AS ( SELECT \"STORE\".\"S_STORE_SK\" AS \"S_STORE_SK\" , \"STORE\".\"S_GMT_OFFSET\" AS \"S_GMT_OFFSET\" FROM \"STORE\" AS \"STORE\" WHERE \"STORE\".\"S_GMT_OFFSET\" = -6 ) , \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"PROMOTIONAL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"PROMOTIONS\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"PROMOTION\" AS \"PROMOTION\" ON ( \"PROMOTION\".\"P_CHANNEL_DMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_EMAIL\" = 'Y' OR \"PROMOTION\".\"P_CHANNEL_TV\" = 'Y' ) AND \"PROMOTION\".\"P_PROMO_SK\" = \"STORE_SALES\".\"SS_PROMO_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) , \"ALL_SALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE_2\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" ) SELECT \"PROMOTIONAL_SALES\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"ALL_SALES\".\"TOTAL\" AS \"TOTAL\" , \"PROMOTIONAL_SALES\".\"PROMOTIONS\" / \"ALL_SALES\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"PROMOTIONAL_SALES\" AS \"PROMOTIONAL_SALES\" CROSS JOIN \"ALL_SALES\" AS \"ALL_SALES\" ORDER BY \"PROMOTIONS\" NULLS LAST , \"TOTAL\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_38\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_38\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_38\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_38\" AS \"SPEQLITE_TEMP_TABLE_38\" ORDER BY \"PROMOTIONS\" , \"TOTAL\" LIMIT 21",
+                "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.781738e+09   51.09*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017872,
+                    "execution_time": 0.008375,
+                    "compile_time": 6.5e-05,
+                    "planning_time": 0.003661
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.017339,
+                    "execution_time": 0.007828,
+                    "compile_time": 6.4e-05,
+                    "planning_time": 0.003609
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_36\".\"PROMOTIONS\" / \"SPEQLITE_TEMP_TABLE_37\".\"TOTAL\" * 100 AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_36\" AS \"SPEQLITE_TEMP_TABLE_36\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_37\" AS \"SPEQLITE_TEMP_TABLE_37\" ORDER BY \"PROMOTIONS\" NULLS LAST , \"TOTAL\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_38\".\"PROMOTIONS\" AS \"PROMOTIONS\" , \"SPEQLITE_TEMP_TABLE_38\".\"TOTAL\" AS \"TOTAL\" , \"SPEQLITE_TEMP_TABLE_38\".\"_COL_2\" AS \"_COL_2\" FROM \"SPEQLITE_TEMP_TABLE_38\" AS \"SPEQLITE_TEMP_TABLE_38\" ORDER BY \"PROMOTIONS\" NULLS LAST , \"TOTAL\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*     promotions         total  _col_2\n0  1.421274e+09  2.781738e+09   51.09*/"
+    }
+]

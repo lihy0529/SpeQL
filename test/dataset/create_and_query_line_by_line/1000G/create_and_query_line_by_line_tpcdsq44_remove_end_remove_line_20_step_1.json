@@ -1,0 +1,790 @@
+[
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */ asceding.rnk, best_performing.i_product_name as best_performing, worst_performing.i_product_name as worst_performing\nfrom (select *\n      from (select ss_item_sk as item_sk, rank() over (order by rank_col asc) as rnk\n            from (select ss_item_sk, avg(ss_net_profit) as rank_col\n                  from store_sales\n                  where ss_store_sk = 639\n                  group by ss_item_sk\n                  having avg(ss_net_profit) > 0.90 * (select avg(ss_net_profit)\n                                                       from store_sales\n                                                       where ss_store_sk = 639\n                                                         and ss_hdemo_sk is null\n                                                       group by ss_store_sk)) V1) V11\n      ) as asceding\njoin item best_performing on asceding.item_sk = best_performing.i_item_sk\njoin item worst_performing on asceding.item_sk = worst_performing.i_item_sk\nwhere asceding.rnk = 1\nor asceding.rnk = (select max(rnk) from (select ss_item_sk, rank() over (order by avg(ss_net_profit) asc) as rnk\n                                          from store_sales\n                                          where ss_store_sk = 639\n                                          group by ss_item_sk) as temp)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"_COL_0\" ) < AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) ) , \"ASCEDING\" AS ( SELECT \"V1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"TEMP\" AS ( SELECT RANK ( ) OVER ( ORDER BY AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) NULLS LAST ) AS \"RNK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" ) , \"_U_1\" AS ( SELECT MAX ( \"TEMP\".\"RNK\" ) AS \"_COL_0\" FROM \"TEMP\" AS \"TEMP\" ) SELECT \"ASCEDING\".\"RNK\" AS \"RNK\" , \"BEST_PERFORMING\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"WORST_PERFORMING\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"ASCEDING\" AS \"ASCEDING\" JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"_COL_0\" = \"ASCEDING\".\"RNK\" OR \"ASCEDING\".\"RNK\" = 1 JOIN \"ITEM\" AS \"BEST_PERFORMING\" ON \"ASCEDING\".\"ITEM_SK\" = \"BEST_PERFORMING\".\"I_ITEM_SK\" JOIN \"ITEM\" AS \"WORST_PERFORMING\" ON \"ASCEDING\".\"ITEM_SK\" = \"WORST_PERFORMING\".\"I_ITEM_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.387539,
+                    "execution_time": 1.33683,
+                    "compile_time": 0.000252,
+                    "planning_time": 0.025433,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 7.215475,
+                    "execution_time": 7.096549,
+                    "compile_time": 0.003199,
+                    "planning_time": 0.087843,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"SPEQLITE_TEMP_TABLE_1\".\"_COL_0\" ) < AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.323868,
+                    "execution_time": 0.266946,
+                    "compile_time": 0.000301,
+                    "planning_time": 0.033152,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.441405,
+                    "execution_time": 0.321219,
+                    "compile_time": 0.003252,
+                    "planning_time": 0.091105,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"SPEQLITE_TEMP_TABLE_2\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_2\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.061473,
+                    "execution_time": 0.037317,
+                    "compile_time": 0.000229,
+                    "planning_time": 0.004646,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.127975,
+                    "execution_time": 0.037731,
+                    "compile_time": 0.003544,
+                    "planning_time": 0.064774,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT RANK ( ) OVER ( ORDER BY AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) NULLS LAST ) AS \"RNK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.320045,
+                    "execution_time": 0.278669,
+                    "compile_time": 0.000304,
+                    "planning_time": 0.025428,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.493559,
+                    "execution_time": 0.382665,
+                    "compile_time": 0.129222,
+                    "planning_time": 0.088353,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT ASCEDING.RNK , BEST_PERFORMING.I_PRODUCT_NAME AS BEST_PERFORMING , WORST_PERFORMING.I_PRODUCT_NAME AS WORST_PERFORMING FROM ( SELECT * FROM ( SELECT SS_ITEM_SK AS ITEM_SK , RANK ( ) OVER ( ORDER BY RANK_COL ASC NULLS FIRST ) AS RNK FROM ( SELECT SS_ITEM_SK , AVG ( SS_NET_PROFIT ) AS RANK_COL FROM STORE_SALES WHERE SS_STORE_SK = 639 GROUP BY SS_ITEM_SK HAVING AVG ( SS_NET_PROFIT ) > 0.90 * ( SELECT AVG ( SS_NET_PROFIT ) FROM STORE_SALES WHERE SS_STORE_SK = 639 AND SS_HDEMO_SK IS NULL GROUP BY SS_STORE_SK ) ) AS V1 ) AS V11 ) AS ASCEDING JOIN ITEM AS BEST_PERFORMING ON ASCEDING.ITEM_SK = BEST_PERFORMING.I_ITEM_SK JOIN ITEM AS WORST_PERFORMING ON ASCEDING.ITEM_SK = WORST_PERFORMING.I_ITEM_SK WHERE ASCEDING.RNK = 1 OR ASCEDING.RNK = ( SELECT MAX ( RNK ) FROM ( SELECT SS_ITEM_SK , RANK ( ) OVER ( ORDER BY AVG ( SS_NET_PROFIT ) ASC NULLS FIRST ) AS RNK FROM STORE_SALES WHERE SS_STORE_SK = 639 GROUP BY SS_ITEM_SK ) AS TEMP ) LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.829405,
+                    "execution_time": 0.741414,
+                    "compile_time": 0.000571,
+                    "planning_time": 0.060253
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.999584,
+                    "execution_time": 0.832895,
+                    "compile_time": 0.009035,
+                    "planning_time": 0.130179
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"RNK\" AS \"RNK\" , \"BEST_PERFORMING\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"WORST_PERFORMING\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"_COL_0\" = \"SPEQLITE_TEMP_TABLE_3\".\"RNK\" OR \"SPEQLITE_TEMP_TABLE_3\".\"RNK\" = 1 JOIN \"ITEM\" AS \"BEST_PERFORMING\" ON \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" = \"BEST_PERFORMING\".\"I_ITEM_SK\" JOIN \"ITEM\" AS \"WORST_PERFORMING\" ON \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" = \"WORST_PERFORMING\".\"I_ITEM_SK\"",
+                "rewrite": null
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */ asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom \n  (select * \n   from (select ss_item_sk as item_sk, rank() over (order by rank_col asc) as rnk\n         from (select ss_item_sk, avg(ss_net_profit) as rank_col \n               from store_sales \n               where ss_store_sk = 639\n               group by ss_item_sk\n               having avg(ss_net_profit) > 0.90 * (select avg(ss_net_profit)\n                                                   from store_sales\n                                                   where ss_store_sk = 639\n                                                     and ss_hdemo_sk is null)) V1) V11\n   where rnk  < 11) as asceding\njoin\n  (select * \n   from (select ss_item_sk as item_sk, rank() over (order by rank_col desc) as rnk\n         from (select ss_item_sk, avg(ss_net_profit) as rank_col \n               from store_sales \n               where ss_store_sk = 639\n               group by ss_item_sk\n               having avg(ss_net_profit) > 0.90 * (select avg(ss_net_profit)\n                                                   from store_sales\n                                                   where ss_store_sk = 639\n                                                     and ss_hdemo_sk is null)) V2) V22\n   where rnk < 11) as descending\non asceding.item_sk = descending.item_sk\nleft join item i1 on asceding.item_sk = i1.i_item_sk\nleft join item i2 on descending.item_sk = i2.i_item_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 ) , \"V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"_COL_0\" ) < AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT \"V1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"_COL_0\" ) < AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) ) , \"V22\" AS ( SELECT \"V2\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" JOIN \"V22\" AS \"V22\" ON \"V11\".\"ITEM_SK\" = \"V22\".\"ITEM_SK\" AND \"V22\".\"RNK\" < 11 LEFT JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"V11\".\"ITEM_SK\" LEFT JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"V22\".\"ITEM_SK\" WHERE \"V11\".\"RNK\" < 11"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.059225,
+                    "execution_time": 0.034111,
+                    "compile_time": 0.000184,
+                    "planning_time": 0.003815,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.118928,
+                    "execution_time": 0.034022,
+                    "compile_time": 0.000183,
+                    "planning_time": 0.061832,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"SPEQLITE_TEMP_TABLE_5\".\"_COL_0\" ) < AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.317422,
+                    "execution_time": 0.266142,
+                    "compile_time": 0.000301,
+                    "planning_time": 0.028338,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.378078,
+                    "execution_time": 0.264428,
+                    "compile_time": 0.000297,
+                    "planning_time": 0.09057,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"SPEQLITE_TEMP_TABLE_6\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_6\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.063982,
+                    "execution_time": 0.04084,
+                    "compile_time": 0.000241,
+                    "planning_time": 0.004471,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.118222,
+                    "execution_time": 0.036747,
+                    "compile_time": 0.000232,
+                    "planning_time": 0.061621,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"_U_1\" WHERE \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"_COL_0\" ) < AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.315803,
+                    "execution_time": 0.264578,
+                    "compile_time": 0.000298,
+                    "planning_time": 0.028093,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.386909,
+                    "execution_time": 0.265836,
+                    "compile_time": 0.000294,
+                    "planning_time": 0.098053,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_8\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.063738,
+                    "execution_time": 0.038733,
+                    "compile_time": 0.000238,
+                    "planning_time": 0.0048,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.120267,
+                    "execution_time": 0.037846,
+                    "compile_time": 0.001996,
+                    "planning_time": 0.06047,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"ITEM_SK\" AND \"SPEQLITE_TEMP_TABLE_9\".\"RNK\" < 11 LEFT JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" LEFT JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_7\".\"RNK\" < 11",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.115074,
+                    "execution_time": 0.043442,
+                    "compile_time": 0.000382,
+                    "planning_time": 0.041384,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.340371,
+                    "execution_time": 0.0442,
+                    "compile_time": 0.157959,
+                    "planning_time": 0.104588,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_10\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_10\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017022,
+                    "execution_time": 0.00703,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.004254
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054875,
+                    "execution_time": 0.007157,
+                    "compile_time": 0.000905,
+                    "planning_time": 0.039736
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"ITEM_SK\" AND \"SPEQLITE_TEMP_TABLE_9\".\"RNK\" < 11 LEFT JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" LEFT JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_7\".\"RNK\" < 11",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_10\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_10\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */  asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom(select *\n     from (select item_sk,rank() over (order by rank_col asc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col \n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V1)V11\n     where rnk  < 11) asceding,\n    (select *\n     from (select item_sk,rank() over (order by rank_col desc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col\n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V2)V21\n     where rnk  < 11) descending,\nitem i1,\nitem i2\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V21\" AS ( SELECT RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" JOIN \"V21\" AS \"V21\" ON \"V21\".\"RNK\" < 11 CROSS JOIN \"ITEM\" AS \"I1\" CROSS JOIN \"ITEM\" AS \"I2\" WHERE \"V11\".\"RNK\" < 11"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.322865,
+                    "execution_time": 0.269964,
+                    "compile_time": 0.000246,
+                    "planning_time": 0.028073,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.386628,
+                    "execution_time": 0.272782,
+                    "compile_time": 0.000244,
+                    "planning_time": 0.08895,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"SPEQLITE_TEMP_TABLE_11\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.314855,
+                    "execution_time": 0.263409,
+                    "compile_time": 0.00029,
+                    "planning_time": 0.027782,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.381244,
+                    "execution_time": 0.264402,
+                    "compile_time": 0.002217,
+                    "planning_time": 0.091363,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_13\" AS SELECT RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_12\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.063213,
+                    "execution_time": 0.038867,
+                    "compile_time": 0.00024,
+                    "planning_time": 0.004503,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.122123,
+                    "execution_time": 0.03705,
+                    "compile_time": 0.002644,
+                    "planning_time": 0.060226,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_14\" AS SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.318802,
+                    "execution_time": 0.264866,
+                    "compile_time": 0.000292,
+                    "planning_time": 0.029682,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.381562,
+                    "execution_time": 0.265553,
+                    "compile_time": 0.000294,
+                    "planning_time": 0.092432,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_15\" AS SELECT RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_14\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.061823,
+                    "execution_time": 0.037921,
+                    "compile_time": 0.000231,
+                    "planning_time": 0.00429,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.119353,
+                    "execution_time": 0.036784,
+                    "compile_time": 0.001889,
+                    "planning_time": 0.060614,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_16\" AS SELECT \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" = 11 CROSS JOIN \"ITEM\" AS \"I1\" CROSS JOIN \"ITEM\" AS \"I2\" WHERE \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" < 11",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.122175,
+                    "execution_time": 0.064674,
+                    "compile_time": 0.000321,
+                    "planning_time": 0.035322,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.353288,
+                    "execution_time": 0.066954,
+                    "compile_time": 0.164874,
+                    "planning_time": 0.097714,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_16\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_16\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_16\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017215,
+                    "execution_time": 0.006928,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.004355
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053349,
+                    "execution_time": 0.007733,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.039647
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" < 11 CROSS JOIN \"ITEM\" AS \"I1\" CROSS JOIN \"ITEM\" AS \"I2\" WHERE \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" < 11",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_16\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_16\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_16\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */  asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom(select *\n     from (select item_sk,rank() over (order by rank_col asc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col \n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V1)V11\n     where rnk  < 11) asceding,\n    (select *\n     from (select item_sk,rank() over (order by rank_col desc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col\n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V2)V21\n     where rnk  < 11) descending,\nitem i1,\nitem i2\nwhere asceding.rnk = descending.rnk \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V21\" AS ( SELECT RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" CROSS JOIN \"ITEM\" AS \"I1\" CROSS JOIN \"ITEM\" AS \"I2\" JOIN \"V21\" AS \"V21\" ON \"V11\".\"RNK\" = \"V21\".\"RNK\" AND \"V21\".\"RNK\" < 11 WHERE \"V11\".\"RNK\" < 11"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_17\" AS SELECT \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" CROSS JOIN \"ITEM\" AS \"I1\" CROSS JOIN \"ITEM\" AS \"I2\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" < 11 WHERE \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" < 11",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.11576,
+                    "execution_time": 0.056634,
+                    "compile_time": 0.000359,
+                    "planning_time": 0.033908,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.18728,
+                    "execution_time": 0.058545,
+                    "compile_time": 0.004802,
+                    "planning_time": 0.098228,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_17\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_17\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_17\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_17\" AS \"SPEQLITE_TEMP_TABLE_17\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017134,
+                    "execution_time": 0.006778,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.004346
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.05526,
+                    "execution_time": 0.008731,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.039522
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" CROSS JOIN \"ITEM\" AS \"I1\" CROSS JOIN \"ITEM\" AS \"I2\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" < 11 WHERE \"SPEQLITE_TEMP_TABLE_13\".\"RNK\" < 11",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_17\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_17\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_17\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_17\" AS \"SPEQLITE_TEMP_TABLE_17\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */  asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom(select *\n     from (select item_sk,rank() over (order by rank_col asc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col \n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V1)V11\n     where rnk  < 11) asceding,\n    (select *\n     from (select item_sk,rank() over (order by rank_col desc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col\n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V2)V21\n     where rnk  < 11) descending,\nitem i1,\nitem i2\nwhere asceding.rnk = descending.rnk \n  and i1.i_item_sk=asceding.item_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT \"V1\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V21\" AS ( SELECT RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" CROSS JOIN \"ITEM\" AS \"I2\" JOIN \"V21\" AS \"V21\" ON \"V11\".\"RNK\" = \"V21\".\"RNK\" AND \"V21\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"V11\".\"ITEM_SK\" WHERE \"V11\".\"RNK\" < 11"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"SPEQLITE_TEMP_TABLE_11\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.321531,
+                    "execution_time": 0.263024,
+                    "compile_time": 0.000295,
+                    "planning_time": 0.035577,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.380172,
+                    "execution_time": 0.263805,
+                    "compile_time": 0.000282,
+                    "planning_time": 0.093623,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_19\" AS SELECT \"SPEQLITE_TEMP_TABLE_18\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_18\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.061291,
+                    "execution_time": 0.037731,
+                    "compile_time": 0.000229,
+                    "planning_time": 0.004366,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.123084,
+                    "execution_time": 0.040237,
+                    "compile_time": 0.000247,
+                    "planning_time": 0.062883,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_20\" AS SELECT \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" CROSS JOIN \"ITEM\" AS \"I2\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_19\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" < 11",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.111971,
+                    "execution_time": 0.049466,
+                    "compile_time": 0.000354,
+                    "planning_time": 0.035295,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.18234,
+                    "execution_time": 0.047733,
+                    "compile_time": 0.005006,
+                    "planning_time": 0.102648,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_20\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_20\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_20\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_20\" AS \"SPEQLITE_TEMP_TABLE_20\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017195,
+                    "execution_time": 0.006862,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.004392
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.052642,
+                    "execution_time": 0.007099,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.039501
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" CROSS JOIN \"ITEM\" AS \"I2\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_15\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_19\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" < 11",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_20\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_20\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_20\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_20\" AS \"SPEQLITE_TEMP_TABLE_20\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */  asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom(select *\n     from (select item_sk,rank() over (order by rank_col asc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col \n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V1)V11\n     where rnk  < 11) asceding,\n    (select *\n     from (select item_sk,rank() over (order by rank_col desc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col\n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V2)V21\n     where rnk  < 11) descending,\nitem i1,\nitem i2\nwhere asceding.rnk = descending.rnk \n  and i1.i_item_sk=asceding.item_sk\n  and i2.i_item_sk=descending.item_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT \"V1\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V21\" AS ( SELECT \"V2\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" JOIN \"V21\" AS \"V21\" ON \"V11\".\"RNK\" = \"V21\".\"RNK\" AND \"V21\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"V11\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"V21\".\"ITEM_SK\" WHERE \"V11\".\"RNK\" < 11"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_21\" AS SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.316085,
+                    "execution_time": 0.264992,
+                    "compile_time": 0.000295,
+                    "planning_time": 0.028589,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.382163,
+                    "execution_time": 0.268233,
+                    "compile_time": 0.000303,
+                    "planning_time": 0.090656,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_22\" AS SELECT \"SPEQLITE_TEMP_TABLE_21\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"SPEQLITE_TEMP_TABLE_21\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"SPEQLITE_TEMP_TABLE_21\" AS \"SPEQLITE_TEMP_TABLE_21\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.06263,
+                    "execution_time": 0.038142,
+                    "compile_time": 0.000227,
+                    "planning_time": 0.004387,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.11911,
+                    "execution_time": 0.038242,
+                    "compile_time": 0.000234,
+                    "planning_time": 0.060954,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_23\" AS SELECT \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" JOIN \"SPEQLITE_TEMP_TABLE_22\" AS \"SPEQLITE_TEMP_TABLE_22\" ON \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_19\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_22\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" < 11",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.111267,
+                    "execution_time": 0.04815,
+                    "compile_time": 0.000391,
+                    "planning_time": 0.034546,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.376531,
+                    "execution_time": 0.046966,
+                    "compile_time": 0.196749,
+                    "planning_time": 0.104179,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_23\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_23\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016977,
+                    "execution_time": 0.006948,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.004205
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053084,
+                    "execution_time": 0.007574,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.03955
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" JOIN \"SPEQLITE_TEMP_TABLE_22\" AS \"SPEQLITE_TEMP_TABLE_22\" ON \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_19\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_22\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" < 11",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_23\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_23\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */  asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom(select *\n     from (select item_sk,rank() over (order by rank_col asc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col \n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V1)V11\n     where rnk  < 11) asceding,\n    (select *\n     from (select item_sk,rank() over (order by rank_col desc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col\n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V2)V21\n     where rnk  < 11) descending,\nitem i1,\nitem i2\nwhere asceding.rnk = descending.rnk \n  and i1.i_item_sk=asceding.item_sk\n  and i2.i_item_sk=descending.item_sk\norder by asceding.rnk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT \"V1\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V21\" AS ( SELECT \"V2\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" JOIN \"V21\" AS \"V21\" ON \"V11\".\"RNK\" = \"V21\".\"RNK\" AND \"V21\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"V11\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"V21\".\"ITEM_SK\" WHERE \"V11\".\"RNK\" < 11 ORDER BY \"V11\".\"RNK\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_23\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_23\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\" ORDER BY \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018521,
+                    "execution_time": 0.008378,
+                    "compile_time": 7.1e-05,
+                    "planning_time": 0.004355
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.177793,
+                    "execution_time": 0.007741,
+                    "compile_time": 0.12402,
+                    "planning_time": 0.039948
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" JOIN \"SPEQLITE_TEMP_TABLE_22\" AS \"SPEQLITE_TEMP_TABLE_22\" ON \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_19\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_22\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" < 11 ORDER BY \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_23\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_23\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\" ORDER BY \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query44.tpl query 4 in stream 0\nselect /* TPC-DS query44.tpl 0.4 */  asceding.rnk, i1.i_product_name best_performing, i2.i_product_name worst_performing\nfrom(select *\n     from (select item_sk,rank() over (order by rank_col asc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col \n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V1)V11\n     where rnk  < 11) asceding,\n    (select *\n     from (select item_sk,rank() over (order by rank_col desc) rnk\n           from (select ss_item_sk item_sk,avg(ss_net_profit) rank_col\n                 from store_sales ss1\n                 where ss_store_sk = 639\n                 group by ss_item_sk\n                 having avg(ss_net_profit) > 0.90*(select avg(ss_net_profit) rank_col\n                                                  from store_sales\n                                                  where ss_store_sk = 639\n                                                    and ss_hdemo_sk is null\n                                                  group by ss_store_sk))V2)V21\n     where rnk  < 11) descending,\nitem i1,\nitem i2\nwhere asceding.rnk = descending.rnk \n  and i1.i_item_sk=asceding.item_sk\n  and i2.i_item_sk=descending.item_sk\norder by asceding.rnk\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT AVG ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"STORE_SALES\" WHERE \"STORE_SALES\".\"SS_HDEMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_STORE_SK\" = 639 GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"V1\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_0\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V11\" AS ( SELECT \"V1\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V1\".\"RANK_COL\" NULLS LAST ) AS \"RNK\" FROM \"V1\" AS \"V1\" ) , \"V2\" AS ( SELECT \"SS1\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , AVG ( \"SS1\".\"SS_NET_PROFIT\" ) AS \"RANK_COL\" FROM \"STORE_SALES\" AS \"SS1\" CROSS JOIN \"_U_0\" AS \"_U_1\" WHERE \"SS1\".\"SS_STORE_SK\" = 639 GROUP BY \"SS1\".\"SS_ITEM_SK\" HAVING 0.90 * MAX ( \"_U_1\".\"RANK_COL\" ) < AVG ( \"SS1\".\"SS_NET_PROFIT\" ) ) , \"V21\" AS ( SELECT \"V2\".\"ITEM_SK\" AS \"ITEM_SK\" , RANK ( ) OVER ( ORDER BY \"V2\".\"RANK_COL\" DESC NULLS FIRST ) AS \"RNK\" FROM \"V2\" AS \"V2\" ) SELECT \"V11\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"V11\" AS \"V11\" JOIN \"V21\" AS \"V21\" ON \"V11\".\"RNK\" = \"V21\".\"RNK\" AND \"V21\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"V11\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"V21\".\"ITEM_SK\" WHERE \"V11\".\"RNK\" < 11 ORDER BY \"V11\".\"RNK\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_23\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_23\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\" ORDER BY \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018478,
+                    "execution_time": 0.008379,
+                    "compile_time": 7.2e-05,
+                    "planning_time": 0.004453
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018352,
+                    "execution_time": 0.007847,
+                    "compile_time": 7.3e-05,
+                    "planning_time": 0.004634
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" AS \"RNK\" , \"I1\".\"I_PRODUCT_NAME\" AS \"BEST_PERFORMING\" , \"I2\".\"I_PRODUCT_NAME\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" JOIN \"SPEQLITE_TEMP_TABLE_22\" AS \"SPEQLITE_TEMP_TABLE_22\" ON \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" = \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" AND \"SPEQLITE_TEMP_TABLE_22\".\"RNK\" < 11 JOIN \"ITEM\" AS \"I1\" ON \"I1\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_19\".\"ITEM_SK\" JOIN \"ITEM\" AS \"I2\" ON \"I2\".\"I_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_22\".\"ITEM_SK\" WHERE \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" < 11 ORDER BY \"SPEQLITE_TEMP_TABLE_19\".\"RNK\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" AS \"RNK\" , \"SPEQLITE_TEMP_TABLE_23\".\"BEST_PERFORMING\" AS \"BEST_PERFORMING\" , \"SPEQLITE_TEMP_TABLE_23\".\"WORST_PERFORMING\" AS \"WORST_PERFORMING\" FROM \"SPEQLITE_TEMP_TABLE_23\" AS \"SPEQLITE_TEMP_TABLE_23\" ORDER BY \"SPEQLITE_TEMP_TABLE_23\".\"RNK\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [rnk, best_performing, worst_performing]\nIndex: []*/"
+    }
+]

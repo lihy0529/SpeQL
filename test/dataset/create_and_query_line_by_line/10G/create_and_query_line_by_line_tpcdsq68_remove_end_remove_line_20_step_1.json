@@ -1,0 +1,643 @@
+[
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,bought_city as ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,customer_address.ca_city as bought_city\n             ,sum(ss_ext_sales_price) as extended_price \n             ,sum(ss_ext_list_price) as list_price\n             ,sum(ss_ext_tax) as extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n       group by ss_ticket_number, ss_customer_sk, customer_address.ca_city) as subquery\njoin customer\non subquery.ss_customer_sk = customer.c_customer_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SUBQUERY\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SUBQUERY\".\"BOUGHT_CITY\" AS \"CA_CITY\" , \"SUBQUERY\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SUBQUERY\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SUBQUERY\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SUBQUERY\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SUBQUERY\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SUBQUERY\" AS \"SUBQUERY\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SUBQUERY\".\"SS_CUSTOMER_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.285565,
+                    "execution_time": 1.06011,
+                    "compile_time": 0.031764,
+                    "planning_time": 0.05824,
+                    "create_size": 504
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.906486,
+                    "execution_time": 1.083193,
+                    "compile_time": 3.528265,
+                    "planning_time": 0.142174,
+                    "create_size": 504
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"BOUGHT_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_1\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_1\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_1\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_1\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_1\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_1\".\"SS_CUSTOMER_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.292856,
+                    "execution_time": 0.066708,
+                    "compile_time": 0.031031,
+                    "planning_time": 0.034226,
+                    "create_size": 616
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.489475,
+                    "execution_time": 0.076969,
+                    "compile_time": 3.15442,
+                    "planning_time": 0.089476,
+                    "create_size": 616
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_2\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_2\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_2\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_2\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_2\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name        ca_city    bought_city  ss_ticket_number  extended_price  extended_tax  list_price\n0       Hobson     Nicholas         Tipton         Tipton            829704        20532.68        464.65    56577.38\n1       Hobson     Nicholas      Woodville      Woodville            610004        12426.42        681.74    41671.20\n2      Deloach       Dianne         Summit         Summit            991241        24769.65        673.96    41767.21\n3         Shea          Eun    Maple Grove    Maple Grove           1405840        18567.16        793.01    27391.20\n4        Conti        Kevin       Red Bank       Red Bank            194925        36632.67       1687.70    52292.66\n5        Soper      Ernesto       Woodland       Woodland           1197303        22779.19        777.19    41479.07\n6       Torres        Jason        Clifton        Clifton           1959362        36474.42        983.93    60224.58\n7       Rogers       Joseph    Spring Hill    Spring Hill           1197192        35193.96        911.83    68528.49\n8                               Greenville     Greenville            337145        14471.27        572.85    32199.86\n9                                 Red Hill       Red Hill           1751605        12909.69        596.07    27093.11\n10      Barnes        Hulda  Highland Park  Highland Park            978779        23836.96        978.86    37478.85\n11       Payne        Emily  Spring Valley  Spring Valley            791044        25508.51       1481.19    46225.81\n12     Cameron        Brian     Pine Grove     Pine Grove            184347        28605.21       1963.92    45523.83\n13    Reynolds        Bruce       Waterloo       Waterloo             58765        35596.08        854.57    61591.27\n14      Howell       Emmett    Green Acres    Green Acres            771714         6540.64        113.14    13011.04\n15        Hill          Amy     Pine Grove     Pine Grove           1023789        45729.84       1871.00    72129.08\n16   Patterson      Cynthia     Five Forks     Five Forks           1153061        24141.63       1115.79    43284.91\n17     Webster         Rita      Fairfield      Fairfield           2339662        17779.86        605.43    34780.60\n18      Easter      Cecilia                                           84862        15318.51        961.16    34069.60\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018159,
+                    "execution_time": 0.007383,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.004077
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.058166,
+                    "execution_time": 0.00859,
+                    "compile_time": 5.2e-05,
+                    "planning_time": 0.039744
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_1\".\"BOUGHT_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_1\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_1\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_1\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_1\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_1\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_1\".\"SS_CUSTOMER_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_2\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_2\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_2\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_2\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_2\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_2\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name        ca_city    bought_city  ss_ticket_number  extended_price  extended_tax  list_price\n0       Hobson     Nicholas         Tipton         Tipton            829704        20532.68        464.65    56577.38\n1       Hobson     Nicholas      Woodville      Woodville            610004        12426.42        681.74    41671.20\n2      Deloach       Dianne         Summit         Summit            991241        24769.65        673.96    41767.21\n3         Shea          Eun    Maple Grove    Maple Grove           1405840        18567.16        793.01    27391.20\n4        Conti        Kevin       Red Bank       Red Bank            194925        36632.67       1687.70    52292.66\n5        Soper      Ernesto       Woodland       Woodland           1197303        22779.19        777.19    41479.07\n6       Torres        Jason        Clifton        Clifton           1959362        36474.42        983.93    60224.58\n7       Rogers       Joseph    Spring Hill    Spring Hill           1197192        35193.96        911.83    68528.49\n8                               Greenville     Greenville            337145        14471.27        572.85    32199.86\n9                                 Red Hill       Red Hill           1751605        12909.69        596.07    27093.11\n10      Barnes        Hulda  Highland Park  Highland Park            978779        23836.96        978.86    37478.85\n11       Payne        Emily  Spring Valley  Spring Valley            791044        25508.51       1481.19    46225.81\n12     Cameron        Brian     Pine Grove     Pine Grove            184347        28605.21       1963.92    45523.83\n13    Reynolds        Bruce       Waterloo       Waterloo             58765        35596.08        854.57    61591.27\n14      Howell       Emmett    Green Acres    Green Acres            771714         6540.64        113.14    13011.04\n15        Hill          Amy     Pine Grove     Pine Grove           1023789        45729.84       1871.00    72129.08\n16   Patterson      Cynthia     Five Forks     Five Forks           1153061        24141.63       1115.79    43284.91\n17     Webster         Rita      Fairfield      Fairfield           2339662        17779.86        605.43    34780.60\n18      Easter      Cecilia                                           84862        15318.51        961.16    34069.60\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,sales_subquery.bought_city as ca_city\n       ,sales_subquery.bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number, ss_customer_sk, ca_city\n) as sales_subquery\njoin customer on sales_subquery.ss_customer_sk = customer.c_customer_sk\n\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SALES_SUBQUERY\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SALES_SUBQUERY\".\"BOUGHT_CITY\" AS \"CA_CITY\" , \"SALES_SUBQUERY\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SALES_SUBQUERY\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SALES_SUBQUERY\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SALES_SUBQUERY\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SALES_SUBQUERY\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SALES_SUBQUERY\" AS \"SALES_SUBQUERY\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SALES_SUBQUERY\".\"SS_CUSTOMER_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.177396,
+                    "execution_time": 0.04205,
+                    "compile_time": 0.039498,
+                    "planning_time": 0.062179,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.542686,
+                    "execution_time": 0.046371,
+                    "compile_time": 3.296465,
+                    "planning_time": 0.160853,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"BOUGHT_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_3\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_3\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_3\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_3\".\"SS_CUSTOMER_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.093214,
+                    "execution_time": 0.038476,
+                    "compile_time": 0.00026,
+                    "planning_time": 0.029422,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.312854,
+                    "execution_time": 0.037915,
+                    "compile_time": 0.153289,
+                    "planning_time": 0.091878,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_4\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_4\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_4\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_4\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_4\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018648,
+                    "execution_time": 0.007116,
+                    "compile_time": 5.9e-05,
+                    "planning_time": 0.005215
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.05615,
+                    "execution_time": 0.007223,
+                    "compile_time": 5.2e-05,
+                    "planning_time": 0.04077
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"BOUGHT_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_3\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_3\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_3\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_3\".\"SS_CUSTOMER_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_4\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_4\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_4\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_4\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_4\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city as bought_city\n             ,sum(ss_ext_sales_price) as extended_price \n             ,sum(ss_ext_list_price) as list_price\n             ,sum(ss_ext_tax) as extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n         and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n         and store_sales.ss_addr_sk = customer_address.ca_address_sk\n         and date_dim.d_dom between 1 and 2 \n         and (household_demographics.hd_dep_count = 6 or\n              household_demographics.hd_vehicle_count = 1)\n         and date_dim.d_year in (1998, 1998 + 1, 1998 + 2)\n         and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ca_city) dn\n      ,customer\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_3\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"LIST_PRICE\" AS \"LIST_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.060784,
+                    "execution_time": 0.033801,
+                    "compile_time": 0.000196,
+                    "planning_time": 0.004674,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.129603,
+                    "execution_time": 0.034679,
+                    "compile_time": 0.000204,
+                    "planning_time": 0.070758,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_5\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_5\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_5\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_5\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.100202,
+                    "execution_time": 0.060054,
+                    "compile_time": 0.000244,
+                    "planning_time": 0.026141,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.494994,
+                    "execution_time": 0.056688,
+                    "compile_time": 3.339865,
+                    "planning_time": 0.087678,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_6\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_6\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_6\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_6\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018436,
+                    "execution_time": 0.007229,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.004996
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.293967,
+                    "execution_time": 0.007171,
+                    "compile_time": 0.2382,
+                    "planning_time": 0.040577
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_5\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_5\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_5\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_5\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_6\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_6\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_6\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_6\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.208121,
+                    "execution_time": 0.039172,
+                    "compile_time": 0.075332,
+                    "planning_time": 0.060505,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.485761,
+                    "execution_time": 0.040681,
+                    "compile_time": 3.267859,
+                    "planning_time": 0.141735,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_7\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_7\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_7\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_7\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_7\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.185868,
+                    "execution_time": 0.066951,
+                    "compile_time": 0.087886,
+                    "planning_time": 0.032322,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.319862,
+                    "execution_time": 0.068041,
+                    "compile_time": 6.151653,
+                    "planning_time": 0.09676,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_8\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_8\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_8\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_8\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_8\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01859,
+                    "execution_time": 0.007073,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.0052
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054634,
+                    "execution_time": 0.007658,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.040615
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_7\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_7\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_7\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_7\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_7\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" CROSS JOIN \"CUSTOMER\" AS \"CUSTOMER\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_8\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_8\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_8\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_8\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_8\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_8\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n where ss_customer_sk = c_customer_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"DN\".\"SS_CUSTOMER_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.133479,
+                    "execution_time": 0.040449,
+                    "compile_time": 0.000418,
+                    "planning_time": 0.060289,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.253278,
+                    "execution_time": 0.039798,
+                    "compile_time": 0.039191,
+                    "planning_time": 0.140664,
+                    "create_size": 0
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.133104,
+                    "execution_time": 0.072457,
+                    "compile_time": 0.0003,
+                    "planning_time": 0.03302,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.77238,
+                    "execution_time": 0.074441,
+                    "compile_time": 3.554817,
+                    "planning_time": 0.11063,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_10\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_10\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_10\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_10\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_10\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_10\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_10\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018288,
+                    "execution_time": 0.006903,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.005114
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054831,
+                    "execution_time": 0.007428,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.040822
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_10\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_10\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_10\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_10\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_10\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_10\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_10\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n where ss_customer_sk = c_customer_sk\n   and customer.c_current_addr_sk = current_addr.ca_address_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"DN\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.101675,
+                    "execution_time": 0.040985,
+                    "compile_time": 0.000324,
+                    "planning_time": 0.032352,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.394475,
+                    "execution_time": 0.043334,
+                    "compile_time": 0.217287,
+                    "planning_time": 0.101341,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018615,
+                    "execution_time": 0.007013,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.005128
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.055053,
+                    "execution_time": 0.007824,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.040787
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n where ss_customer_sk = c_customer_sk\n   and customer.c_current_addr_sk = current_addr.ca_address_sk\n   and current_addr.ca_city <> bought_city\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"DN\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"DN\".\"BOUGHT_CITY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.090473,
+                    "execution_time": 0.041279,
+                    "compile_time": 0.000241,
+                    "planning_time": 0.027409,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.15384,
+                    "execution_time": 0.042713,
+                    "compile_time": 0.000253,
+                    "planning_time": 0.087378,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_12\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_12\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_12\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_12\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_12\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_12\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_12\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01879,
+                    "execution_time": 0.007205,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.005177
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054526,
+                    "execution_time": 0.007249,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.040863
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_12\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_12\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_12\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_12\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_12\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_12\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_12\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n where ss_customer_sk = c_customer_sk\n   and customer.c_current_addr_sk = current_addr.ca_address_sk\n   and current_addr.ca_city <> bought_city\n order by c_last_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"DN\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"DN\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.049603,
+                    "execution_time": 0.013658,
+                    "compile_time": 0.000125,
+                    "planning_time": 0.027945
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.115704,
+                    "execution_time": 0.014962,
+                    "compile_time": 0.000125,
+                    "planning_time": 0.089542
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n where ss_customer_sk = c_customer_sk\n   and customer.c_current_addr_sk = current_addr.ca_address_sk\n   and current_addr.ca_city <> bought_city\n order by c_last_name\n         ,ss_ticket_number\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"DN\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"DN\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"SS_TICKET_NUMBER\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" , \"SS_TICKET_NUMBER\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.048485,
+                    "execution_time": 0.013727,
+                    "compile_time": 0.000132,
+                    "planning_time": 0.026577
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.311585,
+                    "execution_time": 0.014746,
+                    "compile_time": 0.000136,
+                    "planning_time": 0.288698
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"SS_TICKET_NUMBER\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"SS_TICKET_NUMBER\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    },
+    {
+        "input": "-- start template query68.tpl query 95 in stream 0\nselect /* TPC-DS query68.tpl 0.95 */  c_last_name\n       ,c_first_name\n       ,ca_city\n       ,bought_city\n       ,ss_ticket_number\n       ,extended_price\n       ,extended_tax\n       ,list_price\n from (select ss_ticket_number\n             ,ss_customer_sk\n             ,ca_city bought_city\n             ,sum(ss_ext_sales_price) extended_price \n             ,sum(ss_ext_list_price) list_price\n             ,sum(ss_ext_tax) extended_tax \n       from store_sales\n           ,date_dim\n           ,store\n           ,household_demographics\n           ,customer_address \n       where store_sales.ss_sold_date_sk = date_dim.d_date_sk\n         and store_sales.ss_store_sk = store.s_store_sk  \n        and store_sales.ss_hdemo_sk = household_demographics.hd_demo_sk\n        and store_sales.ss_addr_sk = customer_address.ca_address_sk\n        and date_dim.d_dom between 1 and 2 \n        and (household_demographics.hd_dep_count = 6 or\n             household_demographics.hd_vehicle_count= 1)\n        and date_dim.d_year in (1998,1998+1,1998+2)\n        and store.s_city in ('Mount Zion','Springfield')\n       group by ss_ticket_number\n               ,ss_customer_sk\n               ,ss_addr_sk,ca_city) dn\n      ,customer\n      ,customer_address current_addr\n where ss_customer_sk = c_customer_sk\n   and customer.c_current_addr_sk = current_addr.ca_address_sk\n   and current_addr.ca_city <> bought_city\n order by c_last_name\n         ,ss_ticket_number\n limit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DN\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" AS \"BOUGHT_CITY\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"EXTENDED_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_LIST_PRICE\" ) AS \"LIST_PRICE\" , SUM ( \"STORE_SALES\".\"SS_EXT_TAX\" ) AS \"EXTENDED_TAX\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_DOM\" <= 2 AND \"DATE_DIM\".\"D_DOM\" >= 1 AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 ) JOIN \"HOUSEHOLD_DEMOGRAPHICS\" AS \"HOUSEHOLD_DEMOGRAPHICS\" ON \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEMO_SK\" = \"STORE_SALES\".\"SS_HDEMO_SK\" AND ( \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_DEP_COUNT\" = 6 OR \"HOUSEHOLD_DEMOGRAPHICS\".\"HD_VEHICLE_COUNT\" = 1 ) JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_CITY\" IN ( 'Mount Zion' , 'Springfield' ) AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_ADDR_SK\" , \"CUSTOMER_ADDRESS\".\"CA_CITY\" ) SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"DN\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"DN\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"DN\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"DN\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"DN\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"DN\" AS \"DN\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"DN\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"DN\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"SS_TICKET_NUMBER\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" , \"SS_TICKET_NUMBER\" LIMIT 21",
+                "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.048607,
+                    "execution_time": 0.014566,
+                    "compile_time": 0.000129,
+                    "planning_time": 0.025992
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050202,
+                    "execution_time": 0.013954,
+                    "compile_time": 0.000129,
+                    "planning_time": 0.028085
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"CURRENT_ADDR\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_9\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_9\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_9\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"SPEQLITE_TEMP_TABLE_9\".\"SS_CUSTOMER_SK\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_ADDRESS_SK\" = \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" AND \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_9\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"SS_TICKET_NUMBER\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_11\".\"CA_CITY\" AS \"CA_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" AS \"BOUGHT_CITY\" , \"SPEQLITE_TEMP_TABLE_11\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_PRICE\" AS \"EXTENDED_PRICE\" , \"SPEQLITE_TEMP_TABLE_11\".\"EXTENDED_TAX\" AS \"EXTENDED_TAX\" , \"SPEQLITE_TEMP_TABLE_11\".\"LIST_PRICE\" AS \"LIST_PRICE\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" JOIN \"CUSTOMER_ADDRESS\" AS \"CURRENT_ADDR\" ON \"CURRENT_ADDR\".\"CA_CITY\" <> \"SPEQLITE_TEMP_TABLE_11\".\"BOUGHT_CITY\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"SS_TICKET_NUMBER\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*Empty DataFrame\nColumns: [c_last_name, c_first_name, ca_city, bought_city, ss_ticket_number, extended_price, extended_tax, list_price]\nIndex: []*/"
+    }
+]

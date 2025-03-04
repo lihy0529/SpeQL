@@ -1,0 +1,889 @@
+[
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(ssales) from best_ss_customer\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"SSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) SELECT SUM ( \"BEST_SS_CUSTOMER\".\"SSALES\" ) AS \"_COL_0\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.383376,
+                    "execution_time": 0.295739,
+                    "compile_time": 0.000225,
+                    "planning_time": 0.021773,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.47314,
+                    "execution_time": 0.323347,
+                    "compile_time": 0.000231,
+                    "planning_time": 0.08274,
+                    "create_size": 512
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 22.493091,
+                    "execution_time": 22.2769,
+                    "compile_time": 0.000397,
+                    "planning_time": 0.035242,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 23.238208,
+                    "execution_time": 22.96343,
+                    "compile_time": 0.000416,
+                    "planning_time": 0.099881,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SSALES ) FROM BEST_SS_CUSTOMER LIMIT 21",
+                "preview": "\n/*            sum\n0  3.938964e+08*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 47.311615,
+                    "execution_time": 47.226749,
+                    "compile_time": 0.000487,
+                    "planning_time": 0.059668
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 47.399953,
+                    "execution_time": 47.24148,
+                    "compile_time": 0.002448,
+                    "planning_time": 0.128417
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*            sum\n0  3.938964e+08*/"
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select ss_quantity*ss_list_price sales from store_sales join item on ss_item_sk = i_item_sk)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 7.409983,
+                    "execution_time": 7.350486,
+                    "compile_time": 0.000369,
+                    "planning_time": 0.03129,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 10.363784,
+                    "execution_time": 10.234354,
+                    "compile_time": 0.00149,
+                    "planning_time": 0.097111,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*         _col_0\n0  1.027281e+13*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015524,
+                    "execution_time": 0.006977,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.00291
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051882,
+                    "execution_time": 0.007229,
+                    "compile_time": 0.000989,
+                    "planning_time": 0.037781
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_LIST_PRICE\") AS \"_COL_0\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*         _col_0\n0  1.027281e+13*/"
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LIMIT 21",
+                "preview": "\n/*         _col_0\n0  7.289110e+12*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.942072,
+                    "execution_time": 0.90897,
+                    "compile_time": 9.7e-05,
+                    "planning_time": 0.025688
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 2.799054,
+                    "execution_time": 2.698749,
+                    "compile_time": 0.001062,
+                    "planning_time": 0.090639
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\") AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\"",
+                "rewrite": "SELECT SUM(\"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\") AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\""
+            }
+        ],
+        "preview": "\n/*         _col_0\n0  7.289110e+12*/"
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       ) as sales_data\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\") AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\"",
+                "rewrite": "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" CROSS JOIN \"DATE_DIM\" AS \"DATE_DIM\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n) as sales_data\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_YEAR\" = 1998"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_YEAR\" = 1998 LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\") AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "rewrite": "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_YEAR\" = 1998"
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  tpcds_cmax\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_sales_price sales\n       from catalog_sales\n           ,date_dim \n       where cs_sold_date_sk = d_date_sk\n         and d_year = 1998 \n         and d_moy = 4) subquery\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_SALES_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_SALES_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.130153,
+                    "execution_time": 0.068058,
+                    "compile_time": 0.000347,
+                    "planning_time": 0.034266,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.488713,
+                    "execution_time": 0.327124,
+                    "compile_time": 0.00145,
+                    "planning_time": 0.13083,
+                    "create_size": 4
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" LIMIT 21",
+                "preview": "\n/*         _col_0\n0  3.454654e+10*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015604,
+                    "execution_time": 0.00704,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.00292
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051651,
+                    "execution_time": 0.007775,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.038061
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_SALES_PRICE\") AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"_COL_0\" AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": "\n/*         _col_0\n0  3.454654e+10*/"
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_sales_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk) as subquery \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_SALES_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998"
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT SUM(\"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_SALES_PRICE\") AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n) as subquery\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) ) AS SUBQUERY LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n) as subquery\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) AS SUBQUERY LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      \n) as subquery\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) SELECT SUM ( \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" ) AS \"_COL_0\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) AS SUBQUERY LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\nfrom web_sales\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"_Q_1\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" ) SELECT SUM ( \"_Q_1\".\"SALES\" ) AS \"_COL_0\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim\n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) > 4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select \n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales\n       ,date_dim\n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk \n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      ) as sales_data\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"DATE_DIM_4\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"SALES_DATA\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_3\" ON \"_U_3\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_4\" ON \"_U_4\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"_U_3\".\"ITEM_SK\" IS NULL AND NOT \"_U_4\".\"C_CUSTOMER_SK\" IS NULL ) SELECT SUM ( \"SALES_DATA\".\"SALES\" ) AS \"_COL_0\" FROM \"SALES_DATA\" AS \"SALES_DATA\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) AS SALES_DATA LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(SS_QUANTITY*SS_SALES_PRICE) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(SS_QUANTITY*SS_SALES_PRICE) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(SS_QUANTITY*SS_SALES_PRICE) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select CS_QUANTITY*CS_LIST_PRICE sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select WS_QUANTITY*WS_LIST_PRICE sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998\n         and d_moy = 4\n         and ws_sold_date_sk = d_date_sk\n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"DATE_DIM_4\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_Q_1\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_3\" ON \"_U_3\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_4\" ON \"_U_4\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"_U_3\".\"ITEM_SK\" IS NULL AND NOT \"_U_4\".\"C_CUSTOMER_SK\" IS NULL ) SELECT SUM ( \"_Q_1\".\"SALES\" ) AS \"_COL_0\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \nand d_moy = 4 \nand ws_sold_date_sk = d_date_sk \nand ws_item_sk in (select item_sk from frequent_ss_items) \nand ws_bill_customer_sk in (select c_customer_sk from best_ss_customer) \n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"DATE_DIM_4\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_Q_1\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_3\" ON \"_U_3\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_4\" ON \"_U_4\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"_U_3\".\"ITEM_SK\" IS NULL AND NOT \"_U_4\".\"C_CUSTOMER_SK\" IS NULL ) SELECT SUM ( \"_Q_1\".\"SALES\" ) AS \"_COL_0\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*SS_SALES_PRICE) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*SS_SALES_PRICE) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*SS_SALES_PRICE) > (95/100.0) * (select tpcds_cmax from max_store_sales))\n  select  sum(sales)\n from (select CS_QUANTITY*CS_LIST_PRICE sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk\n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer))\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"DATE_DIM_4\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_Q_1\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_3\" ON \"_U_3\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_4\" ON \"_U_4\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"_U_3\".\"ITEM_SK\" IS NULL AND NOT \"_U_4\".\"C_CUSTOMER_SK\" IS NULL ) SELECT SUM ( \"_Q_1\".\"SALES\" ) AS \"_COL_0\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT TPCDS_CMAX FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk \n/*CURSOR_IDENTIFIER*/\n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n)",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk \n         and ws_item_sk in (select item_sk from frequent_ss_items)\n/*CURSOR_IDENTIFIER*/\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n)",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk \n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"DATE_DIM_4\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_Q_1\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_3\" ON \"_U_3\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_4\" ON \"_U_4\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"_U_3\".\"ITEM_SK\" IS NULL AND NOT \"_U_4\".\"C_CUSTOMER_SK\" IS NULL ) SELECT SUM ( \"_Q_1\".\"SALES\" ) AS \"_COL_0\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query23.tpl query 68 in stream 0\nwith /* TPC-DS query23.tpl 0.68 */ frequent_ss_items as \n (select substring(i_item_desc,1,30) itemdesc,i_item_sk item_sk,d_date solddate,count(*) cnt\n  from store_sales\n      ,date_dim \n      ,item\n  where ss_sold_date_sk = d_date_sk\n    and ss_item_sk = i_item_sk \n    and d_year in (1998,1998+1,1998+2,1998+3)\n  group by substring(i_item_desc,1,30),i_item_sk,d_date\n  having count(*) >4),\n max_store_sales as\n (select max(csales) tpcds_cmax \n  from (select c_customer_sk,sum(ss_quantity*ss_sales_price) csales\n        from store_sales\n            ,customer\n            ,date_dim \n        where ss_customer_sk = c_customer_sk\n         and ss_sold_date_sk = d_date_sk\n         and d_year in (1998,1998+1,1998+2,1998+3) \n        group by c_customer_sk)),\n best_ss_customer as\n (select c_customer_sk,sum(ss_quantity*ss_sales_price) ssales\n  from store_sales\n      ,customer\n  where ss_customer_sk = c_customer_sk\n  group by c_customer_sk\n  having sum(ss_quantity*ss_sales_price) > (95/100.0) * (select\n  *\nfrom\n max_store_sales))\n  select  sum(sales)\n from (select cs_quantity*cs_list_price sales\n       from catalog_sales\n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and cs_sold_date_sk = d_date_sk \n         and cs_item_sk in (select item_sk from frequent_ss_items)\n         and cs_bill_customer_sk in (select c_customer_sk from best_ss_customer)\n      union all\n      select ws_quantity*ws_list_price sales\n       from web_sales \n           ,date_dim \n       where d_year = 1998 \n         and d_moy = 4 \n         and ws_sold_date_sk = d_date_sk \n         and ws_item_sk in (select item_sk from frequent_ss_items)\n         and ws_bill_customer_sk in (select c_customer_sk from best_ss_customer)) \n limit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FREQUENT_SS_ITEMS\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4 ) , \"CUSTOMER_2\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"CUSTOMER\" AS \"CUSTOMER\" ) , \"_Q_0\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"CSALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"MAX_STORE_SALES\" AS ( SELECT MAX ( \"_Q_0\".\"CSALES\" ) AS \"TPCDS_CMAX\" FROM \"_Q_0\" AS \"_Q_0\" ) , \"BEST_SS_CUSTOMER\" AS ( SELECT \"CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" CROSS JOIN \"MAX_STORE_SALES\" AS \"MAX_STORE_SALES\" JOIN \"CUSTOMER_2\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" GROUP BY \"CUSTOMER\".\"C_CUSTOMER_SK\" HAVING 0.95 * MAX ( \"MAX_STORE_SALES\".\"TPCDS_CMAX\" ) < SUM ( \"STORE_SALES\".\"SS_QUANTITY\" * \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) , \"_U_1\" AS ( SELECT \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"FREQUENT_SS_ITEMS\" AS \"FREQUENT_SS_ITEMS\" GROUP BY \"FREQUENT_SS_ITEMS\".\"ITEM_SK\" ) , \"_U_2\" AS ( SELECT \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" AS \"C_CUSTOMER_SK\" FROM \"BEST_SS_CUSTOMER\" AS \"BEST_SS_CUSTOMER\" GROUP BY \"BEST_SS_CUSTOMER\".\"C_CUSTOMER_SK\" ) , \"DATE_DIM_4\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 1998 ) , \"_Q_1\" AS ( SELECT \"CATALOG_SALES\".\"CS_QUANTITY\" * \"CATALOG_SALES\".\"CS_LIST_PRICE\" AS \"SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" LEFT JOIN \"_U_1\" AS \"_U_1\" ON \"_U_1\".\"ITEM_SK\" = \"CATALOG_SALES\".\"CS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"C_CUSTOMER_SK\" = \"CATALOG_SALES\".\"CS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" WHERE NOT \"_U_1\".\"ITEM_SK\" IS NULL AND NOT \"_U_2\".\"C_CUSTOMER_SK\" IS NULL UNION ALL SELECT \"WEB_SALES\".\"WS_QUANTITY\" * \"WEB_SALES\".\"WS_LIST_PRICE\" AS \"SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" LEFT JOIN \"_U_1\" AS \"_U_3\" ON \"_U_3\".\"ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_4\" ON \"_U_4\".\"C_CUSTOMER_SK\" = \"WEB_SALES\".\"WS_BILL_CUSTOMER_SK\" JOIN \"DATE_DIM_4\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"_U_3\".\"ITEM_SK\" IS NULL AND NOT \"_U_4\".\"C_CUSTOMER_SK\" IS NULL ) SELECT SUM ( \"_Q_1\".\"SALES\" ) AS \"_COL_0\" FROM \"_Q_1\" AS \"_Q_1\" LIMIT 100"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"ITEM_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" IN ( 1998 , 1999 , 2000 , 2001 ) JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" GROUP BY SUBSTRING ( \"ITEM\".\"I_ITEM_DESC\" , 1 , 30 ) , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" HAVING COUNT ( * ) > 4",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH FREQUENT_SS_ITEMS AS ( SELECT SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) AS ITEMDESC , I_ITEM_SK AS ITEM_SK , D_DATE AS SOLDDATE , COUNT ( * ) AS CNT FROM STORE_SALES , DATE_DIM , ITEM WHERE SS_SOLD_DATE_SK = D_DATE_SK AND SS_ITEM_SK = I_ITEM_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY SUBSTRING ( I_ITEM_DESC FROM 1 FOR 30 ) , I_ITEM_SK , D_DATE HAVING COUNT ( * ) > 4 ) , MAX_STORE_SALES AS ( SELECT MAX ( CSALES ) AS TPCDS_CMAX FROM ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS CSALES FROM STORE_SALES , CUSTOMER , DATE_DIM WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK AND SS_SOLD_DATE_SK = D_DATE_SK AND D_YEAR IN ( 1998 , 1998 + 1 , 1998 + 2 , 1998 + 3 ) GROUP BY C_CUSTOMER_SK ) ) , BEST_SS_CUSTOMER AS ( SELECT C_CUSTOMER_SK , SUM ( SS_QUANTITY * SS_SALES_PRICE ) AS SSALES FROM STORE_SALES , CUSTOMER WHERE SS_CUSTOMER_SK = C_CUSTOMER_SK GROUP BY C_CUSTOMER_SK HAVING SUM ( SS_QUANTITY * SS_SALES_PRICE ) > ( 95 / 100.0 ) * ( SELECT * FROM MAX_STORE_SALES ) ) SELECT SUM ( SALES ) FROM ( SELECT CS_QUANTITY * CS_LIST_PRICE AS SALES FROM CATALOG_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND CS_SOLD_DATE_SK = D_DATE_SK AND CS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND CS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) UNION ALL SELECT WS_QUANTITY * WS_LIST_PRICE AS SALES FROM WEB_SALES , DATE_DIM WHERE D_YEAR = 1998 AND D_MOY = 4 AND WS_SOLD_DATE_SK = D_DATE_SK AND WS_ITEM_SK IN ( SELECT ITEM_SK FROM FREQUENT_SS_ITEMS ) AND WS_BILL_CUSTOMER_SK IN ( SELECT C_CUSTOMER_SK FROM BEST_SS_CUSTOMER ) ) LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": null
+    }
+]

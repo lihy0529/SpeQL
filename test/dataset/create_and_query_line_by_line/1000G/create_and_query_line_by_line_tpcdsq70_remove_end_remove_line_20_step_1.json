@@ -1,0 +1,404 @@
+[
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query70a.tpl query 34 in stream 0\nwith /* TPC-DS query70a.tpl 0.34 */ results as\n( select\n    sum(ss_net_profit) as total_sum ,s_state ,s_county, 0 as gstate, 0 as g_county\n from\n    store_sales\n  ,date_dim      d1\n  ,store\n where\n    d1.d_month_seq between 1188 and 1188 + 11\n and d1.d_date_sk = ss_sold_date_sk\n and s_store_sk  = ss_store_sk\n and s_state in\n            ( select s_state\n              from  (select s_state as s_state,\n                 rank() over ( partition by s_state order by sum(ss_net_profit) desc) as ranking\n                      from  store_sales, store, date_dim\n                      where d_month_seq between 1188 and 1188 + 11\n                 and d_date_sk = ss_sold_date_sk\n                 and s_store_sk  = ss_store_sk\n                      group by s_state\n                    ) tmp1 \n              where ranking <= 5)\n  group by s_state,s_county) ,  \n results_rollup as \n(select total_sum ,s_state ,s_county, 0 as g_state, 0 as g_county, 0 as lochierarchy from results\n union\n select sum(total_sum) as total_sum,s_state, NULL as s_county, 0 as g_state, 1 as g_county, 1 as lochierarchy from results group by s_state\n union\n select sum(total_sum) as total_sum ,NULL as s_state ,NULL as s_county, 1 as g_state, 1 as g_county, 2 as lochierarchy from results)\n  select  total_sum ,s_state ,s_county, lochierarchy \n  ,rank() over (\n     partition by lochierarchy, \n     case when g_county = 0 then s_state end \n     order by total_sum desc) as rank_within_parent\n from results_rollup\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) , \"TMP1\" AS ( SELECT \"STORE\".\"S_STATE\" AS \"S_STATE\" , RANK ( ) OVER ( PARTITION BY \"STORE\".\"S_STATE\" ORDER BY SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) DESC NULLS FIRST ) AS \"RANKING\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1199 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE\".\"S_STATE\" ) , \"_U_0\" AS ( SELECT \"TMP1\".\"S_STATE\" AS \"S_STATE\" FROM \"TMP1\" AS \"TMP1\" WHERE \"TMP1\".\"RANKING\" <= 5 GROUP BY \"TMP1\".\"S_STATE\" ) , \"RESULTS\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"TOTAL_SUM\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"STORE\".\"S_COUNTY\" AS \"S_COUNTY\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"D1\" ON \"D1\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"D1\".\"D_MONTH_SEQ\" <= 1199 AND \"D1\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STATE\" = \"STORE\".\"S_STATE\" WHERE NOT \"_U_0\".\"S_STATE\" IS NULL GROUP BY \"STORE\".\"S_STATE\" , \"STORE\".\"S_COUNTY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS\".\"S_COUNTY\" AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 0 AS \"G_COUNTY\" , 0 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 1 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"S_STATE\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , NULL AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 1 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 2 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS_ROLLUP\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS_ROLLUP\".\"S_COUNTY\" AS \"S_COUNTY\" , \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" AS \"LOCHIERARCHY\" , RANK ( ) OVER ( PARTITION BY \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" , CASE WHEN \"RESULTS_ROLLUP\".\"G_COUNTY\" = 0 THEN \"RESULTS_ROLLUP\".\"S_STATE\" END ORDER BY \"RESULTS_ROLLUP\".\"TOTAL_SUM\" DESC NULLS FIRST ) AS \"RANK_WITHIN_PARENT\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH RESULTS AS ( SELECT SUM ( SS_NET_PROFIT ) AS TOTAL_SUM , S_STATE , S_COUNTY , 0 AS GSTATE , 0 AS G_COUNTY FROM STORE_SALES , DATE_DIM AS D1 , STORE WHERE D1.D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D1.D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK AND S_STATE IN ( SELECT S_STATE FROM ( SELECT S_STATE AS S_STATE , RANK ( ) OVER ( PARTITION BY S_STATE ORDER BY SUM ( SS_NET_PROFIT ) DESC NULLS LAST ) AS RANKING FROM STORE_SALES , STORE , DATE_DIM WHERE D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK GROUP BY S_STATE ) AS TMP1 WHERE RANKING <= 5 ) GROUP BY S_STATE , S_COUNTY ) , RESULTS_ROLLUP AS ( SELECT TOTAL_SUM , S_STATE , S_COUNTY , 0 AS G_STATE , 0 AS G_COUNTY , 0 AS LOCHIERARCHY FROM RESULTS UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , S_STATE , NULL AS S_COUNTY , 0 AS G_STATE , 1 AS G_COUNTY , 1 AS LOCHIERARCHY FROM RESULTS GROUP BY S_STATE UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , NULL AS S_STATE , NULL AS S_COUNTY , 1 AS G_STATE , 1 AS G_COUNTY , 2 AS LOCHIERARCHY FROM RESULTS ) SELECT TOTAL_SUM , S_STATE , S_COUNTY , LOCHIERARCHY , RANK ( ) OVER ( PARTITION BY LOCHIERARCHY , CASE WHEN G_COUNTY = 0 THEN S_STATE END ORDER BY TOTAL_SUM DESC NULLS LAST ) AS RANK_WITHIN_PARENT FROM RESULTS_ROLLUP LIMIT 21",
+                "preview": "\n/*       total_sum s_state                s_county  lochierarchy  rank_within_parent\n0  -8.751270e+08                   Barrow County             0                   1\n1  -8.785569e+08               Williamson County             0                   2\n2  -1.758306e+09                                             0                   3\n3  -1.666450e+10      IN         Marshall County             0                   1\n4  -1.404058e+10      LA  Jefferson Davis Parish             0                   1\n5  -1.755793e+10      LA         Franklin Parish             0                   2\n6  -1.405807e+10      NY            Bronx County             0                   1\n7  -2.190797e+10      TN       Williamson County             0                   1\n8  -8.745871e+08      MN                                     0                   1\n9  -1.755709e+10      MN           Wadena County             0                   2\n10 -2.368866e+10      MN       Pennington County             0                   3\n11 -1.319610e+10      SC        Fairfield County             0                   1\n12 -8.781671e+08      SD                                     0                   1\n13 -2.199906e+10      SD          Ziebach County             0                   2\n14 -1.756026e+10      AL           Mobile County             0                   1\n15 -1.846767e+10      AL           Walker County             0                   2\n16 -1.668485e+10      FL             Levy County             0                   1\n17 -1.932480e+10      NM       San Miguel County             0                   1\n18 -1.406198e+10      WA         Kittitas County             0                   1\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 9.461325,
+                    "execution_time": 9.228442,
+                    "compile_time": 0.001417,
+                    "planning_time": 2.208688
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 25.827914,
+                    "execution_time": 10.60878,
+                    "compile_time": 17.522672,
+                    "planning_time": 11.208147
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*       total_sum s_state                s_county  lochierarchy  rank_within_parent\n0  -8.751270e+08                   Barrow County             0                   1\n1  -8.785569e+08               Williamson County             0                   2\n2  -1.758306e+09                                             0                   3\n3  -1.666450e+10      IN         Marshall County             0                   1\n4  -1.404058e+10      LA  Jefferson Davis Parish             0                   1\n5  -1.755793e+10      LA         Franklin Parish             0                   2\n6  -1.405807e+10      NY            Bronx County             0                   1\n7  -2.190797e+10      TN       Williamson County             0                   1\n8  -8.745871e+08      MN                                     0                   1\n9  -1.755709e+10      MN           Wadena County             0                   2\n10 -2.368866e+10      MN       Pennington County             0                   3\n11 -1.319610e+10      SC        Fairfield County             0                   1\n12 -8.781671e+08      SD                                     0                   1\n13 -2.199906e+10      SD          Ziebach County             0                   2\n14 -1.756026e+10      AL           Mobile County             0                   1\n15 -1.846767e+10      AL           Walker County             0                   2\n16 -1.668485e+10      FL             Levy County             0                   1\n17 -1.932480e+10      NM       San Miguel County             0                   1\n18 -1.406198e+10      WA         Kittitas County             0                   1\n...*/"
+    },
+    {
+        "input": "-- start template query70a.tpl query 34 in stream 0\nwith /* TPC-DS query70a.tpl 0.34 */ results as\n( select\n    sum(ss_net_profit) as total_sum ,s_state ,s_county, 0 as gstate, 0 as g_county\n from\n    store_sales\n  ,date_dim      d1\n  ,store\n where\n    d1.d_month_seq between 1188 and 1188 + 11\n and d1.d_date_sk = ss_sold_date_sk\n and s_store_sk  = ss_store_sk\n and s_state in\n            ( select s_state\n              from  (select s_state as s_state,\n                 rank() over ( partition by s_state order by sum(ss_net_profit) desc) as ranking\n                      from  store_sales, store, date_dim\n                      where d_month_seq between 1188 and 1188 + 11\n                 and d_date_sk = ss_sold_date_sk\n                 and s_store_sk  = ss_store_sk\n                      group by s_state\n                    ) tmp1 \n              where ranking <= 5)\n  group by s_state,s_county) ,  \n results_rollup as \n(select total_sum ,s_state ,s_county, 0 as g_state, 0 as g_county, 0 as lochierarchy from results\n union\n select sum(total_sum) as total_sum,s_state, NULL as s_county, 0 as g_state, 1 as g_county, 1 as lochierarchy from results group by s_state\n union\n select sum(total_sum) as total_sum ,NULL as s_state ,NULL as s_county, 1 as g_state, 1 as g_county, 2 as lochierarchy from results)\n  select  total_sum ,s_state ,s_county, lochierarchy \n  ,rank() over (\n     partition by lochierarchy, \n     case when g_county = 0 then s_state end \n     order by total_sum desc) as rank_within_parent\n from results_rollup\n order by total_sum desc\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) , \"TMP1\" AS ( SELECT \"STORE\".\"S_STATE\" AS \"S_STATE\" , RANK ( ) OVER ( PARTITION BY \"STORE\".\"S_STATE\" ORDER BY SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) DESC NULLS FIRST ) AS \"RANKING\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1199 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE\".\"S_STATE\" ) , \"_U_0\" AS ( SELECT \"TMP1\".\"S_STATE\" AS \"S_STATE\" FROM \"TMP1\" AS \"TMP1\" WHERE \"TMP1\".\"RANKING\" <= 5 GROUP BY \"TMP1\".\"S_STATE\" ) , \"RESULTS\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"TOTAL_SUM\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"STORE\".\"S_COUNTY\" AS \"S_COUNTY\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"D1\" ON \"D1\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"D1\".\"D_MONTH_SEQ\" <= 1199 AND \"D1\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STATE\" = \"STORE\".\"S_STATE\" WHERE NOT \"_U_0\".\"S_STATE\" IS NULL GROUP BY \"STORE\".\"S_STATE\" , \"STORE\".\"S_COUNTY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS\".\"S_COUNTY\" AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 0 AS \"G_COUNTY\" , 0 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 1 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"S_STATE\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , NULL AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 1 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 2 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS_ROLLUP\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS_ROLLUP\".\"S_COUNTY\" AS \"S_COUNTY\" , \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" AS \"LOCHIERARCHY\" , RANK ( ) OVER ( PARTITION BY \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" , CASE WHEN \"RESULTS_ROLLUP\".\"G_COUNTY\" = 0 THEN \"RESULTS_ROLLUP\".\"S_STATE\" END ORDER BY \"RESULTS_ROLLUP\".\"TOTAL_SUM\" DESC NULLS FIRST ) AS \"RANK_WITHIN_PARENT\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"TOTAL_SUM\" DESC NULLS FIRST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH RESULTS AS ( SELECT SUM ( SS_NET_PROFIT ) AS TOTAL_SUM , S_STATE , S_COUNTY , 0 AS GSTATE , 0 AS G_COUNTY FROM STORE_SALES , DATE_DIM AS D1 , STORE WHERE D1.D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D1.D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK AND S_STATE IN ( SELECT S_STATE FROM ( SELECT S_STATE AS S_STATE , RANK ( ) OVER ( PARTITION BY S_STATE ORDER BY SUM ( SS_NET_PROFIT ) DESC NULLS LAST ) AS RANKING FROM STORE_SALES , STORE , DATE_DIM WHERE D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK GROUP BY S_STATE ) AS TMP1 WHERE RANKING <= 5 ) GROUP BY S_STATE , S_COUNTY ) , RESULTS_ROLLUP AS ( SELECT TOTAL_SUM , S_STATE , S_COUNTY , 0 AS G_STATE , 0 AS G_COUNTY , 0 AS LOCHIERARCHY FROM RESULTS UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , S_STATE , NULL AS S_COUNTY , 0 AS G_STATE , 1 AS G_COUNTY , 1 AS LOCHIERARCHY FROM RESULTS GROUP BY S_STATE UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , NULL AS S_STATE , NULL AS S_COUNTY , 1 AS G_STATE , 1 AS G_COUNTY , 2 AS LOCHIERARCHY FROM RESULTS ) SELECT TOTAL_SUM , S_STATE , S_COUNTY , LOCHIERARCHY , RANK ( ) OVER ( PARTITION BY LOCHIERARCHY , CASE WHEN G_COUNTY = 0 THEN S_STATE END ORDER BY TOTAL_SUM DESC NULLS LAST ) AS RANK_WITHIN_PARENT FROM RESULTS_ROLLUP ORDER BY TOTAL_SUM DESC NULLS LAST LIMIT 21",
+                "preview": "\n/*       total_sum s_state                s_county  lochierarchy  rank_within_parent\n0  -8.745871e+08      MN                                     0                   1\n1  -8.751270e+08                   Barrow County             0                   1\n2  -8.781671e+08      SD                                     0                   1\n3  -8.785569e+08               Williamson County             0                   2\n4  -8.805425e+08      WV                                     0                   1\n5  -1.758306e+09                                             0                   3\n6  -3.511989e+09                            None             1                   1\n7  -9.670302e+09      MO          Daviess County             0                   1\n8  -9.670302e+09      MO                    None             1                   2\n9  -1.142887e+10      MI            Huron County             0                   1\n10 -1.316258e+10      TX         Maverick County             0                   1\n11 -1.316258e+10      TX                    None             1                   3\n12 -1.317309e+10      WV          Raleigh County             0                   2\n13 -1.318047e+10      GA       Oglethorpe County             0                   1\n14 -1.318487e+10      MI             Luce County             0                   2\n15 -1.319610e+10      SC        Fairfield County             0                   1\n16 -1.319610e+10      SC                    None             1                   4\n17 -1.404058e+10      LA  Jefferson Davis Parish             0                   1\n18 -1.405124e+10      OH                    None             1                   5\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 9.473721,
+                    "execution_time": 9.244268,
+                    "compile_time": 0.0014,
+                    "planning_time": 2.206964
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 9.674434,
+                    "execution_time": 9.266769,
+                    "compile_time": 0.108012,
+                    "planning_time": 2.32685
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*       total_sum s_state                s_county  lochierarchy  rank_within_parent\n0  -8.745871e+08      MN                                     0                   1\n1  -8.751270e+08                   Barrow County             0                   1\n2  -8.781671e+08      SD                                     0                   1\n3  -8.785569e+08               Williamson County             0                   2\n4  -8.805425e+08      WV                                     0                   1\n5  -1.758306e+09                                             0                   3\n6  -3.511989e+09                            None             1                   1\n7  -9.670302e+09      MO          Daviess County             0                   1\n8  -9.670302e+09      MO                    None             1                   2\n9  -1.142887e+10      MI            Huron County             0                   1\n10 -1.316258e+10      TX         Maverick County             0                   1\n11 -1.316258e+10      TX                    None             1                   3\n12 -1.317309e+10      WV          Raleigh County             0                   2\n13 -1.318047e+10      GA       Oglethorpe County             0                   1\n14 -1.318487e+10      MI             Luce County             0                   2\n15 -1.319610e+10      SC        Fairfield County             0                   1\n16 -1.319610e+10      SC                    None             1                   4\n17 -1.404058e+10      LA  Jefferson Davis Parish             0                   1\n18 -1.405124e+10      OH                    None             1                   5\n...*/"
+    },
+    {
+        "input": "-- start template query70a.tpl query 34 in stream 0\nwith /* TPC-DS query70a.tpl 0.34 */ results as\n( select\n    sum(ss_net_profit) as total_sum ,s_state ,s_county, 0 as gstate, 0 as g_county\n from\n    store_sales\n  ,date_dim      d1\n  ,store\n where\n    d1.d_month_seq between 1188 and 1188 + 11\n and d1.d_date_sk = ss_sold_date_sk\n and s_store_sk  = ss_store_sk\n and s_state in\n            ( select s_state\n              from  (select s_state as s_state,\n                 rank() over ( partition by s_state order by sum(ss_net_profit) desc) as ranking\n                      from  store_sales, store, date_dim\n                      where d_month_seq between 1188 and 1188 + 11\n                 and d_date_sk = ss_sold_date_sk\n                 and s_store_sk  = ss_store_sk\n                      group by s_state\n                    ) tmp1 \n              where ranking <= 5)\n  group by s_state,s_county) ,  \n results_rollup as \n(select total_sum ,s_state ,s_county, 0 as g_state, 0 as g_county, 0 as lochierarchy from results\n union\n select sum(total_sum) as total_sum,s_state, NULL as s_county, 0 as g_state, 1 as g_county, 1 as lochierarchy from results group by s_state\n union\n select sum(total_sum) as total_sum ,NULL as s_state ,NULL as s_county, 1 as g_state, 1 as g_county, 2 as lochierarchy from results)\n  select  total_sum ,s_state ,s_county, lochierarchy \n  ,rank() over (\n     partition by lochierarchy, \n     case when g_county = 0 then s_state end \n     order by total_sum desc) as rank_within_parent\n from results_rollup\n order by\n  lochierarchy desc\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) , \"TMP1\" AS ( SELECT \"STORE\".\"S_STATE\" AS \"S_STATE\" , RANK ( ) OVER ( PARTITION BY \"STORE\".\"S_STATE\" ORDER BY SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) DESC NULLS FIRST ) AS \"RANKING\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1199 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE\".\"S_STATE\" ) , \"_U_0\" AS ( SELECT \"TMP1\".\"S_STATE\" AS \"S_STATE\" FROM \"TMP1\" AS \"TMP1\" WHERE \"TMP1\".\"RANKING\" <= 5 GROUP BY \"TMP1\".\"S_STATE\" ) , \"RESULTS\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"TOTAL_SUM\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"STORE\".\"S_COUNTY\" AS \"S_COUNTY\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"D1\" ON \"D1\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"D1\".\"D_MONTH_SEQ\" <= 1199 AND \"D1\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STATE\" = \"STORE\".\"S_STATE\" WHERE NOT \"_U_0\".\"S_STATE\" IS NULL GROUP BY \"STORE\".\"S_STATE\" , \"STORE\".\"S_COUNTY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS\".\"S_COUNTY\" AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 0 AS \"G_COUNTY\" , 0 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 1 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"S_STATE\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , NULL AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 1 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 2 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS_ROLLUP\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS_ROLLUP\".\"S_COUNTY\" AS \"S_COUNTY\" , \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" AS \"LOCHIERARCHY\" , RANK ( ) OVER ( PARTITION BY \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" , CASE WHEN \"RESULTS_ROLLUP\".\"G_COUNTY\" = 0 THEN \"RESULTS_ROLLUP\".\"S_STATE\" END ORDER BY \"RESULTS_ROLLUP\".\"TOTAL_SUM\" DESC NULLS FIRST ) AS \"RANK_WITHIN_PARENT\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"LOCHIERARCHY\" DESC NULLS FIRST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH RESULTS AS ( SELECT SUM ( SS_NET_PROFIT ) AS TOTAL_SUM , S_STATE , S_COUNTY , 0 AS GSTATE , 0 AS G_COUNTY FROM STORE_SALES , DATE_DIM AS D1 , STORE WHERE D1.D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D1.D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK AND S_STATE IN ( SELECT S_STATE FROM ( SELECT S_STATE AS S_STATE , RANK ( ) OVER ( PARTITION BY S_STATE ORDER BY SUM ( SS_NET_PROFIT ) DESC NULLS LAST ) AS RANKING FROM STORE_SALES , STORE , DATE_DIM WHERE D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK GROUP BY S_STATE ) AS TMP1 WHERE RANKING <= 5 ) GROUP BY S_STATE , S_COUNTY ) , RESULTS_ROLLUP AS ( SELECT TOTAL_SUM , S_STATE , S_COUNTY , 0 AS G_STATE , 0 AS G_COUNTY , 0 AS LOCHIERARCHY FROM RESULTS UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , S_STATE , NULL AS S_COUNTY , 0 AS G_STATE , 1 AS G_COUNTY , 1 AS LOCHIERARCHY FROM RESULTS GROUP BY S_STATE UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , NULL AS S_STATE , NULL AS S_COUNTY , 1 AS G_STATE , 1 AS G_COUNTY , 2 AS LOCHIERARCHY FROM RESULTS ) SELECT TOTAL_SUM , S_STATE , S_COUNTY , LOCHIERARCHY , RANK ( ) OVER ( PARTITION BY LOCHIERARCHY , CASE WHEN G_COUNTY = 0 THEN S_STATE END ORDER BY TOTAL_SUM DESC NULLS LAST ) AS RANK_WITHIN_PARENT FROM RESULTS_ROLLUP ORDER BY LOCHIERARCHY DESC NULLS LAST LIMIT 21",
+                "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.161654e+10      GA     None             1                  19\n2  -3.602793e+10      AL     None             1                  20\n3  -3.159851e+10      LA     None             1                  18\n4  -3.511989e+09             None             1                   1\n5  -9.670302e+09      MO     None             1                   2\n6  -1.316258e+10      TX     None             1                   3\n7  -1.319610e+10      SC     None             1                   4\n8  -1.405124e+10      OH     None             1                   5\n9  -1.405363e+10      WV     None             1                   6\n10 -1.405807e+10      NY     None             1                   7\n11 -1.406198e+10      WA     None             1                   8\n12 -1.491563e+10      CO     None             1                   9\n13 -1.493353e+10      NE     None             1                  10\n14 -1.494054e+10      NC     None             1                  11\n15 -1.666450e+10      IN     None             1                  12\n16 -1.668485e+10      FL     None             1                  13\n17 -1.932480e+10      NM     None             1                  14\n18 -2.108073e+10      PA     None             1                  15\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 9.439871,
+                    "execution_time": 9.210784,
+                    "compile_time": 0.001441,
+                    "planning_time": 2.19947
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 9.588544,
+                    "execution_time": 9.21332,
+                    "compile_time": 0.07471,
+                    "planning_time": 2.277425
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.161654e+10      GA     None             1                  19\n2  -3.602793e+10      AL     None             1                  20\n3  -3.159851e+10      LA     None             1                  18\n4  -3.511989e+09             None             1                   1\n5  -9.670302e+09      MO     None             1                   2\n6  -1.316258e+10      TX     None             1                   3\n7  -1.319610e+10      SC     None             1                   4\n8  -1.405124e+10      OH     None             1                   5\n9  -1.405363e+10      WV     None             1                   6\n10 -1.405807e+10      NY     None             1                   7\n11 -1.406198e+10      WA     None             1                   8\n12 -1.491563e+10      CO     None             1                   9\n13 -1.493353e+10      NE     None             1                  10\n14 -1.494054e+10      NC     None             1                  11\n15 -1.666450e+10      IN     None             1                  12\n16 -1.668485e+10      FL     None             1                  13\n17 -1.932480e+10      NM     None             1                  14\n18 -2.108073e+10      PA     None             1                  15\n...*/"
+    },
+    {
+        "input": "-- start template query70a.tpl query 34 in stream 0\nwith /* TPC-DS query70a.tpl 0.34 */ results as\n( select\n    sum(ss_net_profit) as total_sum ,s_state ,s_county, 0 as gstate, 0 as g_county\n from\n    store_sales\n  ,date_dim      d1\n  ,store\n where\n    d1.d_month_seq between 1188 and 1188 + 11\n and d1.d_date_sk = ss_sold_date_sk\n and s_store_sk  = ss_store_sk\n and s_state in\n            ( select s_state\n              from  (select s_state as s_state,\n                 rank() over ( partition by s_state order by sum(ss_net_profit) desc) as ranking\n                      from  store_sales, store, date_dim\n                      where d_month_seq between 1188 and 1188 + 11\n                 and d_date_sk = ss_sold_date_sk\n                 and s_store_sk  = ss_store_sk\n                      group by s_state\n                    ) tmp1 \n              where ranking <= 5)\n  group by s_state,s_county) ,  \n results_rollup as \n(select total_sum ,s_state ,s_county, 0 as g_state, 0 as g_county, 0 as lochierarchy from results\n union\n select sum(total_sum) as total_sum,s_state, NULL as s_county, 0 as g_state, 1 as g_county, 1 as lochierarchy from results group by s_state\n union\n select sum(total_sum) as total_sum ,NULL as s_state ,NULL as s_county, 1 as g_state, 1 as g_county, 2 as lochierarchy from results)\n  select  total_sum ,s_state ,s_county, lochierarchy \n  ,rank() over (\n     partition by lochierarchy, \n     case when g_county = 0 then s_state end \n     order by total_sum desc) as rank_within_parent\n from results_rollup\n order by\n  lochierarchy desc\n  ,case when lochierarchy = 0 then s_state end\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) , \"TMP1\" AS ( SELECT \"STORE\".\"S_STATE\" AS \"S_STATE\" , RANK ( ) OVER ( PARTITION BY \"STORE\".\"S_STATE\" ORDER BY SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) DESC NULLS FIRST ) AS \"RANKING\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1199 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE\".\"S_STATE\" ) , \"_U_0\" AS ( SELECT \"TMP1\".\"S_STATE\" AS \"S_STATE\" FROM \"TMP1\" AS \"TMP1\" WHERE \"TMP1\".\"RANKING\" <= 5 GROUP BY \"TMP1\".\"S_STATE\" ) , \"RESULTS\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"TOTAL_SUM\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"STORE\".\"S_COUNTY\" AS \"S_COUNTY\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"D1\" ON \"D1\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"D1\".\"D_MONTH_SEQ\" <= 1199 AND \"D1\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STATE\" = \"STORE\".\"S_STATE\" WHERE NOT \"_U_0\".\"S_STATE\" IS NULL GROUP BY \"STORE\".\"S_STATE\" , \"STORE\".\"S_COUNTY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS\".\"S_COUNTY\" AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 0 AS \"G_COUNTY\" , 0 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 1 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"S_STATE\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , NULL AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 1 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 2 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS_ROLLUP\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS_ROLLUP\".\"S_COUNTY\" AS \"S_COUNTY\" , \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" AS \"LOCHIERARCHY\" , RANK ( ) OVER ( PARTITION BY \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" , CASE WHEN \"RESULTS_ROLLUP\".\"G_COUNTY\" = 0 THEN \"RESULTS_ROLLUP\".\"S_STATE\" END ORDER BY \"RESULTS_ROLLUP\".\"TOTAL_SUM\" DESC NULLS FIRST ) AS \"RANK_WITHIN_PARENT\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"LOCHIERARCHY\" DESC NULLS FIRST , CASE WHEN \"LOCHIERARCHY\" = 0 THEN \"S_STATE\" END NULLS LAST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH RESULTS AS ( SELECT SUM ( SS_NET_PROFIT ) AS TOTAL_SUM , S_STATE , S_COUNTY , 0 AS GSTATE , 0 AS G_COUNTY FROM STORE_SALES , DATE_DIM AS D1 , STORE WHERE D1.D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D1.D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK AND S_STATE IN ( SELECT S_STATE FROM ( SELECT S_STATE AS S_STATE , RANK ( ) OVER ( PARTITION BY S_STATE ORDER BY SUM ( SS_NET_PROFIT ) DESC NULLS LAST ) AS RANKING FROM STORE_SALES , STORE , DATE_DIM WHERE D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK GROUP BY S_STATE ) AS TMP1 WHERE RANKING <= 5 ) GROUP BY S_STATE , S_COUNTY ) , RESULTS_ROLLUP AS ( SELECT TOTAL_SUM , S_STATE , S_COUNTY , 0 AS G_STATE , 0 AS G_COUNTY , 0 AS LOCHIERARCHY FROM RESULTS UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , S_STATE , NULL AS S_COUNTY , 0 AS G_STATE , 1 AS G_COUNTY , 1 AS LOCHIERARCHY FROM RESULTS GROUP BY S_STATE UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , NULL AS S_STATE , NULL AS S_COUNTY , 1 AS G_STATE , 1 AS G_COUNTY , 2 AS LOCHIERARCHY FROM RESULTS ) SELECT TOTAL_SUM , S_STATE , S_COUNTY , LOCHIERARCHY , RANK ( ) OVER ( PARTITION BY LOCHIERARCHY , CASE WHEN G_COUNTY = 0 THEN S_STATE END ORDER BY TOTAL_SUM DESC NULLS LAST ) AS RANK_WITHIN_PARENT FROM RESULTS_ROLLUP ORDER BY LOCHIERARCHY DESC NULLS LAST , CASE WHEN LOCHIERARCHY = 0 THEN S_STATE END NULLS FIRST LIMIT 21",
+                "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.161654e+10      GA     None             1                  19\n2  -3.602793e+10      AL     None             1                  20\n3  -3.159851e+10      LA     None             1                  18\n4  -3.511989e+09             None             1                   1\n5  -9.670302e+09      MO     None             1                   2\n6  -1.316258e+10      TX     None             1                   3\n7  -1.319610e+10      SC     None             1                   4\n8  -1.405124e+10      OH     None             1                   5\n9  -1.405363e+10      WV     None             1                   6\n10 -1.405807e+10      NY     None             1                   7\n11 -1.406198e+10      WA     None             1                   8\n12 -1.491563e+10      CO     None             1                   9\n13 -1.493353e+10      NE     None             1                  10\n14 -1.494054e+10      NC     None             1                  11\n15 -1.666450e+10      IN     None             1                  12\n16 -1.668485e+10      FL     None             1                  13\n17 -1.932480e+10      NM     None             1                  14\n18 -2.108073e+10      PA     None             1                  15\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 9.432782,
+                    "execution_time": 9.200564,
+                    "compile_time": 0.001405,
+                    "planning_time": 2.201391
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 9.6431,
+                    "execution_time": 9.202823,
+                    "compile_time": 0.136736,
+                    "planning_time": 2.272667
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.161654e+10      GA     None             1                  19\n2  -3.602793e+10      AL     None             1                  20\n3  -3.159851e+10      LA     None             1                  18\n4  -3.511989e+09             None             1                   1\n5  -9.670302e+09      MO     None             1                   2\n6  -1.316258e+10      TX     None             1                   3\n7  -1.319610e+10      SC     None             1                   4\n8  -1.405124e+10      OH     None             1                   5\n9  -1.405363e+10      WV     None             1                   6\n10 -1.405807e+10      NY     None             1                   7\n11 -1.406198e+10      WA     None             1                   8\n12 -1.491563e+10      CO     None             1                   9\n13 -1.493353e+10      NE     None             1                  10\n14 -1.494054e+10      NC     None             1                  11\n15 -1.666450e+10      IN     None             1                  12\n16 -1.668485e+10      FL     None             1                  13\n17 -1.932480e+10      NM     None             1                  14\n18 -2.108073e+10      PA     None             1                  15\n...*/"
+    },
+    {
+        "input": "-- start template query70a.tpl query 34 in stream 0\nwith /* TPC-DS query70a.tpl 0.34 */ results as\n( select\n    sum(ss_net_profit) as total_sum ,s_state ,s_county, 0 as gstate, 0 as g_county\n from\n    store_sales\n  ,date_dim      d1\n  ,store\n where\n    d1.d_month_seq between 1188 and 1188 + 11\n and d1.d_date_sk = ss_sold_date_sk\n and s_store_sk  = ss_store_sk\n and s_state in\n            ( select s_state\n              from  (select s_state as s_state,\n                 rank() over ( partition by s_state order by sum(ss_net_profit) desc) as ranking\n                      from  store_sales, store, date_dim\n                      where d_month_seq between 1188 and 1188 + 11\n                 and d_date_sk = ss_sold_date_sk\n                 and s_store_sk  = ss_store_sk\n                      group by s_state\n                    ) tmp1 \n              where ranking <= 5)\n  group by s_state,s_county) ,  \n results_rollup as \n(select total_sum ,s_state ,s_county, 0 as g_state, 0 as g_county, 0 as lochierarchy from results\n union\n select sum(total_sum) as total_sum,s_state, NULL as s_county, 0 as g_state, 1 as g_county, 1 as lochierarchy from results group by s_state\n union\n select sum(total_sum) as total_sum ,NULL as s_state ,NULL as s_county, 1 as g_state, 1 as g_county, 2 as lochierarchy from results)\n  select  total_sum ,s_state ,s_county, lochierarchy \n  ,rank() over (\n     partition by lochierarchy, \n     case when g_county = 0 then s_state end \n     order by total_sum desc) as rank_within_parent\n from results_rollup\n order by\n  lochierarchy desc\n  ,case when lochierarchy = 0 then s_state end\n  ,rank_within_parent\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) , \"TMP1\" AS ( SELECT \"STORE\".\"S_STATE\" AS \"S_STATE\" , RANK ( ) OVER ( PARTITION BY \"STORE\".\"S_STATE\" ORDER BY SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) DESC NULLS FIRST ) AS \"RANKING\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1199 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE\".\"S_STATE\" ) , \"_U_0\" AS ( SELECT \"TMP1\".\"S_STATE\" AS \"S_STATE\" FROM \"TMP1\" AS \"TMP1\" WHERE \"TMP1\".\"RANKING\" <= 5 GROUP BY \"TMP1\".\"S_STATE\" ) , \"RESULTS\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"TOTAL_SUM\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"STORE\".\"S_COUNTY\" AS \"S_COUNTY\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"D1\" ON \"D1\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"D1\".\"D_MONTH_SEQ\" <= 1199 AND \"D1\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STATE\" = \"STORE\".\"S_STATE\" WHERE NOT \"_U_0\".\"S_STATE\" IS NULL GROUP BY \"STORE\".\"S_STATE\" , \"STORE\".\"S_COUNTY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS\".\"S_COUNTY\" AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 0 AS \"G_COUNTY\" , 0 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 1 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"S_STATE\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , NULL AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 1 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 2 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS_ROLLUP\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS_ROLLUP\".\"S_COUNTY\" AS \"S_COUNTY\" , \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" AS \"LOCHIERARCHY\" , RANK ( ) OVER ( PARTITION BY \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" , CASE WHEN \"RESULTS_ROLLUP\".\"G_COUNTY\" = 0 THEN \"RESULTS_ROLLUP\".\"S_STATE\" END ORDER BY \"RESULTS_ROLLUP\".\"TOTAL_SUM\" DESC NULLS FIRST ) AS \"RANK_WITHIN_PARENT\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"LOCHIERARCHY\" DESC NULLS FIRST , CASE WHEN \"LOCHIERARCHY\" = 0 THEN \"S_STATE\" END NULLS LAST , \"RANK_WITHIN_PARENT\" NULLS LAST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH RESULTS AS ( SELECT SUM ( SS_NET_PROFIT ) AS TOTAL_SUM , S_STATE , S_COUNTY , 0 AS GSTATE , 0 AS G_COUNTY FROM STORE_SALES , DATE_DIM AS D1 , STORE WHERE D1.D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D1.D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK AND S_STATE IN ( SELECT S_STATE FROM ( SELECT S_STATE AS S_STATE , RANK ( ) OVER ( PARTITION BY S_STATE ORDER BY SUM ( SS_NET_PROFIT ) DESC NULLS LAST ) AS RANKING FROM STORE_SALES , STORE , DATE_DIM WHERE D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK GROUP BY S_STATE ) AS TMP1 WHERE RANKING <= 5 ) GROUP BY S_STATE , S_COUNTY ) , RESULTS_ROLLUP AS ( SELECT TOTAL_SUM , S_STATE , S_COUNTY , 0 AS G_STATE , 0 AS G_COUNTY , 0 AS LOCHIERARCHY FROM RESULTS UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , S_STATE , NULL AS S_COUNTY , 0 AS G_STATE , 1 AS G_COUNTY , 1 AS LOCHIERARCHY FROM RESULTS GROUP BY S_STATE UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , NULL AS S_STATE , NULL AS S_COUNTY , 1 AS G_STATE , 1 AS G_COUNTY , 2 AS LOCHIERARCHY FROM RESULTS ) SELECT TOTAL_SUM , S_STATE , S_COUNTY , LOCHIERARCHY , RANK ( ) OVER ( PARTITION BY LOCHIERARCHY , CASE WHEN G_COUNTY = 0 THEN S_STATE END ORDER BY TOTAL_SUM DESC NULLS LAST ) AS RANK_WITHIN_PARENT FROM RESULTS_ROLLUP ORDER BY LOCHIERARCHY DESC NULLS LAST , CASE WHEN LOCHIERARCHY = 0 THEN S_STATE END NULLS FIRST , RANK_WITHIN_PARENT NULLS FIRST LIMIT 21",
+                "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.511989e+09             None             1                   1\n2  -9.670302e+09      MO     None             1                   2\n3  -1.316258e+10      TX     None             1                   3\n4  -1.319610e+10      SC     None             1                   4\n5  -1.405124e+10      OH     None             1                   5\n6  -1.405363e+10      WV     None             1                   6\n7  -1.405807e+10      NY     None             1                   7\n8  -1.406198e+10      WA     None             1                   8\n9  -1.491563e+10      CO     None             1                   9\n10 -1.493353e+10      NE     None             1                  10\n11 -1.494054e+10      NC     None             1                  11\n12 -1.666450e+10      IN     None             1                  12\n13 -1.668485e+10      FL     None             1                  13\n14 -1.932480e+10      NM     None             1                  14\n15 -2.108073e+10      PA     None             1                  15\n16 -2.190797e+10      TN     None             1                  16\n17 -2.287722e+10      SD     None             1                  17\n18 -3.159851e+10      LA     None             1                  18\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 9.446085,
+                    "execution_time": 9.21807,
+                    "compile_time": 0.001334,
+                    "planning_time": 2.202415
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 9.564553,
+                    "execution_time": 9.212163,
+                    "compile_time": 0.058489,
+                    "planning_time": 2.270139
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.511989e+09             None             1                   1\n2  -9.670302e+09      MO     None             1                   2\n3  -1.316258e+10      TX     None             1                   3\n4  -1.319610e+10      SC     None             1                   4\n5  -1.405124e+10      OH     None             1                   5\n6  -1.405363e+10      WV     None             1                   6\n7  -1.405807e+10      NY     None             1                   7\n8  -1.406198e+10      WA     None             1                   8\n9  -1.491563e+10      CO     None             1                   9\n10 -1.493353e+10      NE     None             1                  10\n11 -1.494054e+10      NC     None             1                  11\n12 -1.666450e+10      IN     None             1                  12\n13 -1.668485e+10      FL     None             1                  13\n14 -1.932480e+10      NM     None             1                  14\n15 -2.108073e+10      PA     None             1                  15\n16 -2.190797e+10      TN     None             1                  16\n17 -2.287722e+10      SD     None             1                  17\n18 -3.159851e+10      LA     None             1                  18\n...*/"
+    },
+    {
+        "input": "-- start template query70a.tpl query 34 in stream 0\nwith /* TPC-DS query70a.tpl 0.34 */ results as\n( select\n    sum(ss_net_profit) as total_sum ,s_state ,s_county, 0 as gstate, 0 as g_county\n from\n    store_sales\n  ,date_dim      d1\n  ,store\n where\n    d1.d_month_seq between 1188 and 1188 + 11\n and d1.d_date_sk = ss_sold_date_sk\n and s_store_sk  = ss_store_sk\n and s_state in\n            ( select s_state\n              from  (select s_state as s_state,\n                 rank() over ( partition by s_state order by sum(ss_net_profit) desc) as ranking\n                      from  store_sales, store, date_dim\n                      where d_month_seq between 1188 and 1188 + 11\n                 and d_date_sk = ss_sold_date_sk\n                 and s_store_sk  = ss_store_sk\n                      group by s_state\n                    ) tmp1 \n              where ranking <= 5)\n  group by s_state,s_county) ,  \n results_rollup as \n(select total_sum ,s_state ,s_county, 0 as g_state, 0 as g_county, 0 as lochierarchy from results\n union\n select sum(total_sum) as total_sum,s_state, NULL as s_county, 0 as g_state, 1 as g_county, 1 as lochierarchy from results group by s_state\n union\n select sum(total_sum) as total_sum ,NULL as s_state ,NULL as s_county, 1 as g_state, 1 as g_county, 2 as lochierarchy from results)\n  select  total_sum ,s_state ,s_county, lochierarchy \n  ,rank() over (\n     partition by lochierarchy, \n     case when g_county = 0 then s_state end \n     order by total_sum desc) as rank_within_parent\n from results_rollup\n order by\n  lochierarchy desc\n  ,case when lochierarchy = 0 then s_state end\n  ,rank_within_parent\n limit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"STORE_SALES_2\" AS ( SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\" ) , \"TMP1\" AS ( SELECT \"STORE\".\"S_STATE\" AS \"S_STATE\" , RANK ( ) OVER ( PARTITION BY \"STORE\".\"S_STATE\" ORDER BY SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) DESC NULLS FIRST ) AS \"RANKING\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1199 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" GROUP BY \"STORE\".\"S_STATE\" ) , \"_U_0\" AS ( SELECT \"TMP1\".\"S_STATE\" AS \"S_STATE\" FROM \"TMP1\" AS \"TMP1\" WHERE \"TMP1\".\"RANKING\" <= 5 GROUP BY \"TMP1\".\"S_STATE\" ) , \"RESULTS\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_NET_PROFIT\" ) AS \"TOTAL_SUM\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"STORE\".\"S_COUNTY\" AS \"S_COUNTY\" FROM \"STORE_SALES_2\" AS \"STORE_SALES\" JOIN \"DATE_DIM\" AS \"D1\" ON \"D1\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AND \"D1\".\"D_MONTH_SEQ\" <= 1199 AND \"D1\".\"D_MONTH_SEQ\" >= 1188 JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"S_STATE\" = \"STORE\".\"S_STATE\" WHERE NOT \"_U_0\".\"S_STATE\" IS NULL GROUP BY \"STORE\".\"S_STATE\" , \"STORE\".\"S_COUNTY\" ) , \"RESULTS_ROLLUP\" AS ( SELECT \"RESULTS\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS\".\"S_COUNTY\" AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 0 AS \"G_COUNTY\" , 0 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , \"RESULTS\".\"S_STATE\" AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 0 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 1 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" GROUP BY \"RESULTS\".\"S_STATE\" UNION SELECT SUM ( \"RESULTS\".\"TOTAL_SUM\" ) AS \"TOTAL_SUM\" , NULL AS \"S_STATE\" , NULL AS \"S_COUNTY\" , 1 AS \"G_STATE\" , 1 AS \"G_COUNTY\" , 2 AS \"LOCHIERARCHY\" FROM \"RESULTS\" AS \"RESULTS\" ) SELECT \"RESULTS_ROLLUP\".\"TOTAL_SUM\" AS \"TOTAL_SUM\" , \"RESULTS_ROLLUP\".\"S_STATE\" AS \"S_STATE\" , \"RESULTS_ROLLUP\".\"S_COUNTY\" AS \"S_COUNTY\" , \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" AS \"LOCHIERARCHY\" , RANK ( ) OVER ( PARTITION BY \"RESULTS_ROLLUP\".\"LOCHIERARCHY\" , CASE WHEN \"RESULTS_ROLLUP\".\"G_COUNTY\" = 0 THEN \"RESULTS_ROLLUP\".\"S_STATE\" END ORDER BY \"RESULTS_ROLLUP\".\"TOTAL_SUM\" DESC NULLS FIRST ) AS \"RANK_WITHIN_PARENT\" FROM \"RESULTS_ROLLUP\" AS \"RESULTS_ROLLUP\" ORDER BY \"LOCHIERARCHY\" DESC NULLS FIRST , CASE WHEN \"LOCHIERARCHY\" = 0 THEN \"S_STATE\" END NULLS LAST , \"RANK_WITHIN_PARENT\" NULLS LAST LIMIT 100"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" AS \"SS_SOLD_DATE_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"STORE_SALES\".\"SS_NET_PROFIT\" AS \"SS_NET_PROFIT\" FROM \"STORE_SALES\" AS \"STORE_SALES\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH RESULTS AS ( SELECT SUM ( SS_NET_PROFIT ) AS TOTAL_SUM , S_STATE , S_COUNTY , 0 AS GSTATE , 0 AS G_COUNTY FROM STORE_SALES , DATE_DIM AS D1 , STORE WHERE D1.D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D1.D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK AND S_STATE IN ( SELECT S_STATE FROM ( SELECT S_STATE AS S_STATE , RANK ( ) OVER ( PARTITION BY S_STATE ORDER BY SUM ( SS_NET_PROFIT ) DESC NULLS LAST ) AS RANKING FROM STORE_SALES , STORE , DATE_DIM WHERE D_MONTH_SEQ BETWEEN 1188 AND 1188 + 11 AND D_DATE_SK = SS_SOLD_DATE_SK AND S_STORE_SK = SS_STORE_SK GROUP BY S_STATE ) AS TMP1 WHERE RANKING <= 5 ) GROUP BY S_STATE , S_COUNTY ) , RESULTS_ROLLUP AS ( SELECT TOTAL_SUM , S_STATE , S_COUNTY , 0 AS G_STATE , 0 AS G_COUNTY , 0 AS LOCHIERARCHY FROM RESULTS UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , S_STATE , NULL AS S_COUNTY , 0 AS G_STATE , 1 AS G_COUNTY , 1 AS LOCHIERARCHY FROM RESULTS GROUP BY S_STATE UNION SELECT SUM ( TOTAL_SUM ) AS TOTAL_SUM , NULL AS S_STATE , NULL AS S_COUNTY , 1 AS G_STATE , 1 AS G_COUNTY , 2 AS LOCHIERARCHY FROM RESULTS ) SELECT TOTAL_SUM , S_STATE , S_COUNTY , LOCHIERARCHY , RANK ( ) OVER ( PARTITION BY LOCHIERARCHY , CASE WHEN G_COUNTY = 0 THEN S_STATE END ORDER BY TOTAL_SUM DESC NULLS LAST ) AS RANK_WITHIN_PARENT FROM RESULTS_ROLLUP ORDER BY LOCHIERARCHY DESC NULLS LAST , CASE WHEN LOCHIERARCHY = 0 THEN S_STATE END NULLS FIRST , RANK_WITHIN_PARENT NULLS FIRST LIMIT 21",
+                "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.511989e+09             None             1                   1\n2  -9.670302e+09      MO     None             1                   2\n3  -1.316258e+10      TX     None             1                   3\n4  -1.319610e+10      SC     None             1                   4\n5  -1.405124e+10      OH     None             1                   5\n6  -1.405363e+10      WV     None             1                   6\n7  -1.405807e+10      NY     None             1                   7\n8  -1.406198e+10      WA     None             1                   8\n9  -1.491563e+10      CO     None             1                   9\n10 -1.493353e+10      NE     None             1                  10\n11 -1.494054e+10      NC     None             1                  11\n12 -1.666450e+10      IN     None             1                  12\n13 -1.668485e+10      FL     None             1                  13\n14 -1.932480e+10      NM     None             1                  14\n15 -2.108073e+10      PA     None             1                  15\n16 -2.190797e+10      TN     None             1                  16\n17 -2.287722e+10      SD     None             1                  17\n18 -3.159851e+10      LA     None             1                  18\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 9.484597,
+                    "execution_time": 9.256428,
+                    "compile_time": 0.00138,
+                    "planning_time": 2.195878
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 9.431165,
+                    "execution_time": 9.204179,
+                    "compile_time": 0.001363,
+                    "planning_time": 2.203416
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*       total_sum s_state s_county  lochierarchy  rank_within_parent\n0  -4.400133e+11    None     None             2                   1\n1  -3.511989e+09             None             1                   1\n2  -9.670302e+09      MO     None             1                   2\n3  -1.316258e+10      TX     None             1                   3\n4  -1.319610e+10      SC     None             1                   4\n5  -1.405124e+10      OH     None             1                   5\n6  -1.405363e+10      WV     None             1                   6\n7  -1.405807e+10      NY     None             1                   7\n8  -1.406198e+10      WA     None             1                   8\n9  -1.491563e+10      CO     None             1                   9\n10 -1.493353e+10      NE     None             1                  10\n11 -1.494054e+10      NC     None             1                  11\n12 -1.666450e+10      IN     None             1                  12\n13 -1.668485e+10      FL     None             1                  13\n14 -1.932480e+10      NM     None             1                  14\n15 -2.108073e+10      PA     None             1                  15\n16 -2.190797e+10      TN     None             1                  16\n17 -2.287722e+10      SD     None             1                  17\n18 -3.159851e+10      LA     None             1                  18\n...*/"
+    }
+]

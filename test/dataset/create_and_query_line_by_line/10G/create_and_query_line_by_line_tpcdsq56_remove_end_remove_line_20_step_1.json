@@ -1,0 +1,947 @@
+[
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_item_id is not null)\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_ship_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id\n)\nselect 'store sales' as channel, ss.* from ss\nunion all\nselect 'catalog sales' as channel, cs.* from cs\nunion all\nselect 'web sales' as channel, ws.* from ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_2\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE NOT \"ITEM\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_2\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT 'web sales' AS \"CHANNEL\" , \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.140962,
+                    "execution_time": 0.044111,
+                    "compile_time": 0.000239,
+                    "planning_time": 0.023291,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.214929,
+                    "execution_time": 0.048519,
+                    "compile_time": 0.000241,
+                    "planning_time": 0.088925,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.081172,
+                    "execution_time": 0.031854,
+                    "compile_time": 0.000255,
+                    "planning_time": 0.025253,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.142246,
+                    "execution_time": 0.031336,
+                    "compile_time": 0.000253,
+                    "planning_time": 0.087064,
+                    "create_size": 6
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.186901,
+                    "execution_time": 0.048093,
+                    "compile_time": 0.034093,
+                    "planning_time": 0.027026,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.315562,
+                    "execution_time": 0.049665,
+                    "compile_time": 3.097185,
+                    "planning_time": 0.087544,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE NOT \"ITEM\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.113404,
+                    "execution_time": 0.04602,
+                    "compile_time": 0.000273,
+                    "planning_time": 0.025642,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.177047,
+                    "execution_time": 0.045529,
+                    "compile_time": 0.000272,
+                    "planning_time": 0.086375,
+                    "create_size": 512
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"SPEQLITE_TEMP_TABLE_4\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.272561,
+                    "execution_time": 0.104166,
+                    "compile_time": 0.07717,
+                    "planning_time": 0.038371,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 6.869425,
+                    "execution_time": 0.115101,
+                    "compile_time": 6.587442,
+                    "planning_time": 0.101977,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT 'web sales' AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_5\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" LIMIT 21",
+                "preview": "\n/*      channel         i_item_id  total_sales\n0   web sales  AAAAAAAAGKGAAAAA     14066.17\n1   web sales  AAAAAAAAACDCAAAA      6843.20\n2   web sales  AAAAAAAAOGFKAAAA      1585.09\n3   web sales  AAAAAAAAPOKDBAAA      3850.16\n4   web sales  AAAAAAAAOCMKAAAA      1196.30\n5   web sales  AAAAAAAANBNKAAAA      3442.20\n6   web sales  AAAAAAAAOGBFAAAA      1533.57\n7   web sales  AAAAAAAAINMHAAAA      5687.51\n8   web sales  AAAAAAAANPJFBAAA       195.44\n9   web sales  AAAAAAAAFIGDAAAA     16029.12\n10  web sales  AAAAAAAALDGIAAAA      2569.38\n11  web sales  AAAAAAAACINIAAAA     11276.10\n12  web sales  AAAAAAAANGPJAAAA      2186.72\n13  web sales  AAAAAAAAAACOAAAA      7941.92\n14  web sales  AAAAAAAABKNBAAAA       258.68\n15  web sales  AAAAAAAADNPCBAAA      3137.52\n16  web sales  AAAAAAAAIDGFAAAA       381.15\n17  web sales  AAAAAAAAOPDJAAAA       898.35\n18  web sales  AAAAAAAAGDPABAAA       960.15\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.0169,
+                    "execution_time": 0.007816,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003137
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.061975,
+                    "execution_time": 0.007472,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.045404
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT 'web sales' AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_5\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\"",
+                "rewrite": "SELECT 'web sales' AS \"CHANNEL\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_5\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\""
+            }
+        ],
+        "preview": "\n/*      channel         i_item_id  total_sales\n0   web sales  AAAAAAAAGKGAAAAA     14066.17\n1   web sales  AAAAAAAAACDCAAAA      6843.20\n2   web sales  AAAAAAAAOGFKAAAA      1585.09\n3   web sales  AAAAAAAAPOKDBAAA      3850.16\n4   web sales  AAAAAAAAOCMKAAAA      1196.30\n5   web sales  AAAAAAAANBNKAAAA      3442.20\n6   web sales  AAAAAAAAOGBFAAAA      1533.57\n7   web sales  AAAAAAAAINMHAAAA      5687.51\n8   web sales  AAAAAAAANPJFBAAA       195.44\n9   web sales  AAAAAAAAFIGDAAAA     16029.12\n10  web sales  AAAAAAAALDGIAAAA      2569.38\n11  web sales  AAAAAAAACINIAAAA     11276.10\n12  web sales  AAAAAAAANGPJAAAA      2186.72\n13  web sales  AAAAAAAAAACOAAAA      7941.92\n14  web sales  AAAAAAAABKNBAAAA       258.68\n15  web sales  AAAAAAAADNPCBAAA      3137.52\n16  web sales  AAAAAAAAIDGFAAAA       381.15\n17  web sales  AAAAAAAAOPDJAAAA       898.35\n18  web sales  AAAAAAAAGDPABAAA       960.15\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id\n) \nselect * from ss\nunion all\nselect * from cs\nunion all\nselect * from ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.10088,
+                    "execution_time": 0.042786,
+                    "compile_time": 0.000279,
+                    "planning_time": 0.032407,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.158916,
+                    "execution_time": 0.044113,
+                    "compile_time": 0.00029,
+                    "planning_time": 0.085741,
+                    "create_size": 512
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.204434,
+                    "execution_time": 0.089464,
+                    "compile_time": 0.038684,
+                    "planning_time": 0.04091,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.525552,
+                    "execution_time": 0.100378,
+                    "compile_time": 3.282818,
+                    "planning_time": 0.102868,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKHLGBAAA       225.28\n1   AAAAAAAAILGDAAAA      1888.74\n2   AAAAAAAAAANKAAAA        34.32\n3   AAAAAAAAKEDFBAAA      4577.36\n4   AAAAAAAACFAIBAAA      4304.87\n5   AAAAAAAAEGJDAAAA      1359.60\n6   AAAAAAAAKGEBBAAA      2617.24\n7   AAAAAAAAOHDDBAAA      1305.75\n8   AAAAAAAAGLIIBAAA       144.00\n9   AAAAAAAAGAGEBAAA      2091.68\n10  AAAAAAAAMJNAAAAA       160.08\n11  AAAAAAAAKFPABAAA      4370.81\n12  AAAAAAAAENEHBAAA      1158.72\n13  AAAAAAAAAHGJAAAA      3967.68\n14  AAAAAAAAJAFCAAAA      9002.25\n15  AAAAAAAAIDEOAAAA      2651.06\n16  AAAAAAAACHAHAAAA        15.56\n17  AAAAAAAAPPBGAAAA      1058.20\n18  AAAAAAAAINBABAAA       408.20\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016003,
+                    "execution_time": 0.00704,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.003038
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.055609,
+                    "execution_time": 0.007631,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.039053
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKHLGBAAA       225.28\n1   AAAAAAAAILGDAAAA      1888.74\n2   AAAAAAAAAANKAAAA        34.32\n3   AAAAAAAAKEDFBAAA      4577.36\n4   AAAAAAAACFAIBAAA      4304.87\n5   AAAAAAAAEGJDAAAA      1359.60\n6   AAAAAAAAKGEBBAAA      2617.24\n7   AAAAAAAAOHDDBAAA      1305.75\n8   AAAAAAAAGLIIBAAA       144.00\n9   AAAAAAAAGAGEBAAA      2091.68\n10  AAAAAAAAMJNAAAAA       160.08\n11  AAAAAAAAKFPABAAA      4370.81\n12  AAAAAAAAENEHBAAA      1158.72\n13  AAAAAAAAAHGJAAAA      3967.68\n14  AAAAAAAAJAFCAAAA      9002.25\n15  AAAAAAAAIDEOAAAA      2651.06\n16  AAAAAAAACHAHAAAA        15.56\n17  AAAAAAAAPPBGAAAA      1058.20\n18  AAAAAAAAINBABAAA       408.20\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id\n)\nselect * from ss\nunion all\nselect * from cs\nunion all\nselect * from ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKDFCAAAA       988.35\n1   AAAAAAAAEMPFBAAA      1513.80\n2   AAAAAAAAMJADBAAA      3487.72\n3   AAAAAAAAGKLOAAAA      3269.00\n4   AAAAAAAAGPKDAAAA     24094.88\n5   AAAAAAAAAPOHBAAA      5303.18\n6   AAAAAAAAADBCBAAA      6333.04\n7   AAAAAAAAGGBCBAAA      2282.49\n8   AAAAAAAAANIDBAAA       201.08\n9   AAAAAAAAELPBAAAA         2.66\n10  AAAAAAAACFJFBAAA       561.75\n11  AAAAAAAAKCIFAAAA     17132.06\n12  AAAAAAAAEEOJAAAA       752.16\n13  AAAAAAAAEBHBBAAA      3635.15\n14  AAAAAAAACKEHAAAA      6265.66\n15  AAAAAAAAEOHCBAAA     12294.16\n16  AAAAAAAAKFGNAAAA        38.13\n17  AAAAAAAAIMABBAAA        43.16\n18  AAAAAAAACKNJAAAA     11852.49\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015832,
+                    "execution_time": 0.007037,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003063
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016112,
+                    "execution_time": 0.007018,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003162
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKDFCAAAA       988.35\n1   AAAAAAAAEMPFBAAA      1513.80\n2   AAAAAAAAMJADBAAA      3487.72\n3   AAAAAAAAGKLOAAAA      3269.00\n4   AAAAAAAAGPKDAAAA     24094.88\n5   AAAAAAAAAPOHBAAA      5303.18\n6   AAAAAAAAADBCBAAA      6333.04\n7   AAAAAAAAGGBCBAAA      2282.49\n8   AAAAAAAAANIDBAAA       201.08\n9   AAAAAAAAELPBAAAA         2.66\n10  AAAAAAAACFJFBAAA       561.75\n11  AAAAAAAAKCIFAAAA     17132.06\n12  AAAAAAAAEEOJAAAA       752.16\n13  AAAAAAAAEBHBBAAA      3635.15\n14  AAAAAAAACKEHAAAA      6265.66\n15  AAAAAAAAEOHCBAAA     12294.16\n16  AAAAAAAAKFGNAAAA        38.13\n17  AAAAAAAAIMABBAAA        43.16\n18  AAAAAAAACKNJAAAA     11852.49\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\ngroup by i_item_id\n) \nselect * from ss union all select * from cs union all select * from ws /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH WS AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH WS AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\"",
+                "rewrite": "WITH WS AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\ngroup by i_item_id\n) select * from ss union all select * from cs union all select * from ws /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH WS AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 15,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH WS AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\"",
+                "rewrite": "WITH WS AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" CROSS JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2000 JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "with /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id, sum(ss_ext_sales_price) total_sales\n from\n    store_sales,\n    date_dim,\n    customer_address,\n    item\n where i_item_id in (select i_item_id from item where i_color in ('lavender','rose','beige'))\n and ss_item_sk = i_item_sk\n and ss_sold_date_sk = d_date_sk\n and d_year = 2000\n and d_moy = 4\n and ss_addr_sk = ca_address_sk\n and ca_gmt_offset = -6 \n group by i_item_id),\n cs as (\n select i_item_id, sum(cs_ext_sales_price) total_sales\n from\n    catalog_sales,\n    date_dim,\n    customer_address,\n    item\n where i_item_id in (select i_item_id from item where i_color in ('lavender','rose','beige'))\n and cs_item_sk = i_item_sk\n and cs_sold_date_sk = d_date_sk\n and d_year = 2000\n and d_moy = 4\n and cs_bill_addr_sk = ca_address_sk\n and ca_gmt_offset = -6 \n group by i_item_id),\n ws as (\n select i_item_id, sum(ws_ext_sales_price) total_sales\n from\n    web_sales,\n    date_dim,\n    customer_address,\n    item\n where i_item_id in (select i_item_id from item where i_color in ('lavender','rose','beige'))\n and ws_item_sk = i_item_sk\n and ws_sold_date_sk = d_date_sk\n and d_year = 2000\n and d_moy = 4\n and ws_bill_addr_sk = ca_address_sk\n and ca_gmt_offset = -6 \n group by i_item_id)\n/*CURSOR_IDENTIFIER*/ \nselect * from ss\nunion all\nselect * from cs\nunion all\nselect * from ws;",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ON \"SPEQLITE_TEMP_TABLE_6\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"SPEQLITE_TEMP_TABLE_6\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.425093,
+                    "execution_time": 0.30576,
+                    "compile_time": 0.049486,
+                    "planning_time": 0.035656,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.731609,
+                    "execution_time": 0.31468,
+                    "compile_time": 3.280329,
+                    "planning_time": 0.096527,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.398102,
+                    "execution_time": 0.309001,
+                    "compile_time": 0.015304,
+                    "planning_time": 0.038807,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.79365,
+                    "execution_time": 0.322673,
+                    "compile_time": 3.326699,
+                    "planning_time": 0.104832,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAMICAAAAA      4251.80\n1   AAAAAAAADDLCAAAA      1367.16\n2   AAAAAAAAKONFBAAA      4869.72\n3   AAAAAAAAIIGKAAAA      9506.20\n4   AAAAAAAACNHAAAAA       191.10\n5   AAAAAAAAAHECAAAA     12924.48\n6   AAAAAAAAOLINAAAA      7815.96\n7   AAAAAAAAOCPBAAAA      5982.34\n8   AAAAAAAAOJHIAAAA      9691.56\n9   AAAAAAAAMGJNAAAA      7903.97\n10  AAAAAAAAOMNEBAAA      6521.14\n11  AAAAAAAAIAMLAAAA      2379.34\n12  AAAAAAAAKMHHBAAA      6622.14\n13  AAAAAAAAKAHHBAAA      1241.66\n14  AAAAAAAACFABAAAA      5635.00\n15  AAAAAAAAADJABAAA      6313.68\n16  AAAAAAAAAHGDAAAA      1211.14\n17  AAAAAAAAEKHBAAAA     14210.63\n18  AAAAAAAAIFMDBAAA      1457.26\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.034681,
+                    "execution_time": 0.021395,
+                    "compile_time": 0.000115,
+                    "planning_time": 0.006531
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.074024,
+                    "execution_time": 0.021083,
+                    "compile_time": 0.000121,
+                    "planning_time": 0.042818
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAMICAAAAA      4251.80\n1   AAAAAAAADDLCAAAA      1367.16\n2   AAAAAAAAKONFBAAA      4869.72\n3   AAAAAAAAIIGKAAAA      9506.20\n4   AAAAAAAACNHAAAAA       191.10\n5   AAAAAAAAAHECAAAA     12924.48\n6   AAAAAAAAOLINAAAA      7815.96\n7   AAAAAAAAOCPBAAAA      5982.34\n8   AAAAAAAAOJHIAAAA      9691.56\n9   AAAAAAAAMGJNAAAA      7903.97\n10  AAAAAAAAOMNEBAAA      6521.14\n11  AAAAAAAAIAMLAAAA      2379.34\n12  AAAAAAAAKMHHBAAA      6622.14\n13  AAAAAAAAKAHHBAAA      1241.66\n14  AAAAAAAACFABAAAA      5635.00\n15  AAAAAAAAADJABAAA      6313.68\n16  AAAAAAAAAHGDAAAA      1211.14\n17  AAAAAAAAEKHBAAAA     14210.63\n18  AAAAAAAAIFMDBAAA      1457.26\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "with /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n    customer_address,\n    item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\nselect * from ss\njoin cs on ss.i_item_id = cs.i_item_id\njoin ws on ss.i_item_id = ws.i_item_id;\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" JOIN \"CS\" AS \"CS\" ON \"CS\".\"I_ITEM_ID\" = \"SS\".\"I_ITEM_ID\" JOIN \"WS\" AS \"WS\" ON \"SS\".\"I_ITEM_ID\" = \"WS\".\"I_ITEM_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" AS \"I_ITEM_ID_COL_2\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES_COL_3\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID_COL_4\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" JOIN \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" ON \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.101519,
+                    "execution_time": 0.067556,
+                    "compile_time": 0.000291,
+                    "planning_time": 0.006202,
+                    "create_size": 1152
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.274287,
+                    "execution_time": 0.068948,
+                    "compile_time": 0.107115,
+                    "planning_time": 0.064818,
+                    "create_size": 1152
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_10\".\"I_ITEM_ID_COL_2\" AS \"I_ITEM_ID_COL_2\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL_SALES_COL_3\" AS \"TOTAL_SALES_COL_3\" , \"SPEQLITE_TEMP_TABLE_10\".\"I_ITEM_ID_COL_4\" AS \"I_ITEM_ID_COL_4\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL_SALES_COL_5\" AS \"TOTAL_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales   i_item_id_col_2  total_sales_col_3   i_item_id_col_4  total_sales_col_5\n0   AAAAAAAAGKLOAAAA      9903.44  AAAAAAAAGKLOAAAA            4327.77  AAAAAAAAGKLOAAAA            3269.00\n1   AAAAAAAAGPKDAAAA     11558.97  AAAAAAAAGPKDAAAA            1559.08  AAAAAAAAGPKDAAAA           24094.88\n2   AAAAAAAAMJADBAAA        39.56  AAAAAAAAMJADBAAA            1390.60  AAAAAAAAMJADBAAA            3487.72\n3   AAAAAAAAANIDBAAA      2086.43  AAAAAAAAANIDBAAA              19.12  AAAAAAAAANIDBAAA             201.08\n4   AAAAAAAAELPBAAAA      7132.50  AAAAAAAAELPBAAAA            2455.48  AAAAAAAAELPBAAAA               2.66\n5   AAAAAAAAKBCCBAAA      2221.10  AAAAAAAAKBCCBAAA            1570.22  AAAAAAAAKBCCBAAA             703.99\n6   AAAAAAAAACJBBAAA      7132.32  AAAAAAAAACJBBAAA            2977.13  AAAAAAAAACJBBAAA            2291.80\n7   AAAAAAAAKFEGAAAA      4563.40  AAAAAAAAKFEGAAAA            5986.48  AAAAAAAAKFEGAAAA            2179.40\n8   AAAAAAAANHDIAAAA       688.12  AAAAAAAANHDIAAAA            7447.70  AAAAAAAANHDIAAAA            4436.26\n9   AAAAAAAAGONHAAAA      1430.04  AAAAAAAAGONHAAAA              60.00  AAAAAAAAGONHAAAA           10659.44\n10  AAAAAAAAOAEABAAA     19184.26  AAAAAAAAOAEABAAA            9788.81  AAAAAAAAOAEABAAA             505.89\n11  AAAAAAAAKHBFAAAA      3109.61  AAAAAAAAKHBFAAAA             690.03  AAAAAAAAKHBFAAAA            6193.51\n12  AAAAAAAAKILMAAAA       224.41  AAAAAAAAKILMAAAA            5551.95  AAAAAAAAKILMAAAA            2977.73\n13  AAAAAAAACNHPAAAA       734.80  AAAAAAAACNHPAAAA            1190.16  AAAAAAAACNHPAAAA              61.20\n14  AAAAAAAACDFAAAAA       348.40  AAAAAAAACDFAAAAA            1526.91  AAAAAAAACDFAAAAA            1907.84\n15  AAAAAAAAAJLFBAAA     10816.90  AAAAAAAAAJLFBAAA            3571.92  AAAAAAAAAJLFBAAA               0.00\n16  AAAAAAAAMNDHAAAA      5361.76  AAAAAAAAMNDHAAAA            6361.51  AAAAAAAAMNDHAAAA           18083.89\n17  AAAAAAAAHPDAAAAA       978.42  AAAAAAAAHPDAAAAA            6745.81  AAAAAAAAHPDAAAAA            1207.68\n18  AAAAAAAALNBDAAAA       389.67  AAAAAAAALNBDAAAA            1208.07  AAAAAAAALNBDAAAA            5227.91\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017986,
+                    "execution_time": 0.008136,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.003732
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.056185,
+                    "execution_time": 0.008285,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.038684
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ON \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" JOIN \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" ON \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_10\".\"I_ITEM_ID_COL_2\" AS \"I_ITEM_ID_COL_2\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL_SALES_COL_3\" AS \"TOTAL_SALES_COL_3\" , \"SPEQLITE_TEMP_TABLE_10\".\"I_ITEM_ID_COL_4\" AS \"I_ITEM_ID_COL_4\" , \"SPEQLITE_TEMP_TABLE_10\".\"TOTAL_SALES_COL_5\" AS \"TOTAL_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales   i_item_id_col_2  total_sales_col_3   i_item_id_col_4  total_sales_col_5\n0   AAAAAAAAGKLOAAAA      9903.44  AAAAAAAAGKLOAAAA            4327.77  AAAAAAAAGKLOAAAA            3269.00\n1   AAAAAAAAGPKDAAAA     11558.97  AAAAAAAAGPKDAAAA            1559.08  AAAAAAAAGPKDAAAA           24094.88\n2   AAAAAAAAMJADBAAA        39.56  AAAAAAAAMJADBAAA            1390.60  AAAAAAAAMJADBAAA            3487.72\n3   AAAAAAAAANIDBAAA      2086.43  AAAAAAAAANIDBAAA              19.12  AAAAAAAAANIDBAAA             201.08\n4   AAAAAAAAELPBAAAA      7132.50  AAAAAAAAELPBAAAA            2455.48  AAAAAAAAELPBAAAA               2.66\n5   AAAAAAAAKBCCBAAA      2221.10  AAAAAAAAKBCCBAAA            1570.22  AAAAAAAAKBCCBAAA             703.99\n6   AAAAAAAAACJBBAAA      7132.32  AAAAAAAAACJBBAAA            2977.13  AAAAAAAAACJBBAAA            2291.80\n7   AAAAAAAAKFEGAAAA      4563.40  AAAAAAAAKFEGAAAA            5986.48  AAAAAAAAKFEGAAAA            2179.40\n8   AAAAAAAANHDIAAAA       688.12  AAAAAAAANHDIAAAA            7447.70  AAAAAAAANHDIAAAA            4436.26\n9   AAAAAAAAGONHAAAA      1430.04  AAAAAAAAGONHAAAA              60.00  AAAAAAAAGONHAAAA           10659.44\n10  AAAAAAAAOAEABAAA     19184.26  AAAAAAAAOAEABAAA            9788.81  AAAAAAAAOAEABAAA             505.89\n11  AAAAAAAAKHBFAAAA      3109.61  AAAAAAAAKHBFAAAA             690.03  AAAAAAAAKHBFAAAA            6193.51\n12  AAAAAAAAKILMAAAA       224.41  AAAAAAAAKILMAAAA            5551.95  AAAAAAAAKILMAAAA            2977.73\n13  AAAAAAAACNHPAAAA       734.80  AAAAAAAACNHPAAAA            1190.16  AAAAAAAACNHPAAAA              61.20\n14  AAAAAAAACDFAAAAA       348.40  AAAAAAAACDFAAAAA            1526.91  AAAAAAAACDFAAAAA            1907.84\n15  AAAAAAAAAJLFBAAA     10816.90  AAAAAAAAAJLFBAAA            3571.92  AAAAAAAAAJLFBAAA               0.00\n16  AAAAAAAAMNDHAAAA      5361.76  AAAAAAAAMNDHAAAA            6361.51  AAAAAAAAMNDHAAAA           18083.89\n17  AAAAAAAAHPDAAAAA       978.42  AAAAAAAAHPDAAAAA            6745.81  AAAAAAAAHPDAAAAA            1207.68\n18  AAAAAAAALNBDAAAA       389.67  AAAAAAAALNBDAAAA            1208.07  AAAAAAAALNBDAAAA            5227.91\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n select i_item_id, sum(total_sales) total_sales\n from (select i_item_id, total_sales from ss \n        union all\n        select i_item_id, total_sales from cs\n        union all\n        select i_item_id, total_sales from ws) as combined\n group by i_item_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"COMBINED\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"COMBINED\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED\" AS \"COMBINED\" GROUP BY \"COMBINED\".\"I_ITEM_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_9\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.091268,
+                    "execution_time": 0.055656,
+                    "compile_time": 0.000216,
+                    "planning_time": 0.006466,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.147836,
+                    "execution_time": 0.056141,
+                    "compile_time": 0.000215,
+                    "planning_time": 0.059862,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.074461,
+                    "execution_time": 0.045559,
+                    "compile_time": 0.000223,
+                    "planning_time": 0.003669,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.13065,
+                    "execution_time": 0.044604,
+                    "compile_time": 0.000219,
+                    "planning_time": 0.058816,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAACBAGBAAA      1164.15\n1   AAAAAAAAEMAHAAAA     11894.61\n2   AAAAAAAACLGJAAAA     17385.01\n3   AAAAAAAANEOIBAAA      2060.02\n4   AAAAAAAAKNKBBAAA      9593.01\n5   AAAAAAAAADEKAAAA     14704.71\n6   AAAAAAAAEACEBAAA      7691.23\n7   AAAAAAAAPLGEBAAA      7850.02\n8   AAAAAAAACCLBAAAA      9608.01\n9   AAAAAAAAOCFKAAAA      9240.04\n10  AAAAAAAAMHIGBAAA      2181.63\n11  AAAAAAAAAMGNAAAA      2746.03\n12  AAAAAAAAODAIAAAA      6606.86\n13  AAAAAAAAKKFKAAAA      4727.27\n14  AAAAAAAAAJDHBAAA       801.85\n15  AAAAAAAAOJIIBAAA      7696.84\n16  AAAAAAAAKECGAAAA       778.40\n17  AAAAAAAAEHPJAAAA      1098.00\n18  AAAAAAAAKPHIAAAA     14844.82\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.0164,
+                    "execution_time": 0.00779,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002974
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.052784,
+                    "execution_time": 0.007287,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.038041
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAACBAGBAAA      1164.15\n1   AAAAAAAAEMAHAAAA     11894.61\n2   AAAAAAAACLGJAAAA     17385.01\n3   AAAAAAAANEOIBAAA      2060.02\n4   AAAAAAAAKNKBBAAA      9593.01\n5   AAAAAAAAADEKAAAA     14704.71\n6   AAAAAAAAEACEBAAA      7691.23\n7   AAAAAAAAPLGEBAAA      7850.02\n8   AAAAAAAACCLBAAAA      9608.01\n9   AAAAAAAAOCFKAAAA      9240.04\n10  AAAAAAAAMHIGBAAA      2181.63\n11  AAAAAAAAAMGNAAAA      2746.03\n12  AAAAAAAAODAIAAAA      6606.86\n13  AAAAAAAAKKFKAAAA      4727.27\n14  AAAAAAAAAJDHBAAA       801.85\n15  AAAAAAAAOJIIBAAA      7696.84\n16  AAAAAAAAKECGAAAA       778.40\n17  AAAAAAAAEHPJAAAA      1098.00\n18  AAAAAAAAKPHIAAAA     14844.82\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n  select  i_item_id, sum(total_sales) as total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) as derived_table\ngroup by i_item_id /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"DERIVED_TABLE\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"DERIVED_TABLE\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"DERIVED_TABLE\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"DERIVED_TABLE\" AS \"DERIVED_TABLE\" GROUP BY \"DERIVED_TABLE\".\"I_ITEM_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKLNFBAAA     17798.27\n1   AAAAAAAAGKLOAAAA     17500.21\n2   AAAAAAAAADBCBAAA      6760.00\n3   AAAAAAAAEOPKAAAA      7081.48\n4   AAAAAAAAKPMMAAAA     21079.12\n5   AAAAAAAAMBHEBAAA        93.43\n6   AAAAAAAAJFLCBAAA     19093.78\n7   AAAAAAAAMLJAAAAA     13501.49\n8   AAAAAAAAMGLBBAAA     17891.45\n9   AAAAAAAAAEBLAAAA      1863.48\n10  AAAAAAAAGPKDAAAA     37212.93\n11  AAAAAAAAGBKGAAAA      8310.89\n12  AAAAAAAAPHCDBAAA      2639.58\n13  AAAAAAAAMJADBAAA      4917.88\n14  AAAAAAAAAPOHBAAA      7136.79\n15  AAAAAAAALBEDAAAA      7596.84\n16  AAAAAAAAKDFCAAAA      1182.86\n17  AAAAAAAAGGBCBAAA      2482.74\n18  AAAAAAAAANIDBAAA      2306.63\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016426,
+                    "execution_time": 0.007874,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002962
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.05117,
+                    "execution_time": 0.007352,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.037999
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\"",
+                "rewrite": "SELECT \"I_ITEM_ID\" AS \"I_ITEM_ID\", \"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKLNFBAAA     17798.27\n1   AAAAAAAAGKLOAAAA     17500.21\n2   AAAAAAAAADBCBAAA      6760.00\n3   AAAAAAAAEOPKAAAA      7081.48\n4   AAAAAAAAKPMMAAAA     21079.12\n5   AAAAAAAAMBHEBAAA        93.43\n6   AAAAAAAAJFLCBAAA     19093.78\n7   AAAAAAAAMLJAAAAA     13501.49\n8   AAAAAAAAMGLBBAAA     17891.45\n9   AAAAAAAAAEBLAAAA      1863.48\n10  AAAAAAAAGPKDAAAA     37212.93\n11  AAAAAAAAGBKGAAAA      8310.89\n12  AAAAAAAAPHCDBAAA      2639.58\n13  AAAAAAAAMJADBAAA      4917.88\n14  AAAAAAAAAPOHBAAA      7136.79\n15  AAAAAAAALBEDAAAA      7596.84\n16  AAAAAAAAKDFCAAAA      1182.86\n17  AAAAAAAAGGBCBAAA      2482.74\n18  AAAAAAAAANIDBAAA      2306.63\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n    customer_address,\n    item\n where i_item_id in (select\n     i_item_id\n from item\n where i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n \ti_item_id               in (select\n \t i_item_id\n from item\n where i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n \ti_item_id               in (select\n \t i_item_id\n from item\n where i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n select  i_item_id,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) as combined\n group by i_item_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"COMBINED\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"COMBINED\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED\" AS \"COMBINED\" GROUP BY \"COMBINED\".\"I_ITEM_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAMICAAAAA      4251.80\n1   AAAAAAAADDLCAAAA      4530.66\n2   AAAAAAAAKONFBAAA     18679.73\n3   AAAAAAAAIIGKAAAA     18196.48\n4   AAAAAAAACNHAAAAA     18341.26\n5   AAAAAAAAAHECAAAA     14263.67\n6   AAAAAAAAOLINAAAA      7815.96\n7   AAAAAAAAOCPBAAAA      6853.01\n8   AAAAAAAAOJHIAAAA      9691.56\n9   AAAAAAAAMGJNAAAA      8037.09\n10  AAAAAAAAOMNEBAAA      6521.14\n11  AAAAAAAAIAMLAAAA      2849.59\n12  AAAAAAAAKMHHBAAA      7755.35\n13  AAAAAAAAKAHHBAAA      4301.68\n14  AAAAAAAACFABAAAA     28360.08\n15  AAAAAAAAADJABAAA     12939.54\n16  AAAAAAAAAHGDAAAA      1639.96\n17  AAAAAAAAEKHBAAAA     18634.34\n18  AAAAAAAAIFMDBAAA     11787.14\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015917,
+                    "execution_time": 0.007141,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.002976
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016284,
+                    "execution_time": 0.007195,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.003198
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\"",
+                "rewrite": "SELECT \"I_ITEM_ID\" AS \"I_ITEM_ID\", \"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAMICAAAAA      4251.80\n1   AAAAAAAADDLCAAAA      4530.66\n2   AAAAAAAAKONFBAAA     18679.73\n3   AAAAAAAAIIGKAAAA     18196.48\n4   AAAAAAAACNHAAAAA     18341.26\n5   AAAAAAAAAHECAAAA     14263.67\n6   AAAAAAAAOLINAAAA      7815.96\n7   AAAAAAAAOCPBAAAA      6853.01\n8   AAAAAAAAOJHIAAAA      9691.56\n9   AAAAAAAAMGJNAAAA      8037.09\n10  AAAAAAAAOMNEBAAA      6521.14\n11  AAAAAAAAIAMLAAAA      2849.59\n12  AAAAAAAAKMHHBAAA      7755.35\n13  AAAAAAAAKAHHBAAA      4301.68\n14  AAAAAAAACFABAAAA     28360.08\n15  AAAAAAAAADJABAAA     12939.54\n16  AAAAAAAAAHGDAAAA      1639.96\n17  AAAAAAAAEKHBAAAA     18634.34\n18  AAAAAAAAIFMDBAAA     11787.14\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i.i_item_id, sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim d,\n    customer_address ca,\n    item i\n where i.i_item_id in (select i_item_id\n                      from item\n                      where i_color in ('lavender','rose','beige'))\n and     ss_item_sk = i.i_item_sk\n and     ss_sold_date_sk = d.d_date_sk\n and     d_year = 2000\n and     d_moy = 4\n and     ss_addr_sk = ca.ca_address_sk\n and     ca_gmt_offset = -6 \n group by i.i_item_id),\n cs as (\n select i.i_item_id, sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim d,\n    customer_address ca,\n    item i\n where i.i_item_id in (select i_item_id\n                      from item\n                      where i_color in ('lavender','rose','beige'))\n and     cs_item_sk = i.i_item_sk\n and     cs_sold_date_sk = d.d_date_sk\n and     d_year = 2000\n and     d_moy = 4\n and     cs_bill_addr_sk = ca.ca_address_sk\n and     ca_gmt_offset = -6 \n group by i.i_item_id),\n ws as (\n select i.i_item_id, sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim d,\n    customer_address ca,\n    item i\n where i.i_item_id in (select i_item_id\n                      from item\n                      where i_color in ('lavender','rose','beige'))\n and     ws_item_sk = i.i_item_sk\n and     ws_sold_date_sk = d.d_date_sk\n and     d_year = 2000\n and     d_moy = 4\n and     ws_bill_addr_sk = ca.ca_address_sk\n and     ca_gmt_offset = -6\n group by i.i_item_id)\nselect tmp1.i_item_id, sum(tmp1.total_sales) total_sales\nfrom (select * from ss \n      union all\n      select * from cs \n      union all\n      select * from ws) tmp1\ngroup by tmp1.i_item_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CA\" AS ( SELECT \"CA\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CA\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CA\" WHERE \"CA\".\"CA_GMT_OFFSET\" = -6 ) , \"D\" AS ( SELECT \"D\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"D\".\"D_YEAR\" AS \"D_YEAR\" , \"D\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"D\" WHERE \"D\".\"D_MOY\" = 4 AND \"D\".\"D_YEAR\" = 2000 ) , \"I\" AS ( SELECT \"I\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"I\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"I\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"I\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CA\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"D\" AS \"D\" ON \"D\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"I\" AS \"I\" ON \"I\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"I\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"I\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"I\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CA\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" JOIN \"D\" AS \"D\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"D\".\"D_DATE_SK\" JOIN \"I\" AS \"I\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"I\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"I\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"I\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"I\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CA\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"D\" AS \"D\" ON \"D\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"I\" AS \"I\" ON \"I\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"I\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"I\".\"I_ITEM_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_ITEM_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_13\" AS SELECT \"CA\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CA\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CA\" WHERE \"CA\".\"CA_GMT_OFFSET\" = -6",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.140208,
+                    "execution_time": 0.045226,
+                    "compile_time": 0.000229,
+                    "planning_time": 0.022852,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.201328,
+                    "execution_time": 0.044016,
+                    "compile_time": 0.000234,
+                    "planning_time": 0.083956,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_14\" AS SELECT \"D\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"D\".\"D_YEAR\" AS \"D_YEAR\" , \"D\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"D\" WHERE \"D\".\"D_MOY\" = 4 AND \"D\".\"D_YEAR\" = 2000",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.07922,
+                    "execution_time": 0.030804,
+                    "compile_time": 0.000241,
+                    "planning_time": 0.025109,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.143242,
+                    "execution_time": 0.030626,
+                    "compile_time": 0.000238,
+                    "planning_time": 0.088927,
+                    "create_size": 6
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_15\" AS SELECT \"I\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"I\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"I\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.146874,
+                    "execution_time": 0.04627,
+                    "compile_time": 0.00023,
+                    "planning_time": 0.023862,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.348594,
+                    "execution_time": 0.06808,
+                    "compile_time": 0.116658,
+                    "planning_time": 0.085535,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_16\" AS SELECT \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ON \"SPEQLITE_TEMP_TABLE_13\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ON \"SPEQLITE_TEMP_TABLE_14\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" ON \"SPEQLITE_TEMP_TABLE_6\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\" WHERE NOT \"SPEQLITE_TEMP_TABLE_6\".\"I_ITEM_ID\" IS NULL GROUP BY \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.162603,
+                    "execution_time": 0.091611,
+                    "compile_time": 0.000522,
+                    "planning_time": 0.035308,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.311069,
+                    "execution_time": 0.092807,
+                    "compile_time": 0.082985,
+                    "planning_time": 0.099954,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_17\" AS SELECT \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ON \"SPEQLITE_TEMP_TABLE_13\".\"CA_ADDRESS_SK\" = \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"SPEQLITE_TEMP_TABLE_14\".\"D_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.165961,
+                    "execution_time": 0.089082,
+                    "compile_time": 0.000543,
+                    "planning_time": 0.039776,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.27248,
+                    "execution_time": 0.08933,
+                    "compile_time": 0.046955,
+                    "planning_time": 0.100541,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ON \"SPEQLITE_TEMP_TABLE_13\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ON \"SPEQLITE_TEMP_TABLE_14\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"SPEQLITE_TEMP_TABLE_15\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.16476,
+                    "execution_time": 0.086418,
+                    "compile_time": 0.000505,
+                    "planning_time": 0.043689,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.227294,
+                    "execution_time": 0.086341,
+                    "compile_time": 0.000507,
+                    "planning_time": 0.105926,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_19\" AS SELECT \"SPEQLITE_TEMP_TABLE_16\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_17\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_17\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_17\" AS \"SPEQLITE_TEMP_TABLE_17\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.090934,
+                    "execution_time": 0.055264,
+                    "compile_time": 0.000222,
+                    "planning_time": 0.00648,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.133104,
+                    "execution_time": 0.055544,
+                    "compile_time": 0.000218,
+                    "planning_time": 0.048257,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_20\" AS SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" GROUP BY \"SPEQLITE_TEMP_TABLE_19\".\"I_ITEM_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.073708,
+                    "execution_time": 0.044224,
+                    "compile_time": 0.000233,
+                    "planning_time": 0.003593,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.134771,
+                    "execution_time": 0.046529,
+                    "compile_time": 0.000232,
+                    "planning_time": 0.061793,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_20\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_20\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_20\" AS \"SPEQLITE_TEMP_TABLE_20\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAAEBLAAAA      1863.48\n1   AAAAAAAAKDFCAAAA      1182.86\n2   AAAAAAAAGBKGAAAA      8310.89\n3   AAAAAAAAGPKDAAAA     37212.93\n4   AAAAAAAAAPOHBAAA      7136.79\n5   AAAAAAAAGKLOAAAA     17500.21\n6   AAAAAAAAMLJAAAAA     13501.49\n7   AAAAAAAAKPMMAAAA     21079.12\n8   AAAAAAAAJFLCBAAA     19093.78\n9   AAAAAAAAMJADBAAA      4917.88\n10  AAAAAAAALBEDAAAA      7596.84\n11  AAAAAAAAKLNFBAAA     17798.27\n12  AAAAAAAAMGLBBAAA     17891.45\n13  AAAAAAAAMBHEBAAA        93.43\n14  AAAAAAAAEOPKAAAA      7081.48\n15  AAAAAAAAADBCBAAA      6760.00\n16  AAAAAAAAPHCDBAAA      2639.58\n17  AAAAAAAAANIDBAAA      2306.63\n18  AAAAAAAAGGBCBAAA      2482.74\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016655,
+                    "execution_time": 0.007723,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.003127
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.052264,
+                    "execution_time": 0.007857,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.038435
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" GROUP BY \"SPEQLITE_TEMP_TABLE_19\".\"I_ITEM_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_20\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_20\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_20\" AS \"SPEQLITE_TEMP_TABLE_20\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAAEBLAAAA      1863.48\n1   AAAAAAAAKDFCAAAA      1182.86\n2   AAAAAAAAGBKGAAAA      8310.89\n3   AAAAAAAAGPKDAAAA     37212.93\n4   AAAAAAAAAPOHBAAA      7136.79\n5   AAAAAAAAGKLOAAAA     17500.21\n6   AAAAAAAAMLJAAAAA     13501.49\n7   AAAAAAAAKPMMAAAA     21079.12\n8   AAAAAAAAJFLCBAAA     19093.78\n9   AAAAAAAAMJADBAAA      4917.88\n10  AAAAAAAALBEDAAAA      7596.84\n11  AAAAAAAAKLNFBAAA     17798.27\n12  AAAAAAAAMGLBBAAA     17891.45\n13  AAAAAAAAMBHEBAAA        93.43\n14  AAAAAAAAEOPKAAAA      7081.48\n15  AAAAAAAAADBCBAAA      6760.00\n16  AAAAAAAAPHCDBAAA      2639.58\n17  AAAAAAAAANIDBAAA      2306.63\n18  AAAAAAAAGGBCBAAA      2482.74\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n  select  i_item_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_item_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_ITEM_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKLNFBAAA     17798.27\n1   AAAAAAAAGKLOAAAA     17500.21\n2   AAAAAAAAADBCBAAA      6760.00\n3   AAAAAAAAEOPKAAAA      7081.48\n4   AAAAAAAAKPMMAAAA     21079.12\n5   AAAAAAAAMBHEBAAA        93.43\n6   AAAAAAAAJFLCBAAA     19093.78\n7   AAAAAAAAMLJAAAAA     13501.49\n8   AAAAAAAAMGLBBAAA     17891.45\n9   AAAAAAAAAEBLAAAA      1863.48\n10  AAAAAAAAGPKDAAAA     37212.93\n11  AAAAAAAAGBKGAAAA      8310.89\n12  AAAAAAAAPHCDBAAA      2639.58\n13  AAAAAAAAMJADBAAA      4917.88\n14  AAAAAAAAAPOHBAAA      7136.79\n15  AAAAAAAALBEDAAAA      7596.84\n16  AAAAAAAAKDFCAAAA      1182.86\n17  AAAAAAAAGGBCBAAA      2482.74\n18  AAAAAAAAANIDBAAA      2306.63\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015941,
+                    "execution_time": 0.007291,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.002974
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016441,
+                    "execution_time": 0.007274,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.003256
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\"",
+                "rewrite": "SELECT \"I_ITEM_ID\" AS \"I_ITEM_ID\", \"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAKLNFBAAA     17798.27\n1   AAAAAAAAGKLOAAAA     17500.21\n2   AAAAAAAAADBCBAAA      6760.00\n3   AAAAAAAAEOPKAAAA      7081.48\n4   AAAAAAAAKPMMAAAA     21079.12\n5   AAAAAAAAMBHEBAAA        93.43\n6   AAAAAAAAJFLCBAAA     19093.78\n7   AAAAAAAAMLJAAAAA     13501.49\n8   AAAAAAAAMGLBBAAA     17891.45\n9   AAAAAAAAAEBLAAAA      1863.48\n10  AAAAAAAAGPKDAAAA     37212.93\n11  AAAAAAAAGBKGAAAA      8310.89\n12  AAAAAAAAPHCDBAAA      2639.58\n13  AAAAAAAAMJADBAAA      4917.88\n14  AAAAAAAAAPOHBAAA      7136.79\n15  AAAAAAAALBEDAAAA      7596.84\n16  AAAAAAAAKDFCAAAA      1182.86\n17  AAAAAAAAGGBCBAAA      2482.74\n18  AAAAAAAAANIDBAAA      2306.63\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n  select  i_item_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_item_id\n order by total_sales \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_ITEM_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ORDER BY \"TOTAL_SALES\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAIBOBBAAA         0.00\n1   AAAAAAAAODPBBAAA         5.44\n2   AAAAAAAACBOLAAAA         8.94\n3   AAAAAAAAIFNFAAAA        11.20\n4   AAAAAAAAKENABAAA        14.56\n5   AAAAAAAAOOEIBAAA        16.38\n6   AAAAAAAAFPAOAAAA        28.08\n7   AAAAAAAAMCJCBAAA        29.24\n8   AAAAAAAAKAMCBAAA        30.80\n9   AAAAAAAAJBHEBAAA        31.50\n10  AAAAAAAAAOJHBAAA        34.40\n11  AAAAAAAAMHPPAAAA        35.52\n12  AAAAAAAAIHHGAAAA        35.65\n13  AAAAAAAAKBDPAAAA        36.12\n14  AAAAAAAAOGODAAAA        41.40\n15  AAAAAAAAMCFDAAAA        42.30\n16  AAAAAAAAOCEFAAAA        43.68\n17  AAAAAAAAOCCIAAAA        44.10\n18  AAAAAAAAHHGHBAAA        46.20\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01795,
+                    "execution_time": 0.008869,
+                    "compile_time": 6.6e-05,
+                    "planning_time": 0.003315
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054804,
+                    "execution_time": 0.008875,
+                    "compile_time": 7e-05,
+                    "planning_time": 0.038465
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ORDER BY \"TOTAL_SALES\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAIBOBBAAA         0.00\n1   AAAAAAAAODPBBAAA         5.44\n2   AAAAAAAACBOLAAAA         8.94\n3   AAAAAAAAIFNFAAAA        11.20\n4   AAAAAAAAKENABAAA        14.56\n5   AAAAAAAAOOEIBAAA        16.38\n6   AAAAAAAAFPAOAAAA        28.08\n7   AAAAAAAAMCJCBAAA        29.24\n8   AAAAAAAAKAMCBAAA        30.80\n9   AAAAAAAAJBHEBAAA        31.50\n10  AAAAAAAAAOJHBAAA        34.40\n11  AAAAAAAAMHPPAAAA        35.52\n12  AAAAAAAAIHHGAAAA        35.65\n13  AAAAAAAAKBDPAAAA        36.12\n14  AAAAAAAAOGODAAAA        41.40\n15  AAAAAAAAMCFDAAAA        42.30\n16  AAAAAAAAOCEFAAAA        43.68\n17  AAAAAAAAOCCIAAAA        44.10\n18  AAAAAAAAHHGHBAAA        46.20\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n  select  i_item_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_item_id\n order by total_sales,\n          i_item_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_ITEM_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST , \"I_ITEM_ID\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ORDER BY \"TOTAL_SALES\" , \"I_ITEM_ID\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAIBOBBAAA         0.00\n1   AAAAAAAAODPBBAAA         5.44\n2   AAAAAAAACBOLAAAA         8.94\n3   AAAAAAAAIFNFAAAA        11.20\n4   AAAAAAAAKENABAAA        14.56\n5   AAAAAAAAOOEIBAAA        16.38\n6   AAAAAAAAFPAOAAAA        28.08\n7   AAAAAAAAMCJCBAAA        29.24\n8   AAAAAAAAKAMCBAAA        30.80\n9   AAAAAAAAJBHEBAAA        31.50\n10  AAAAAAAAAOJHBAAA        34.40\n11  AAAAAAAAMHPPAAAA        35.52\n12  AAAAAAAAIHHGAAAA        35.65\n13  AAAAAAAAKBDPAAAA        36.12\n14  AAAAAAAAOGODAAAA        41.40\n15  AAAAAAAAMCFDAAAA        42.30\n16  AAAAAAAAOCEFAAAA        43.68\n17  AAAAAAAAOCCIAAAA        44.10\n18  AAAAAAAAHHGHBAAA        46.20\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018225,
+                    "execution_time": 0.00897,
+                    "compile_time": 6.7e-05,
+                    "planning_time": 0.003518
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053367,
+                    "execution_time": 0.009155,
+                    "compile_time": 6.9e-05,
+                    "planning_time": 0.038396
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST , \"I_ITEM_ID\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ORDER BY \"TOTAL_SALES\" NULLS LAST , \"I_ITEM_ID\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAIBOBBAAA         0.00\n1   AAAAAAAAODPBBAAA         5.44\n2   AAAAAAAACBOLAAAA         8.94\n3   AAAAAAAAIFNFAAAA        11.20\n4   AAAAAAAAKENABAAA        14.56\n5   AAAAAAAAOOEIBAAA        16.38\n6   AAAAAAAAFPAOAAAA        28.08\n7   AAAAAAAAMCJCBAAA        29.24\n8   AAAAAAAAKAMCBAAA        30.80\n9   AAAAAAAAJBHEBAAA        31.50\n10  AAAAAAAAAOJHBAAA        34.40\n11  AAAAAAAAMHPPAAAA        35.52\n12  AAAAAAAAIHHGAAAA        35.65\n13  AAAAAAAAKBDPAAAA        36.12\n14  AAAAAAAAOGODAAAA        41.40\n15  AAAAAAAAMCFDAAAA        42.30\n16  AAAAAAAAOCEFAAAA        43.68\n17  AAAAAAAAOCCIAAAA        44.10\n18  AAAAAAAAHHGHBAAA        46.20\n...*/"
+    },
+    {
+        "input": "-- start template query56.tpl query 83 in stream 0\nwith /* TPC-DS query56.tpl 0.83 */ ss as (\n select i_item_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where i_item_id in (select\n     i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n cs as (\n select i_item_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6 \n group by i_item_id),\n ws as (\n select i_item_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_item_id               in (select\n  i_item_id\nfrom item\nwhere i_color in ('lavender','rose','beige'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2000\n and     d_moy                   = 4\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -6\n group by i_item_id)\n  select  i_item_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_item_id\n order by total_sales,\n          i_item_id\n limit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -6 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 4 AND \"DATE_DIM\".\"D_YEAR\" = 2000 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_COLOR\" IN ( 'lavender' , 'rose' , 'beige' ) GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_0\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_1\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_ITEM_ID\" = \"ITEM\".\"I_ITEM_ID\" WHERE NOT \"_U_2\".\"I_ITEM_ID\" IS NULL GROUP BY \"ITEM\".\"I_ITEM_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_ITEM_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST , \"I_ITEM_ID\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ORDER BY \"TOTAL_SALES\" , \"I_ITEM_ID\" LIMIT 21",
+                "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAIBOBBAAA         0.00\n1   AAAAAAAAODPBBAAA         5.44\n2   AAAAAAAACBOLAAAA         8.94\n3   AAAAAAAAIFNFAAAA        11.20\n4   AAAAAAAAKENABAAA        14.56\n5   AAAAAAAAOOEIBAAA        16.38\n6   AAAAAAAAFPAOAAAA        28.08\n7   AAAAAAAAMCJCBAAA        29.24\n8   AAAAAAAAKAMCBAAA        30.80\n9   AAAAAAAAJBHEBAAA        31.50\n10  AAAAAAAAAOJHBAAA        34.40\n11  AAAAAAAAMHPPAAAA        35.52\n12  AAAAAAAAIHHGAAAA        35.65\n13  AAAAAAAAKBDPAAAA        36.12\n14  AAAAAAAAOGODAAAA        41.40\n15  AAAAAAAAMCFDAAAA        42.30\n16  AAAAAAAAOCEFAAAA        43.68\n17  AAAAAAAAOCCIAAAA        44.10\n18  AAAAAAAAHHGHBAAA        46.20\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017562,
+                    "execution_time": 0.008322,
+                    "compile_time": 6.8e-05,
+                    "planning_time": 0.003407
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.017782,
+                    "execution_time": 0.008361,
+                    "compile_time": 7e-05,
+                    "planning_time": 0.003542
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_11\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" GROUP BY \"SPEQLITE_TEMP_TABLE_11\".\"I_ITEM_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST , \"I_ITEM_ID\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"I_ITEM_ID\" AS \"I_ITEM_ID\" , \"SPEQLITE_TEMP_TABLE_12\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ORDER BY \"TOTAL_SALES\" NULLS LAST , \"I_ITEM_ID\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*           i_item_id  total_sales\n0   AAAAAAAAIBOBBAAA         0.00\n1   AAAAAAAAODPBBAAA         5.44\n2   AAAAAAAACBOLAAAA         8.94\n3   AAAAAAAAIFNFAAAA        11.20\n4   AAAAAAAAKENABAAA        14.56\n5   AAAAAAAAOOEIBAAA        16.38\n6   AAAAAAAAFPAOAAAA        28.08\n7   AAAAAAAAMCJCBAAA        29.24\n8   AAAAAAAAKAMCBAAA        30.80\n9   AAAAAAAAJBHEBAAA        31.50\n10  AAAAAAAAAOJHBAAA        34.40\n11  AAAAAAAAMHPPAAAA        35.52\n12  AAAAAAAAIHHGAAAA        35.65\n13  AAAAAAAAKBDPAAAA        36.12\n14  AAAAAAAAOGODAAAA        41.40\n15  AAAAAAAAMCFDAAAA        42.30\n16  AAAAAAAAOCEFAAAA        43.68\n17  AAAAAAAAOCCIAAAA        44.10\n18  AAAAAAAAHHGHBAAA        46.20\n...*/"
+    }
+]

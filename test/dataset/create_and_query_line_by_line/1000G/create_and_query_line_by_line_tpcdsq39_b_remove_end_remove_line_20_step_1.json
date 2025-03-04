@@ -1,0 +1,804 @@
+[
+    {
+        "input": "with /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select INV_WAREHOUSE_SK, INV_ITEM_SK,\n       stddev_samp(INV_QUANTITY_ON_HAND) as stdev,\n       avg(INV_QUANTITY_ON_HAND) as mean,\n       case avg(INV_QUANTITY_ON_HAND) when 0 then null else stddev_samp(INV_QUANTITY_ON_HAND)/avg(INV_QUANTITY_ON_HAND) end as cov\n from inventory\n group by INV_WAREHOUSE_SK, INV_ITEM_SK)\n/*CURSOR_IDENTIFIER*/\nselect * from inv;",
+        "optimize": [
+            "WITH \"INV\" AS ( SELECT \"INVENTORY\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"INVENTORY\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" , CASE WHEN AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) = 0 THEN NULL ELSE STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) / AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) END AS \"COV\" FROM \"INVENTORY\" AS \"INVENTORY\" GROUP BY \"INVENTORY\".\"INV_WAREHOUSE_SK\" , \"INVENTORY\".\"INV_ITEM_SK\" ) SELECT \"INV\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"INV\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , \"INV\".\"STDEV\" AS \"STDEV\" , \"INV\".\"MEAN\" AS \"MEAN\" , \"INV\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"INVENTORY\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"INVENTORY\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" , CASE WHEN AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) = 0 THEN NULL ELSE STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) / AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) END AS \"COV\" FROM \"INVENTORY\" AS \"INVENTORY\" GROUP BY \"INVENTORY\".\"INV_WAREHOUSE_SK\" , \"INVENTORY\".\"INV_ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 8.334729,
+                    "execution_time": 8.040817,
+                    "compile_time": 0.000437,
+                    "planning_time": 0.022559,
+                    "create_size": 1024
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 8.451292,
+                    "execution_time": 8.082113,
+                    "compile_time": 0.000462,
+                    "planning_time": 0.083916,
+                    "create_size": 1024
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_1\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_1\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\" LIMIT 21",
+                "preview": "\n/*    inv_warehouse_sk  inv_item_sk       stdev  mean       cov\n0                 10         5869  289.675747   482  0.600987\n1                 10         5883  289.709455   524  0.552881\n2                 10         5898  281.791209   479  0.588291\n3                 10        12105  317.143899   520  0.609892\n4                 10        12109  263.649925   485  0.543608\n5                 10        12126  277.135194   536  0.517043\n6                 10        12129  274.527442   548  0.500962\n7                 10        12150  279.392175   545  0.512646\n8                 10        12157  283.272865   512  0.553267\n9                 10        12171  268.511733   469  0.572520\n10                10        12180  313.837886   558  0.562433\n11                10        12193  285.323199   505  0.564996\n12                10        12246  314.727923   530  0.593826\n13                10        12270  298.884819   534  0.559709\n14                10        12285  299.476495   499  0.600153\n15                10        12297  302.937840   498  0.608309\n16                10        18504  303.930839   544  0.558696\n17                10        18528  315.145541   480  0.656553\n18                10        18529  284.428337   517  0.550152\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017937,
+                    "execution_time": 0.008226,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.003625
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.055913,
+                    "execution_time": 0.007758,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.039365
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_1\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_1\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_1\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_1\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_1\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\""
+            }
+        ],
+        "preview": "\n/*    inv_warehouse_sk  inv_item_sk       stdev  mean       cov\n0                 10         5869  289.675747   482  0.600987\n1                 10         5883  289.709455   524  0.552881\n2                 10         5898  281.791209   479  0.588291\n3                 10        12105  317.143899   520  0.609892\n4                 10        12109  263.649925   485  0.543608\n5                 10        12126  277.135194   536  0.517043\n6                 10        12129  274.527442   548  0.500962\n7                 10        12150  279.392175   545  0.512646\n8                 10        12157  283.272865   512  0.553267\n9                 10        12171  268.511733   469  0.572520\n10                10        12180  313.837886   558  0.562433\n11                10        12193  285.323199   505  0.564996\n12                10        12246  314.727923   530  0.593826\n13                10        12270  298.884819   534  0.559709\n14                10        12285  299.476495   499  0.600153\n15                10        12297  302.937840   498  0.608309\n16                10        18504  303.930839   544  0.558696\n17                10        18528  315.145541   480  0.656553\n18                10        18529  284.428337   517  0.550152\n...*/"
+    },
+    {
+        "input": "with /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select inv_warehouse_sk as w_warehouse_sk, inv_item_sk as i_item_sk, \n       /* Placeholder names for missing columns */\n       'Warehouse Name' as w_warehouse_name, datepart(month, getdate()) as d_moy,\n       stdev, mean, case mean when 0 then null else stdev/mean end cov\n from (\n       select inv_warehouse_sk, inv_item_sk, \n              stddev_samp(inv_quantity_on_hand) stdev, avg(inv_quantity_on_hand) mean\n       from inventory\n       group by inv_warehouse_sk, inv_item_sk\n     ) as subquery\n)\nselect * from inv\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SUBQUERY\" AS ( SELECT \"INVENTORY\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"INVENTORY\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" GROUP BY \"INVENTORY\".\"INV_WAREHOUSE_SK\" , \"INVENTORY\".\"INV_ITEM_SK\" ) SELECT \"SUBQUERY\".\"INV_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SUBQUERY\".\"INV_ITEM_SK\" AS \"I_ITEM_SK\" , 'Warehouse Name' AS \"W_WAREHOUSE_NAME\" , CAST ( CAST ( CURRENT_TIMESTAMP ( ) AS VARBINARY ) AS VARCHAR ( MAX ) ) AS \"D_MOY\" , \"SUBQUERY\".\"STDEV\" AS \"STDEV\" , \"SUBQUERY\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SUBQUERY\".\"MEAN\" = 0 THEN NULL ELSE \"SUBQUERY\".\"STDEV\" / \"SUBQUERY\".\"MEAN\" END AS \"COV\" FROM \"SUBQUERY\" AS \"SUBQUERY\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"INV_WAREHOUSE_SK\" AS \"INV_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"INV_ITEM_SK\" AS \"INV_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_1\".\"MEAN\" AS \"MEAN\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.531218,
+                    "execution_time": 0.320769,
+                    "compile_time": 0.000256,
+                    "planning_time": 0.003534,
+                    "create_size": 896
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.712506,
+                    "execution_time": 0.317243,
+                    "compile_time": 0.127757,
+                    "planning_time": 0.05753,
+                    "create_size": 896
+                }
+            }
+        ],
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"INV_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"INV_ITEM_SK\" AS \"I_ITEM_SK\" , 'Warehouse Name' AS \"W_WAREHOUSE_NAME\" , CAST ( CAST ( CURRENT_TIMESTAMP ( ) AS VARBINARY ) AS VARCHAR ( MAX ) ) AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_2\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_2\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SPEQLITE_TEMP_TABLE_2\".\"MEAN\" = 0 THEN NULL ELSE \"SPEQLITE_TEMP_TABLE_2\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_2\".\"MEAN\" END AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"INV_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"INV_ITEM_SK\" AS \"I_ITEM_SK\" , 'Warehouse Name' AS \"W_WAREHOUSE_NAME\" , CAST ( CAST ( CURRENT_TIMESTAMP ( ) AS VARBINARY ) AS VARCHAR ( MAX ) ) AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_2\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_2\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SPEQLITE_TEMP_TABLE_2\".\"MEAN\" = 0 THEN NULL ELSE \"SPEQLITE_TEMP_TABLE_2\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_2\".\"MEAN\" END AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect * from inv /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) SELECT \"FOO\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"STDEV\" AS \"STDEV\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 6.026377,
+                    "execution_time": 5.646341,
+                    "compile_time": 0.000579,
+                    "planning_time": 0.044489,
+                    "create_size": 2688
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 9.675475,
+                    "execution_time": 5.910652,
+                    "compile_time": 3.283491,
+                    "planning_time": 0.141703,
+                    "create_size": 2688
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" = 0 THEN NULL ELSE \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" END AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" WHERE CASE WHEN \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" = 0 THEN 0 ELSE \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" END > 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.839427,
+                    "execution_time": 0.453893,
+                    "compile_time": 0.000391,
+                    "planning_time": 0.006149,
+                    "create_size": 1280
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 1.240367,
+                    "execution_time": 0.464433,
+                    "compile_time": 0.329057,
+                    "planning_time": 0.063674,
+                    "create_size": 1280
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_4\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_4\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_4\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_4\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" LIMIT 21",
+                "preview": "\n/*       w_warehouse_name  w_warehouse_sk  i_item_sk  d_moy       stdev  mean       cov\n0   Conventional childr               1     149075     11  432.630231   273  1.584726\n1   Conventional childr               1     149117     11  332.348161   307  1.082567\n2   Conventional childr               1     149193     11  348.323006   318  1.095355\n3        Quite effectiv               7      25449      7  371.521534   338  1.099176\n4        Quite effectiv               7      31985      7  333.926639   309  1.080669\n5        Quite effectiv               7      38219      7  465.512173   440  1.057982\n6        Quite effectiv               7      38231      7  525.357259   484  1.085449\n7        Quite effectiv               7      38377      7  277.004212   219  1.264859\n8        Quite effectiv               7      38383      7  343.626129   310  1.108471\n9        Quite effectiv               7      44741      7  283.012956   256  1.105519\n10  Conventional childr               1     277127     11  402.564032   339  1.187505\n11  Conventional childr               1     283503     11  322.770817   290  1.113003\n12       Quite effectiv               7     262323      7  307.924639   300  1.026415\n13       Quite effectiv               7     262345      7  385.034198   359  1.072519\n14       Quite effectiv               7     268667      7  504.063819   339  1.486914\n15       Quite effectiv               7     268787      7  444.695401   406  1.095309\n16       Quite effectiv               7     275043      7  350.064161   263  1.331042\n17       Quite effectiv               7     275175      7  237.165730   233  1.017879\n18       Quite effectiv               7     281401      7  383.938689   237  1.619994\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017968,
+                    "execution_time": 0.007693,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.003987
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.333273,
+                    "execution_time": 0.008016,
+                    "compile_time": 0.276512,
+                    "planning_time": 0.039823
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" = 0 THEN NULL ELSE \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" END AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" WHERE CASE WHEN \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" = 0 THEN 0 ELSE \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" END > 1",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"W_WAREHOUSE_NAME\" AS \"W_WAREHOUSE_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_4\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_4\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_4\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_4\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_4\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": "\n/*       w_warehouse_name  w_warehouse_sk  i_item_sk  d_moy       stdev  mean       cov\n0   Conventional childr               1     149075     11  432.630231   273  1.584726\n1   Conventional childr               1     149117     11  332.348161   307  1.082567\n2   Conventional childr               1     149193     11  348.323006   318  1.095355\n3        Quite effectiv               7      25449      7  371.521534   338  1.099176\n4        Quite effectiv               7      31985      7  333.926639   309  1.080669\n5        Quite effectiv               7      38219      7  465.512173   440  1.057982\n6        Quite effectiv               7      38231      7  525.357259   484  1.085449\n7        Quite effectiv               7      38377      7  277.004212   219  1.264859\n8        Quite effectiv               7      38383      7  343.626129   310  1.108471\n9        Quite effectiv               7      44741      7  283.012956   256  1.105519\n10  Conventional childr               1     277127     11  402.564032   339  1.187505\n11  Conventional childr               1     283503     11  322.770817   290  1.113003\n12       Quite effectiv               7     262323      7  307.924639   300  1.026415\n13       Quite effectiv               7     262345      7  385.034198   359  1.072519\n14       Quite effectiv               7     268667      7  504.063819   339  1.486914\n15       Quite effectiv               7     268787      7  444.695401   406  1.095309\n16       Quite effectiv               7     275043      7  350.064161   263  1.331042\n17       Quite effectiv               7     275175      7  237.165730   233  1.017879\n18       Quite effectiv               7     281401      7  383.938689   237  1.619994\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv.w_warehouse_sk,inv.i_item_sk,inv.d_moy,inv.mean, inv.cov from inv\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_3\".\"STDEV\" AS \"STDEV\" , \"SPEQLITE_TEMP_TABLE_3\".\"MEAN\" AS \"MEAN\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.45163,
+                    "execution_time": 1.195277,
+                    "compile_time": 0.000375,
+                    "planning_time": 0.003645,
+                    "create_size": 1920
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 1.772158,
+                    "execution_time": 1.185676,
+                    "compile_time": 0.274239,
+                    "planning_time": 0.058369,
+                    "create_size": 1920
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"SPEQLITE_TEMP_TABLE_5\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_5\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" = 0 THEN NULL ELSE \"SPEQLITE_TEMP_TABLE_5\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" END AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" WHERE CASE WHEN \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" = 0 THEN 0 ELSE \"SPEQLITE_TEMP_TABLE_5\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" END > 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.678977,
+                    "execution_time": 0.420411,
+                    "compile_time": 0.00039,
+                    "planning_time": 0.005969,
+                    "create_size": 1024
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.730875,
+                    "execution_time": 0.414806,
+                    "compile_time": 0.000402,
+                    "planning_time": 0.061115,
+                    "create_size": 1024
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_6\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov\n0               16     125835      4   329  1.228370\n1               16     189927      4   312  1.248472\n2                4      71759      1   299  1.590569\n3                4      71791      1   297  1.133246\n4                4      71807      1   258  1.072906\n5                4      78297      1   421  1.161363\n6                4      84689      1   384  1.138023\n7                4      91001      1    61  1.075531\n8                4      97365      1   373  1.122812\n9                7     188973      4   494  1.121561\n10               7     201707      4   323  1.058694\n11               7     208175      4   304  1.156403\n12               7     214553      4   308  1.414156\n13               7     214585      4   371  1.059038\n14              15      88703      2   267  1.218261\n15              15      88791      2   368  1.099930\n16              15      88807      2   452  1.032661\n17              15      88819      2   411  1.001123\n18              10     223277      7   288  1.017420\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018121,
+                    "execution_time": 0.008161,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.003753
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054651,
+                    "execution_time": 0.008063,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.039488
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_5\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_5\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" = 0 THEN NULL ELSE \"SPEQLITE_TEMP_TABLE_5\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" END AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" WHERE CASE WHEN \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" = 0 THEN 0 ELSE \"SPEQLITE_TEMP_TABLE_5\".\"STDEV\" / \"SPEQLITE_TEMP_TABLE_5\".\"MEAN\" END > 1",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_6\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_6\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\""
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov\n0               16     125835      4   329  1.228370\n1               16     189927      4   312  1.248472\n2                4      71759      1   299  1.590569\n3                4      71791      1   297  1.133246\n4                4      71807      1   258  1.072906\n5                4      78297      1   421  1.161363\n6                4      84689      1   384  1.138023\n7                4      91001      1    61  1.075531\n8                4      97365      1   373  1.122812\n9                7     188973      4   494  1.121561\n10               7     201707      4   323  1.058694\n11               7     208175      4   304  1.156403\n12               7     214553      4   308  1.414156\n13               7     214585      4   371  1.059038\n14              15      88703      2   267  1.218261\n15              15      88791      2   368  1.099930\n16              15      88807      2   452  1.032661\n17              15      88819      2   411  1.001123\n18              10     223277      7   288  1.017420\n...*/"
+    },
+    {
+        "input": "with /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(INV_QUANTITY_ON_HAND) stdev,avg(INV_QUANTITY_ON_HAND) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year = 2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1, inv inv2\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" CROSS JOIN \"INV\" AS \"INV2\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                6     157209     10   305  1.142454                     6           157209           10         305   1.142454\n1                6     157209     10   305  1.142454                     8            40469            9         443   1.063808\n2                6     157209     10   305  1.142454                     8            66051            9         330   1.024538\n3                6     157209     10   305  1.142454                     8            66071            9         405   1.054024\n4                6     157209     10   305  1.142454                    15            24097            5         285   1.014419\n5                6     157209     10   305  1.142454                    15            30355            5         297   1.147676\n6                6     157209     10   305  1.142454                     3            78345            5         306   1.265266\n7                6     157209     10   305  1.142454                     3            78429            5         194   1.165234\n8                6     157209     10   305  1.142454                    17           222781            7         259   1.597586\n9                6     157209     10   305  1.142454                    17           229107            7         297   1.134377\n10               6     157209     10   305  1.142454                    17           235499            7         445   1.016793\n11               6     157209     10   305  1.142454                    17           235581            7         325   1.033209\n12               6     157209     10   305  1.142454                    10            47631            5         332   1.114703\n13               6     157209     10   305  1.142454                    10            60323            5         312   1.275866\n14               6     157209     10   305  1.142454                    10            66709            5         365   1.013098\n15               6     157209     10   305  1.142454                    11             4553            4         487   1.013095\n16               6     157209     10   305  1.142454                     5           118265            4         374   1.051480\n17               6     157209     10   305  1.142454                    15           136431            8         302   1.284152\n18               6     157209     10   305  1.142454                     4           251225           12         153   1.469425\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.100245,
+                    "execution_time": 0.087093,
+                    "compile_time": 8.8e-05,
+                    "planning_time": 0.005523
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.183965,
+                    "execution_time": 0.133206,
+                    "compile_time": 9.8e-05,
+                    "planning_time": 0.041282
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\"",
+                "rewrite": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\""
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                6     157209     10   305  1.142454                     6           157209           10         305   1.142454\n1                6     157209     10   305  1.142454                     8            40469            9         443   1.063808\n2                6     157209     10   305  1.142454                     8            66051            9         330   1.024538\n3                6     157209     10   305  1.142454                     8            66071            9         405   1.054024\n4                6     157209     10   305  1.142454                    15            24097            5         285   1.014419\n5                6     157209     10   305  1.142454                    15            30355            5         297   1.147676\n6                6     157209     10   305  1.142454                     3            78345            5         306   1.265266\n7                6     157209     10   305  1.142454                     3            78429            5         194   1.165234\n8                6     157209     10   305  1.142454                    17           222781            7         259   1.597586\n9                6     157209     10   305  1.142454                    17           229107            7         297   1.134377\n10               6     157209     10   305  1.142454                    17           235499            7         445   1.016793\n11               6     157209     10   305  1.142454                    17           235581            7         325   1.033209\n12               6     157209     10   305  1.142454                    10            47631            5         332   1.114703\n13               6     157209     10   305  1.142454                    10            60323            5         312   1.275866\n14               6     157209     10   305  1.142454                    10            66709            5         365   1.013098\n15               6     157209     10   305  1.142454                    11             4553            4         487   1.013095\n16               6     157209     10   305  1.142454                     5           118265            4         374   1.051480\n17               6     157209     10   305  1.142454                    15           136431            8         302   1.284152\n18               6     157209     10   305  1.142454                     4           251225           12         153   1.469425\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" CROSS JOIN \"INV\" AS \"INV2\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                8     246747     12   362  1.110601                     1           111123            1         408   1.069728\n1                8     246747     12   362  1.110601                     1            53547            1         362   1.331500\n2                8     246747     12   362  1.110601                     1            53549            1         245   1.091377\n3                8     246747     12   362  1.110601                     1            53559            1         470   1.078278\n4                8     246747     12   362  1.110601                     1            53627            1         209   1.402839\n5                8     246747     12   362  1.110601                     1            79285            1         354   1.193033\n6                8     246747     12   362  1.110601                     1            91939            1         325   1.326132\n7                8     246747     12   362  1.110601                     1           104743            1         461   1.002914\n8                8     246747     12   362  1.110601                     1           155923            1         343   1.241963\n9                8     246747     12   362  1.110601                     1           162375            1         292   1.103698\n10               8     246747     12   362  1.110601                    11           199695            1         343   1.245595\n11               8     246747     12   362  1.110601                    11           225175            1         363   1.391079\n12               8     246747     12   362  1.110601                    11           231555            1         246   1.090848\n13               8     246747     12   362  1.110601                     8           280307            1         133   1.092712\n14               8     246747     12   362  1.110601                     8           280381            1         355   1.529062\n15               8     246747     12   362  1.110601                     4            78525            1         242   1.201480\n16               8     246747     12   362  1.110601                     4            85099            1         285   1.250060\n17               8     246747     12   362  1.110601                     4           155331            1         358   1.167407\n18               8     246747     12   362  1.110601                     4           155405            1         199   1.398083\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.109427,
+                    "execution_time": 0.094016,
+                    "compile_time": 0.000125,
+                    "planning_time": 0.006486
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.099333,
+                    "execution_time": 0.084009,
+                    "compile_time": 9.6e-05,
+                    "planning_time": 0.005647
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\"",
+                "rewrite": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\""
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                8     246747     12   362  1.110601                     1           111123            1         408   1.069728\n1                8     246747     12   362  1.110601                     1            53547            1         362   1.331500\n2                8     246747     12   362  1.110601                     1            53549            1         245   1.091377\n3                8     246747     12   362  1.110601                     1            53559            1         470   1.078278\n4                8     246747     12   362  1.110601                     1            53627            1         209   1.402839\n5                8     246747     12   362  1.110601                     1            79285            1         354   1.193033\n6                8     246747     12   362  1.110601                     1            91939            1         325   1.326132\n7                8     246747     12   362  1.110601                     1           104743            1         461   1.002914\n8                8     246747     12   362  1.110601                     1           155923            1         343   1.241963\n9                8     246747     12   362  1.110601                     1           162375            1         292   1.103698\n10               8     246747     12   362  1.110601                    11           199695            1         343   1.245595\n11               8     246747     12   362  1.110601                    11           225175            1         363   1.391079\n12               8     246747     12   362  1.110601                    11           231555            1         246   1.090848\n13               8     246747     12   362  1.110601                     8           280307            1         133   1.092712\n14               8     246747     12   362  1.110601                     8           280381            1         355   1.529062\n15               8     246747     12   362  1.110601                     4            78525            1         242   1.201480\n16               8     246747     12   362  1.110601                     4            85099            1         285   1.250060\n17               8     246747     12   362  1.110601                     4           155331            1         358   1.167407\n18               8     246747     12   362  1.110601                     4           155405            1         199   1.398083\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK_COL_5\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK_COL_6\" , \"INV2\".\"D_MOY\" AS \"D_MOY_COL_7\" , \"INV2\".\"MEAN\" AS \"MEAN_COL_8\" , \"INV2\".\"COV\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.787026,
+                    "execution_time": 2.299102,
+                    "compile_time": 0.000607,
+                    "planning_time": 0.006409,
+                    "create_size": 3456
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 2.935025,
+                    "execution_time": 2.30709,
+                    "compile_time": 0.000598,
+                    "planning_time": 0.130418,
+                    "create_size": 3456
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean      cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n1                2     135829      2   289  1.22122                    13           135829            3         369   1.013934\n2                2     135829      2   289  1.22122                    18           135829            2         402   1.024877\n3                2     135829      2   289  1.22122                    16           135829           12         412   1.011116\n4                2     135829      2   289  1.22122                    16           135829            2         213   1.356141\n5                2     135829      2   289  1.22122                     4           135829            3         373   1.106214\n6                2     135829      2   289  1.22122                     3           135829            4         343   1.064824\n7                2     135829      2   289  1.22122                    14           135829            8         299   1.014226\n8                2     135829      2   289  1.22122                     9           135829            1         393   1.028832\n9                2     135829      2   289  1.22122                    17           135829            5         298   1.174070\n10               2     135829      2   289  1.22122                     2           135829            2         289   1.221220\n11               9      76751      7   211  1.14966                     7            76751           11         331   1.065376\n12               9      76751      7   211  1.14966                     7            76751            4         255   1.819785\n13               9      76751      7   211  1.14966                    14            76751            2         340   1.212689\n14               9      76751      7   211  1.14966                    11            76751            7         211   1.169439\n15               9      76751      7   211  1.14966                    11            76751            1         360   1.223031\n16               9      76751      7   211  1.14966                    14            76751            4         243   1.278776\n17               9      76751      7   211  1.14966                    12            76751            1         335   1.338615\n18               9      76751      7   211  1.14966                    20            76751            4         415   1.042009\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.019348,
+                    "execution_time": 0.008029,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.004403
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.057327,
+                    "execution_time": 0.008884,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.040708
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean      cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n1                2     135829      2   289  1.22122                    13           135829            3         369   1.013934\n2                2     135829      2   289  1.22122                    18           135829            2         402   1.024877\n3                2     135829      2   289  1.22122                    16           135829           12         412   1.011116\n4                2     135829      2   289  1.22122                    16           135829            2         213   1.356141\n5                2     135829      2   289  1.22122                     4           135829            3         373   1.106214\n6                2     135829      2   289  1.22122                     3           135829            4         343   1.064824\n7                2     135829      2   289  1.22122                    14           135829            8         299   1.014226\n8                2     135829      2   289  1.22122                     9           135829            1         393   1.028832\n9                2     135829      2   289  1.22122                    17           135829            5         298   1.174070\n10               2     135829      2   289  1.22122                     2           135829            2         289   1.221220\n11               9      76751      7   211  1.14966                     7            76751           11         331   1.065376\n12               9      76751      7   211  1.14966                     7            76751            4         255   1.819785\n13               9      76751      7   211  1.14966                    14            76751            2         340   1.212689\n14               9      76751      7   211  1.14966                    11            76751            7         211   1.169439\n15               9      76751      7   211  1.14966                    11            76751            1         360   1.223031\n16               9      76751      7   211  1.14966                    14            76751            4         243   1.278776\n17               9      76751      7   211  1.14966                    12            76751            1         335   1.338615\n18               9      76751      7   211  1.14966                    20            76751            4         415   1.042009\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean      cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n1                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n2                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n3                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n4                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n5                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n6                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n7                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n8                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n9                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n10               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n11               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n12               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n13               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n14               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n15               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n16               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n17               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n18               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.797115,
+                    "execution_time": 0.779794,
+                    "compile_time": 0.000148,
+                    "planning_time": 0.006698
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 1.314994,
+                    "execution_time": 1.260135,
+                    "compile_time": 0.000139,
+                    "planning_time": 0.042595
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\""
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean      cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n1                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n2                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n3                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n4                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n5                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n6                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n7                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n8                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n9                2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n10               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n11               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n12               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n13               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n14               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n15               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n16               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n17               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n18               2     135829      2   289  1.22122                    13           135829            5         325   1.102644\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n  and inv1.d_moy=1\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" WHERE \"INV1\".\"D_MOY\" = 1"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" WHERE \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" WHERE \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n1               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n2               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n3               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n4               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n5               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n6               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n7               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n8               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n9               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n10              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n11              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n12              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n13              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n14              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n15              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n16              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n17              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n18              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.11928,
+                    "execution_time": 0.101365,
+                    "compile_time": 0.000141,
+                    "planning_time": 0.007566
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.231674,
+                    "execution_time": 0.17255,
+                    "compile_time": 0.000136,
+                    "planning_time": 0.043678
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" WHERE \"INV1\".\"D_MOY\" = 1",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" WHERE \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1"
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n1               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n2               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n3               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n4               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n5               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n6               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n7               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n8               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n9               20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n10              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n11              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n12              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n13              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n14              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n15              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n16              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n17              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n18              20      96907      1   498  1.085545                     4            96907            4         354   1.106728\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n  and inv1.d_moy=1\n  and inv2.d_moy=1+1\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"D_MOY\" = 1"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n1               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n2               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n3               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n4               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n5               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n6               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n7               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n8               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n9               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n10              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n11              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n12              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n13              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n14              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n15              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n16              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n17              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n18              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.136947,
+                    "execution_time": 0.117308,
+                    "compile_time": 0.000195,
+                    "planning_time": 0.008162
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.243466,
+                    "execution_time": 0.180108,
+                    "compile_time": 0.000198,
+                    "planning_time": 0.044037
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"D_MOY\" = 1",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1"
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n1               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n2               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n3               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n4               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n5               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n6               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n7               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n8               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n9               16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n10              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n11              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n12              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n13              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n14              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n15              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n16              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n17              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n18              16     182273      1   253  1.011801                    15           182273            6         319   1.077042\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n  and inv1.d_moy=1\n  and inv2.d_moy=1+1\n  and inv1.cov > 1.5\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n1               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n2               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n3               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n4               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n5               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n6               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n7               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n8               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n9               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n10              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n11              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n12              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n13              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n14              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n15              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n16              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n17              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n18              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.070229,
+                    "execution_time": 0.050091,
+                    "compile_time": 0.000194,
+                    "planning_time": 0.008616
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.30111,
+                    "execution_time": 0.102745,
+                    "compile_time": 0.13547,
+                    "planning_time": 0.045779
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1"
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n1               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n2               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n3               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n4               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n5               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n6               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n7               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n8               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n9               11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n10              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n11              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n12              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n13              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n14              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n15              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n16              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n17              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n18              11     161649      1   309  1.516865                     4           161649            6         485    1.10781\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n  and inv1.d_moy=1\n  and inv2.d_moy=1+1\n  and inv1.cov > 1.5\norder by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1 ORDER BY \"INV1\".\"W_WAREHOUSE_SK\" NULLS LAST , \"INV1\".\"I_ITEM_SK\" NULLS LAST , \"INV1\".\"D_MOY\" NULLS LAST , \"INV1\".\"MEAN\" NULLS LAST , \"INV1\".\"COV\" NULLS LAST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 ORDER BY \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                1        759      1   266  1.609756                    20              759            1         325    1.30266\n1                1        759      1   266  1.609756                    20              759            1         325    1.30266\n2                1        759      1   266  1.609756                    20              759            1         325    1.30266\n3                1        759      1   266  1.609756                    20              759            1         325    1.30266\n4                1        759      1   266  1.609756                    20              759            1         325    1.30266\n5                1        759      1   266  1.609756                    20              759            1         325    1.30266\n6                1        759      1   266  1.609756                    20              759            1         325    1.30266\n7                1        759      1   266  1.609756                    20              759            1         325    1.30266\n8                1        759      1   266  1.609756                    20              759            1         325    1.30266\n9                1        759      1   266  1.609756                    20              759            1         325    1.30266\n10               1        759      1   266  1.609756                    20              759            1         325    1.30266\n11               1        759      1   266  1.609756                    20              759            1         325    1.30266\n12               1        759      1   266  1.609756                    20              759            1         325    1.30266\n13               1        759      1   266  1.609756                    20              759            1         325    1.30266\n14               1        759      1   266  1.609756                    20              759            1         325    1.30266\n15               1        759      1   266  1.609756                    20              759            1         325    1.30266\n16               1        759      1   266  1.609756                    20              759            1         325    1.30266\n17               1        759      1   266  1.609756                    20              759            1         325    1.30266\n18               1        759      1   266  1.609756                    20              759            1         325    1.30266\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 2.692013,
+                    "execution_time": 2.672059,
+                    "compile_time": 0.000155,
+                    "planning_time": 0.009519
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 2.757984,
+                    "execution_time": 2.698842,
+                    "compile_time": 0.000151,
+                    "planning_time": 0.045128
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1 ORDER BY \"INV1\".\"W_WAREHOUSE_SK\" NULLS LAST , \"INV1\".\"I_ITEM_SK\" NULLS LAST , \"INV1\".\"D_MOY\" NULLS LAST , \"INV1\".\"MEAN\" NULLS LAST , \"INV1\".\"COV\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 ORDER BY \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                1        759      1   266  1.609756                    20              759            1         325    1.30266\n1                1        759      1   266  1.609756                    20              759            1         325    1.30266\n2                1        759      1   266  1.609756                    20              759            1         325    1.30266\n3                1        759      1   266  1.609756                    20              759            1         325    1.30266\n4                1        759      1   266  1.609756                    20              759            1         325    1.30266\n5                1        759      1   266  1.609756                    20              759            1         325    1.30266\n6                1        759      1   266  1.609756                    20              759            1         325    1.30266\n7                1        759      1   266  1.609756                    20              759            1         325    1.30266\n8                1        759      1   266  1.609756                    20              759            1         325    1.30266\n9                1        759      1   266  1.609756                    20              759            1         325    1.30266\n10               1        759      1   266  1.609756                    20              759            1         325    1.30266\n11               1        759      1   266  1.609756                    20              759            1         325    1.30266\n12               1        759      1   266  1.609756                    20              759            1         325    1.30266\n13               1        759      1   266  1.609756                    20              759            1         325    1.30266\n14               1        759      1   266  1.609756                    20              759            1         325    1.30266\n15               1        759      1   266  1.609756                    20              759            1         325    1.30266\n16               1        759      1   266  1.609756                    20              759            1         325    1.30266\n17               1        759      1   266  1.609756                    20              759            1         325    1.30266\n18               1        759      1   266  1.609756                    20              759            1         325    1.30266\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n  and inv1.d_moy=1\n  and inv2.d_moy=1+1\n  and inv1.cov > 1.5\norder by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov\n        ,inv2.d_moy,inv2.mean, inv2.cov\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1 ORDER BY \"INV1\".\"W_WAREHOUSE_SK\" NULLS LAST , \"INV1\".\"I_ITEM_SK\" NULLS LAST , \"INV1\".\"D_MOY\" NULLS LAST , \"INV1\".\"MEAN\" NULLS LAST , \"INV1\".\"COV\" NULLS LAST , \"INV2\".\"D_MOY\" NULLS LAST , \"INV2\".\"MEAN\" NULLS LAST , \"INV2\".\"COV\" NULLS LAST"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 ORDER BY \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                1        759      1   266  1.609756                    16              759            1         249   1.112382\n1                1        759      1   266  1.609756                    16              759            1         249   1.112382\n2                1        759      1   266  1.609756                    16              759            1         249   1.112382\n3                1        759      1   266  1.609756                    16              759            1         249   1.112382\n4                1        759      1   266  1.609756                    16              759            1         249   1.112382\n5                1        759      1   266  1.609756                    16              759            1         249   1.112382\n6                1        759      1   266  1.609756                    16              759            1         249   1.112382\n7                1        759      1   266  1.609756                    16              759            1         249   1.112382\n8                1        759      1   266  1.609756                    16              759            1         249   1.112382\n9                1        759      1   266  1.609756                    16              759            1         249   1.112382\n10               1        759      1   266  1.609756                    16              759            1         249   1.112382\n11               1        759      1   266  1.609756                    16              759            1         249   1.112382\n12               1        759      1   266  1.609756                    16              759            1         249   1.112382\n13               1        759      1   266  1.609756                    16              759            1         249   1.112382\n14               1        759      1   266  1.609756                    16              759            1         249   1.112382\n15               1        759      1   266  1.609756                    16              759            1         249   1.112382\n16               1        759      1   266  1.609756                    16              759            1         249   1.112382\n17               1        759      1   266  1.609756                    16              759            1         249   1.112382\n18               1        759      1   266  1.609756                    16              759            1         249   1.112382\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 2.706411,
+                    "execution_time": 2.686445,
+                    "compile_time": 0.000163,
+                    "planning_time": 0.009685
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 2.78034,
+                    "execution_time": 2.712204,
+                    "compile_time": 0.000163,
+                    "planning_time": 0.046158
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1 ORDER BY \"INV1\".\"W_WAREHOUSE_SK\" NULLS LAST , \"INV1\".\"I_ITEM_SK\" NULLS LAST , \"INV1\".\"D_MOY\" NULLS LAST , \"INV1\".\"MEAN\" NULLS LAST , \"INV1\".\"COV\" NULLS LAST , \"INV2\".\"D_MOY\" NULLS LAST , \"INV2\".\"MEAN\" NULLS LAST , \"INV2\".\"COV\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 ORDER BY \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                1        759      1   266  1.609756                    16              759            1         249   1.112382\n1                1        759      1   266  1.609756                    16              759            1         249   1.112382\n2                1        759      1   266  1.609756                    16              759            1         249   1.112382\n3                1        759      1   266  1.609756                    16              759            1         249   1.112382\n4                1        759      1   266  1.609756                    16              759            1         249   1.112382\n5                1        759      1   266  1.609756                    16              759            1         249   1.112382\n6                1        759      1   266  1.609756                    16              759            1         249   1.112382\n7                1        759      1   266  1.609756                    16              759            1         249   1.112382\n8                1        759      1   266  1.609756                    16              759            1         249   1.112382\n9                1        759      1   266  1.609756                    16              759            1         249   1.112382\n10               1        759      1   266  1.609756                    16              759            1         249   1.112382\n11               1        759      1   266  1.609756                    16              759            1         249   1.112382\n12               1        759      1   266  1.609756                    16              759            1         249   1.112382\n13               1        759      1   266  1.609756                    16              759            1         249   1.112382\n14               1        759      1   266  1.609756                    16              759            1         249   1.112382\n15               1        759      1   266  1.609756                    16              759            1         249   1.112382\n16               1        759      1   266  1.609756                    16              759            1         249   1.112382\n17               1        759      1   266  1.609756                    16              759            1         249   1.112382\n18               1        759      1   266  1.609756                    16              759            1         249   1.112382\n...*/"
+    },
+    {
+        "input": "\nwith /* TPC-DS query39.tpl 0.5 part2 */ inv as\n(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n       ,stdev,mean, case mean when 0 then null else stdev/mean end cov\n from(select w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy\n            ,stddev_samp(inv_quantity_on_hand) stdev,avg(inv_quantity_on_hand) mean\n      from inventory\n          ,item\n          ,warehouse\n          ,date_dim\n      where inv_item_sk = i_item_sk\n        and inv_warehouse_sk = w_warehouse_sk\n        and inv_date_sk = d_date_sk\n        and d_year =2001\n      group by w_warehouse_name,w_warehouse_sk,i_item_sk,d_moy) foo\n where case mean when 0 then 0 else stdev/mean end > 1)\nselect inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean, inv1.cov\n        ,inv2.w_warehouse_sk,inv2.i_item_sk,inv2.d_moy,inv2.mean, inv2.cov\nfrom inv inv1,inv inv2\nwhere inv1.i_item_sk = inv2.i_item_sk\n  and inv1.w_warehouse_sk =  inv2.w_warehouse_sk\n  and inv1.d_moy=1\n  and inv2.d_moy=1+1\n  and inv1.cov > 1.5\norder by inv1.w_warehouse_sk,inv1.i_item_sk,inv1.d_moy,inv1.mean,inv1.cov\n        ,inv2.d_moy,inv2.mean, inv2.cov\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"FOO\" AS ( SELECT \"WAREHOUSE\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" , STDDEV_SAMP ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"STDEV\" , AVG ( \"INVENTORY\".\"INV_QUANTITY_ON_HAND\" ) AS \"MEAN\" FROM \"INVENTORY\" AS \"INVENTORY\" JOIN \"DATE_DIM\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"INVENTORY\".\"INV_DATE_SK\" AND \"DATE_DIM\".\"D_YEAR\" = 2001 JOIN \"ITEM\" AS \"ITEM\" ON \"INVENTORY\".\"INV_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" JOIN \"WAREHOUSE\" AS \"WAREHOUSE\" ON \"INVENTORY\".\"INV_WAREHOUSE_SK\" = \"WAREHOUSE\".\"W_WAREHOUSE_SK\" GROUP BY \"WAREHOUSE\".\"W_WAREHOUSE_NAME\" , \"WAREHOUSE\".\"W_WAREHOUSE_SK\" , \"ITEM\".\"I_ITEM_SK\" , \"DATE_DIM\".\"D_MOY\" ) , \"INV\" AS ( SELECT \"FOO\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"FOO\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"FOO\".\"D_MOY\" AS \"D_MOY\" , \"FOO\".\"MEAN\" AS \"MEAN\" , CASE WHEN \"FOO\".\"MEAN\" = 0 THEN NULL ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END AS \"COV\" FROM \"FOO\" AS \"FOO\" WHERE CASE WHEN \"FOO\".\"MEAN\" = 0 THEN 0 ELSE \"FOO\".\"STDEV\" / \"FOO\".\"MEAN\" END > 1 ) SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"INV\" AS \"INV1\" JOIN \"INV\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1 ORDER BY \"INV1\".\"W_WAREHOUSE_SK\" NULLS LAST , \"INV1\".\"I_ITEM_SK\" NULLS LAST , \"INV1\".\"D_MOY\" NULLS LAST , \"INV1\".\"MEAN\" NULLS LAST , \"INV1\".\"COV\" NULLS LAST , \"INV2\".\"D_MOY\" NULLS LAST , \"INV2\".\"MEAN\" NULLS LAST , \"INV2\".\"COV\" NULLS LAST LIMIT 100"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 ORDER BY \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" LIMIT 21",
+                "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                1        759      1   266  1.609756                    16              759            1         249   1.112382\n1                1        759      1   266  1.609756                    16              759            1         249   1.112382\n2                1        759      1   266  1.609756                    16              759            1         249   1.112382\n3                1        759      1   266  1.609756                    16              759            1         249   1.112382\n4                1        759      1   266  1.609756                    16              759            1         249   1.112382\n5                1        759      1   266  1.609756                    16              759            1         249   1.112382\n6                1        759      1   266  1.609756                    16              759            1         249   1.112382\n7                1        759      1   266  1.609756                    16              759            1         249   1.112382\n8                1        759      1   266  1.609756                    16              759            1         249   1.112382\n9                1        759      1   266  1.609756                    16              759            1         249   1.112382\n10               1        759      1   266  1.609756                    16              759            1         249   1.112382\n11               1        759      1   266  1.609756                    16              759            1         249   1.112382\n12               1        759      1   266  1.609756                    16              759            1         249   1.112382\n13               1        759      1   266  1.609756                    16              759            1         249   1.112382\n14               1        759      1   266  1.609756                    16              759            1         249   1.112382\n15               1        759      1   266  1.609756                    16              759            1         249   1.112382\n16               1        759      1   266  1.609756                    16              759            1         249   1.112382\n17               1        759      1   266  1.609756                    16              759            1         249   1.112382\n18               1        759      1   266  1.609756                    16              759            1         249   1.112382\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 2.706313,
+                    "execution_time": 2.686394,
+                    "compile_time": 0.000152,
+                    "planning_time": 0.009693
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 2.733154,
+                    "execution_time": 2.712629,
+                    "compile_time": 0.000153,
+                    "planning_time": 0.009835
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"INV1\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV1\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV1\".\"D_MOY\" AS \"D_MOY\" , \"INV1\".\"MEAN\" AS \"MEAN\" , \"INV1\".\"COV\" AS \"COV\" , \"INV2\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"INV2\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"INV2\".\"D_MOY\" AS \"D_MOY\" , \"INV2\".\"MEAN\" AS \"MEAN\" , \"INV2\".\"COV\" AS \"COV\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"INV1\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"INV1\".\"I_ITEM_SK\" = \"INV2\".\"I_ITEM_SK\" AND \"INV1\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"INV1\".\"COV\" > 1.5 AND \"INV1\".\"D_MOY\" = 1 ORDER BY \"INV1\".\"W_WAREHOUSE_SK\" NULLS LAST , \"INV1\".\"I_ITEM_SK\" NULLS LAST , \"INV1\".\"D_MOY\" NULLS LAST , \"INV1\".\"MEAN\" NULLS LAST , \"INV1\".\"COV\" NULLS LAST , \"INV2\".\"D_MOY\" NULLS LAST , \"INV2\".\"MEAN\" NULLS LAST , \"INV2\".\"COV\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" AS \"W_WAREHOUSE_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" AS \"D_MOY\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" AS \"MEAN\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" AS \"COV\" , \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK_COL_5\" AS \"W_WAREHOUSE_SK_COL_5\" , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK_COL_6\" AS \"I_ITEM_SK_COL_6\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" AS \"D_MOY_COL_7\" , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" AS \"MEAN_COL_8\" , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" AS \"COV_COL_9\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" JOIN \"SPEQLITE_TEMP_TABLE_6\" AS \"INV2\" ON \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" = \"INV2\".\"W_WAREHOUSE_SK\" AND \"INV2\".\"D_MOY\" = 2 WHERE \"SPEQLITE_TEMP_TABLE_7\".\"COV\" > 1.5 AND \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" = 1 ORDER BY \"SPEQLITE_TEMP_TABLE_7\".\"W_WAREHOUSE_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"I_ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"COV\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"D_MOY_COL_7\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"MEAN_COL_8\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_7\".\"COV_COL_9\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*    w_warehouse_sk  i_item_sk  d_moy  mean       cov  w_warehouse_sk_col_5  i_item_sk_col_6  d_moy_col_7  mean_col_8  cov_col_9\n0                1        759      1   266  1.609756                    16              759            1         249   1.112382\n1                1        759      1   266  1.609756                    16              759            1         249   1.112382\n2                1        759      1   266  1.609756                    16              759            1         249   1.112382\n3                1        759      1   266  1.609756                    16              759            1         249   1.112382\n4                1        759      1   266  1.609756                    16              759            1         249   1.112382\n5                1        759      1   266  1.609756                    16              759            1         249   1.112382\n6                1        759      1   266  1.609756                    16              759            1         249   1.112382\n7                1        759      1   266  1.609756                    16              759            1         249   1.112382\n8                1        759      1   266  1.609756                    16              759            1         249   1.112382\n9                1        759      1   266  1.609756                    16              759            1         249   1.112382\n10               1        759      1   266  1.609756                    16              759            1         249   1.112382\n11               1        759      1   266  1.609756                    16              759            1         249   1.112382\n12               1        759      1   266  1.609756                    16              759            1         249   1.112382\n13               1        759      1   266  1.609756                    16              759            1         249   1.112382\n14               1        759      1   266  1.609756                    16              759            1         249   1.112382\n15               1        759      1   266  1.609756                    16              759            1         249   1.112382\n16               1        759      1   266  1.609756                    16              759            1         249   1.112382\n17               1        759      1   266  1.609756                    16              759            1         249   1.112382\n18               1        759      1   266  1.609756                    16              759            1         249   1.112382\n...*/"
+    }
+]

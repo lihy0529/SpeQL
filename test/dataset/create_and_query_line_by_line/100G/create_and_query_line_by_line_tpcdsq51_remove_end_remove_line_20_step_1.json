@@ -1,0 +1,849 @@
+[
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\nSELECT * FROM web_v1 /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) SELECT \"WEB_V1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"WEB_V1\".\"D_DATE\" AS \"D_DATE\" , \"WEB_V1\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"WEB_V1\" AS \"WEB_V1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.079668,
+                    "execution_time": 0.031512,
+                    "compile_time": 0.000248,
+                    "planning_time": 0.023923,
+                    "create_size": 24
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.14701,
+                    "execution_time": 0.032725,
+                    "compile_time": 0.000265,
+                    "planning_time": 0.087776,
+                    "create_size": 24
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.57512,
+                    "execution_time": 2.13532,
+                    "compile_time": 0.269502,
+                    "planning_time": 0.028577,
+                    "create_size": 1664
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 11.22531,
+                    "execution_time": 4.226383,
+                    "compile_time": 9.728241,
+                    "planning_time": 0.028126,
+                    "create_size": 1664
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  cume_sales\n0       202  19980613      110.89\n1       202  19980618      135.95\n2       202  19980710      191.35\n3       202  19980714      333.29\n4       202  19980721      352.15\n5       202  19980722      409.14\n6       202  19980730      421.76\n7       202  19980805      491.57\n8       202  19980808      494.98\n9       202  19980813      513.33\n10      202  19980815      591.89\n11      202  19980818      598.93\n12      202  19980820      716.89\n13      202  19980823      731.17\n14      202  19980826      738.62\n15      202  19980828      751.48\n16      202  19980830      807.47\n17      202  19980831      825.55\n18      202  19980904      898.46\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017543,
+                    "execution_time": 0.007698,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.00408
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 2.474789,
+                    "execution_time": 0.008528,
+                    "compile_time": 2.417696,
+                    "planning_time": 0.039208
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  cume_sales\n0       202  19980613      110.89\n1       202  19980618      135.95\n2       202  19980710      191.35\n3       202  19980714      333.29\n4       202  19980721      352.15\n5       202  19980722      409.14\n6       202  19980730      421.76\n7       202  19980805      491.57\n8       202  19980808      494.98\n9       202  19980813      513.33\n10      202  19980815      591.89\n11      202  19980818      598.93\n12      202  19980820      716.89\n13      202  19980823      731.17\n14      202  19980826      738.62\n15      202  19980828      751.48\n16      202  19980830      807.47\n17      202  19980831      825.55\n18      202  19980904      898.46\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select * from store_v1, web_v1\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) SELECT \"STORE_V1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"STORE_V1\".\"D_DATE\" AS \"D_DATE\" , \"STORE_V1\".\"CUME_SALES\" AS \"CUME_SALES\" , \"WEB_V1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"WEB_V1\".\"D_DATE\" AS \"D_DATE\" , \"WEB_V1\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"STORE_V1\" AS \"STORE_V1\" CROSS JOIN \"WEB_V1\" AS \"WEB_V1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.933261,
+                    "execution_time": 3.625087,
+                    "compile_time": 0.042226,
+                    "planning_time": 0.026553,
+                    "create_size": 1914
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 9.948402,
+                    "execution_time": 6.316241,
+                    "compile_time": 3.362175,
+                    "planning_time": 0.086641,
+                    "create_size": 1914
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" AS \"CUME_SALES\" , \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK_COL_3\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE_COL_4\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" AS \"CUME_SALES\" , \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK_COL_3\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE_COL_4\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  cume_sales  item_sk_col_3  d_date_col_4  cume_sales_col_5\n0         7  19980601       51.18              1      19980602            107.74\n1         7  19980601       51.18              1      19980617            117.06\n2         7  19980601       51.18              1      19980630            156.44\n3         7  19980601       51.18              1      19980703            290.31\n4         7  19980601       51.18              1      19980704            417.06\n5         7  19980601       51.18              1      19980708            516.80\n6         7  19980601       51.18              1      19980711            559.07\n7         7  19980601       51.18              1      19980712            570.34\n8         7  19980601       51.18              1      19980718            575.57\n9         7  19980601       51.18              1      19980723            723.64\n10        7  19980601       51.18              1      19980726            788.34\n11        7  19980601       51.18              1      19980729            831.50\n12        7  19980601       51.18              1      19980731            838.98\n13        7  19980601       51.18              1      19980801            853.61\n14        7  19980601       51.18              1      19980802            864.24\n15        7  19980601       51.18              1      19980807            889.50\n16        7  19980601       51.18              1      19980812            929.45\n17        7  19980601       51.18              1      19980813            954.40\n18        7  19980601       51.18              1      19980816            975.51\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.501893,
+                    "execution_time": 0.488148,
+                    "compile_time": 0.030174,
+                    "planning_time": 0.006417
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.268967,
+                    "execution_time": 0.499687,
+                    "compile_time": 3.203643,
+                    "planning_time": 0.041838
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" AS \"CUME_SALES\" , \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" AS \"CUME_SALES\" , \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK_COL_3\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE_COL_4\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  cume_sales  item_sk_col_3  d_date_col_4  cume_sales_col_5\n0         7  19980601       51.18              1      19980602            107.74\n1         7  19980601       51.18              1      19980617            117.06\n2         7  19980601       51.18              1      19980630            156.44\n3         7  19980601       51.18              1      19980703            290.31\n4         7  19980601       51.18              1      19980704            417.06\n5         7  19980601       51.18              1      19980708            516.80\n6         7  19980601       51.18              1      19980711            559.07\n7         7  19980601       51.18              1      19980712            570.34\n8         7  19980601       51.18              1      19980718            575.57\n9         7  19980601       51.18              1      19980723            723.64\n10        7  19980601       51.18              1      19980726            788.34\n11        7  19980601       51.18              1      19980729            831.50\n12        7  19980601       51.18              1      19980731            838.98\n13        7  19980601       51.18              1      19980801            853.61\n14        7  19980601       51.18              1      19980802            864.24\n15        7  19980601       51.18              1      19980807            889.50\n16        7  19980601       51.18              1      19980812            929.45\n17        7  19980601       51.18              1      19980813            954.40\n18        7  19980601       51.18              1      19980816            975.51\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk from web_v1)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) SELECT \"WEB_V1\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"WEB_V1\" AS \"WEB_V1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.561884,
+                    "execution_time": 0.488555,
+                    "compile_time": 0.016136,
+                    "planning_time": 0.003725,
+                    "create_size": 1024
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.901115,
+                    "execution_time": 0.508423,
+                    "compile_time": 3.272844,
+                    "planning_time": 0.058584,
+                    "create_size": 1024
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" LIMIT 21",
+                "preview": "\n/*    item_sk\n0       260\n1       260\n2       260\n3       260\n4       260\n5       260\n6       260\n7       260\n8       260\n9       260\n10      260\n11      260\n12      260\n13      260\n14      260\n15      260\n16      260\n17      260\n18      260\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016514,
+                    "execution_time": 0.007182,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.003806
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053269,
+                    "execution_time": 0.007325,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.038303
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"ITEM_SK\" AS \"ITEM_SK\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\""
+            }
+        ],
+        "preview": "\n/*    item_sk\n0       260\n1       260\n2       260\n3       260\n4       260\n5       260\n6       260\n7       260\n8       260\n9       260\n10      260\n11      260\n12      260\n13      260\n14      260\n15      260\n16      260\n17      260\n18      260\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n/*CURSOR_IDENTIFIER*/ \n     ,cume_sales\n from web_v1) as web_data",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) SELECT \"WEB_V1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"WEB_V1\".\"D_DATE\" AS \"D_DATE\" , \"WEB_V1\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"WEB_V1\" AS \"WEB_V1\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  cume_sales\n0       260  19980604       37.10\n1       260  19980608      194.97\n2       260  19980614      210.26\n3       260  19980629      246.44\n4       260  19980701      263.93\n5       260  19980711      317.39\n6       260  19980724      462.83\n7       260  19980726      477.21\n8       260  19980729      482.96\n9       260  19980731      490.06\n10      260  19980801      587.74\n11      260  19980804      591.21\n12      260  19980808      686.89\n13      260  19980811      720.88\n14      260  19980816      727.87\n15      260  19980830      758.82\n16      260  19980901      778.33\n17      260  19980906      783.18\n18      260  19980908      833.46\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018029,
+                    "execution_time": 0.008063,
+                    "compile_time": 5e-05,
+                    "planning_time": 0.004204
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018105,
+                    "execution_time": 0.008388,
+                    "compile_time": 4.5e-05,
+                    "planning_time": 0.004078
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  cume_sales\n0       260  19980604       37.10\n1       260  19980608      194.97\n2       260  19980614      210.26\n3       260  19980629      246.44\n4       260  19980701      263.93\n5       260  19980711      317.39\n6       260  19980724      462.83\n7       260  19980726      477.21\n8       260  19980729      482.96\n9       260  19980731      490.06\n10      260  19980801      587.74\n11      260  19980804      591.21\n12      260  19980808      686.89\n13      260  19980811      720.88\n14      260  19980816      727.87\n15      260  19980830      758.82\n16      260  19980901      778.33\n17      260  19980906      783.18\n18      260  19980908      833.46\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  w.item_sk,\n         w.d_date,\n         w.cume_sales as web_sales,\n         s.cume_sales as store_sales \nfrom web_v1 w\njoin store_v1 s on w.item_sk = s.item_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) SELECT \"W\".\"ITEM_SK\" AS \"ITEM_SK\" , \"W\".\"D_DATE\" AS \"D_DATE\" , \"W\".\"CUME_SALES\" AS \"WEB_SALES\" , \"S\".\"CUME_SALES\" AS \"STORE_SALES\" FROM \"WEB_V1\" AS \"W\" JOIN \"STORE_V1\" AS \"S\" ON \"S\".\"ITEM_SK\" = \"W\".\"ITEM_SK\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" AS \"CUME_SALES\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.726401,
+                    "execution_time": 0.520941,
+                    "compile_time": 0.000242,
+                    "planning_time": 0.003964,
+                    "create_size": 1658
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 5.065517,
+                    "execution_time": 0.625982,
+                    "compile_time": 4.174535,
+                    "planning_time": 0.058611,
+                    "create_size": 1658
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"W\".\"ITEM_SK\" AS \"ITEM_SK\" , \"W\".\"D_DATE\" AS \"D_DATE\" , \"W\".\"CUME_SALES\" AS \"WEB_SALES\" , \"S\".\"CUME_SALES\" AS \"STORE_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"W\" JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"S\" ON \"S\".\"ITEM_SK\" = \"W\".\"ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 30,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"W\".\"ITEM_SK\" AS \"ITEM_SK\" , \"W\".\"D_DATE\" AS \"D_DATE\" , \"W\".\"CUME_SALES\" AS \"WEB_SALES\" , \"S\".\"CUME_SALES\" AS \"STORE_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"W\" JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"S\" ON \"S\".\"ITEM_SK\" = \"W\".\"ITEM_SK\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales\n0        80  19980606      68.86        14.99\n1        80  19980612      74.89        14.99\n2        80  19980618     127.42        14.99\n3        80  19980623     149.62        14.99\n4        80  19980624     152.46        14.99\n5        80  19980627     155.80        14.99\n6        80  19980628     175.31        14.99\n7        80  19980629     199.54        14.99\n8        80  19980707     207.59        14.99\n9        80  19980709     267.49        14.99\n10       80  19980717     290.64        14.99\n11       80  19980803     393.38        14.99\n12       80  19980805     428.71        14.99\n13       80  19980806     520.72        14.99\n14       80  19980807     575.01        14.99\n15       80  19980808     688.63        14.99\n16       80  19980809     699.91        14.99\n17       80  19980814     701.98        14.99\n18       80  19980821     862.32        14.99\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.046156,
+                    "execution_time": 0.019431,
+                    "compile_time": 6.8e-05,
+                    "planning_time": 0.006672
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.60481,
+                    "execution_time": 0.036923,
+                    "compile_time": 3.512673,
+                    "planning_time": 0.041642
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"W\".\"ITEM_SK\" AS \"ITEM_SK\" , \"W\".\"D_DATE\" AS \"D_DATE\" , \"W\".\"CUME_SALES\" AS \"WEB_SALES\" , \"S\".\"CUME_SALES\" AS \"STORE_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"W\" JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"S\" ON \"S\".\"ITEM_SK\" = \"W\".\"ITEM_SK\"",
+                "rewrite": "SELECT \"W\".\"ITEM_SK\" AS \"ITEM_SK\" , \"W\".\"D_DATE\" AS \"D_DATE\" , \"W\".\"CUME_SALES\" AS \"WEB_SALES\" , \"S\".\"CUME_SALES\" AS \"STORE_SALES\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"W\" JOIN \"SPEQLITE_TEMP_TABLE_5\" AS \"S\" ON \"S\".\"ITEM_SK\" = \"W\".\"ITEM_SK\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales\n0        80  19980606      68.86        14.99\n1        80  19980612      74.89        14.99\n2        80  19980618     127.42        14.99\n3        80  19980623     149.62        14.99\n4        80  19980624     152.46        14.99\n5        80  19980627     155.80        14.99\n6        80  19980628     175.31        14.99\n7        80  19980629     199.54        14.99\n8        80  19980707     207.59        14.99\n9        80  19980709     267.49        14.99\n10       80  19980717     290.64        14.99\n11       80  19980803     393.38        14.99\n12       80  19980805     428.71        14.99\n13       80  19980806     520.72        14.99\n14       80  19980807     575.01        14.99\n15       80  19980808     688.63        14.99\n16       80  19980809     699.91        14.99\n17       80  19980814     701.98        14.99\n18       80  19980821     862.32        14.99\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(WS_SALES_PRICE))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere WS_SOLD_DATE_SK=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date\n),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(SS_SALES_PRICE))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere SS_SOLD_DATE_SK=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date\n)\nselect  *\nfrom (\n  select item_sk\n     ,d_date\n     ,cume_sales as web_sales\n     ,0 as store_sales\n     ,max(cume_sales) \n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,0 as store_cumulative \n     from web_v1\n  union all\n  select item_sk\n     ,d_date\n     ,0 as web_sales\n     ,cume_sales as store_sales\n     ,0 as web_cumulative\n     ,max(cume_sales) \n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from store_v1\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"_Q_0\" AS ( SELECT \"WEB_V1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"WEB_V1\".\"D_DATE\" AS \"D_DATE\" , \"WEB_V1\".\"CUME_SALES\" AS \"WEB_SALES\" , 0 AS \"STORE_SALES\" , MAX ( \"WEB_V1\".\"CUME_SALES\" ) OVER ( PARTITION BY \"WEB_V1\".\"ITEM_SK\" ORDER BY \"WEB_V1\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , 0 AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB_V1\" UNION ALL SELECT \"STORE_V1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"STORE_V1\".\"D_DATE\" AS \"D_DATE\" , 0 AS \"WEB_SALES\" , \"STORE_V1\".\"CUME_SALES\" AS \"STORE_SALES\" , 0 AS \"WEB_CUMULATIVE\" , MAX ( \"STORE_V1\".\"CUME_SALES\" ) OVER ( PARTITION BY \"STORE_V1\".\"ITEM_SK\" ORDER BY \"STORE_V1\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"STORE_V1\" AS \"STORE_V1\" ) SELECT \"_Q_0\".\"ITEM_SK\" AS \"ITEM_SK\" , \"_Q_0\".\"D_DATE\" AS \"D_DATE\" , \"_Q_0\".\"WEB_SALES\" AS \"WEB_SALES\" , \"_Q_0\".\"STORE_SALES\" AS \"STORE_SALES\" , \"_Q_0\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"_Q_0\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" AS \"WEB_SALES\" , 0 AS \"STORE_SALES\" , MAX ( \"SPEQLITE_TEMP_TABLE_2\".\"CUME_SALES\" ) OVER ( PARTITION BY \"SPEQLITE_TEMP_TABLE_2\".\"ITEM_SK\" ORDER BY \"SPEQLITE_TEMP_TABLE_2\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , 0 AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_3\".\"D_DATE\" AS \"D_DATE\" , 0 AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" AS \"STORE_SALES\" , 0 AS \"WEB_CUMULATIVE\" , MAX ( \"SPEQLITE_TEMP_TABLE_3\".\"CUME_SALES\" ) OVER ( PARTITION BY \"SPEQLITE_TEMP_TABLE_3\".\"ITEM_SK\" ORDER BY \"SPEQLITE_TEMP_TABLE_3\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.673011,
+                    "execution_time": 1.124267,
+                    "compile_time": 0.000462,
+                    "planning_time": 0.009929,
+                    "create_size": 3456
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 11.250619,
+                    "execution_time": 1.134388,
+                    "compile_time": 9.561866,
+                    "planning_time": 0.051715,
+                    "create_size": 3456
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_6\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_6\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_6\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_6\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       202  19980613     110.89          0.0          110.89               0.0\n1       202  19980618     135.95          0.0          135.95               0.0\n2       202  19980710     191.35          0.0          191.35               0.0\n3       202  19980714     333.29          0.0          333.29               0.0\n4       202  19980721     352.15          0.0          352.15               0.0\n5       202  19980722     409.14          0.0          409.14               0.0\n6       202  19980730     421.76          0.0          421.76               0.0\n7       202  19980805     491.57          0.0          491.57               0.0\n8       202  19980808     494.98          0.0          494.98               0.0\n9       202  19980813     513.33          0.0          513.33               0.0\n10      202  19980815     591.89          0.0          591.89               0.0\n11      202  19980818     598.93          0.0          598.93               0.0\n12      202  19980820     716.89          0.0          716.89               0.0\n13      202  19980823     731.17          0.0          731.17               0.0\n14      202  19980826     738.62          0.0          738.62               0.0\n15      202  19980828     751.48          0.0          751.48               0.0\n16      202  19980830     807.47          0.0          807.47               0.0\n17      202  19980831     825.55          0.0          825.55               0.0\n18      202  19980904     898.46          0.0          898.46               0.0\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018471,
+                    "execution_time": 0.008425,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.003731
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.33936,
+                    "execution_time": 0.008055,
+                    "compile_time": 3.281838,
+                    "planning_time": 0.039043
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_6\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_6\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_6\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_6\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_6\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_6\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_6\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_6\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_6\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       202  19980613     110.89          0.0          110.89               0.0\n1       202  19980618     135.95          0.0          135.95               0.0\n2       202  19980710     191.35          0.0          191.35               0.0\n3       202  19980714     333.29          0.0          333.29               0.0\n4       202  19980721     352.15          0.0          352.15               0.0\n5       202  19980722     409.14          0.0          409.14               0.0\n6       202  19980730     421.76          0.0          421.76               0.0\n7       202  19980805     491.57          0.0          491.57               0.0\n8       202  19980808     494.98          0.0          494.98               0.0\n9       202  19980813     513.33          0.0          513.33               0.0\n10      202  19980815     591.89          0.0          591.89               0.0\n11      202  19980818     598.93          0.0          598.93               0.0\n12      202  19980820     716.89          0.0          716.89               0.0\n13      202  19980823     731.17          0.0          731.17               0.0\n14      202  19980826     738.62          0.0          738.62               0.0\n15      202  19980828     751.48          0.0          751.48               0.0\n16      202  19980830     807.47          0.0          807.47               0.0\n17      202  19980831     825.55          0.0          825.55               0.0\n18      202  19980904     898.46          0.0          898.46               0.0\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(WS_SALES_PRICE))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(SS_SALES_PRICE))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (\n         select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                , coalesce(web.cume_sales, 0) as web_sales\n                , coalesce(store.cume_sales, 0) as store_sales\n           from web_v1 web\n           full outer join store_v1 store\n           on web.item_sk = store.item_sk and web.d_date = store.d_date\n     )\n)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"_Q_1\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , COALESCE ( \"WEB\".\"CUME_SALES\" , 0 ) AS \"WEB_SALES\" , COALESCE ( \"STORE\".\"CUME_SALES\" , 0 ) AS \"STORE_SALES\" , MAX ( COALESCE ( \"WEB\".\"CUME_SALES\" , 0 ) ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( COALESCE ( \"STORE\".\"CUME_SALES\" , 0 ) ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"_Q_1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"_Q_1\".\"D_DATE\" AS \"D_DATE\" , \"_Q_1\".\"WEB_SALES\" AS \"WEB_SALES\" , \"_Q_1\".\"STORE_SALES\" AS \"STORE_SALES\" , \"_Q_1\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"_Q_1\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , COALESCE ( \"WEB\".\"CUME_SALES\" , 0 ) AS \"WEB_SALES\" , COALESCE ( \"STORE\".\"CUME_SALES\" , 0 ) AS \"STORE_SALES\" , MAX ( COALESCE ( \"WEB\".\"CUME_SALES\" , 0 ) ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( COALESCE ( \"STORE\".\"CUME_SALES\" , 0 ) ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"WEB\" FULL JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.757479,
+                    "execution_time": 2.077875,
+                    "compile_time": 0.000497,
+                    "planning_time": 0.009159,
+                    "create_size": 2688
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 12.957792,
+                    "execution_time": 2.031534,
+                    "compile_time": 10.792302,
+                    "planning_time": 0.097371,
+                    "create_size": 2688
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_7\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_7\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980602     107.74         2.64          107.74              2.64\n1         1  19980603       0.00        61.26          107.74             61.26\n2         1  19980608       0.00        72.59          107.74             72.59\n3         1  19980610       0.00        83.00          107.74             83.00\n4         1  19980611       0.00       367.06          107.74            367.06\n5         1  19980613       0.00       476.80          107.74            476.80\n6         1  19980614       0.00       518.27          107.74            518.27\n7         1  19980617     117.06       527.74          117.06            527.74\n8         1  19980619       0.00       558.45          117.06            558.45\n9         1  19980620       0.00       682.57          117.06            682.57\n10        1  19980622       0.00       697.57          117.06            697.57\n11        1  19980624       0.00       865.14          117.06            865.14\n12        1  19980626       0.00       971.16          117.06            971.16\n13        1  19980627       0.00      1043.28          117.06           1043.28\n14        1  19980630     156.44         0.00          156.44           1043.28\n15        1  19980701       0.00      1120.33          156.44           1120.33\n16        1  19980703     290.31         0.00          290.31           1120.33\n17        1  19980704     417.06      1154.59          417.06           1154.59\n18        1  19980705       0.00      1177.30          417.06           1177.30\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018173,
+                    "execution_time": 0.008106,
+                    "compile_time": 5.2e-05,
+                    "planning_time": 0.003789
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054718,
+                    "execution_time": 0.00792,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.038792
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_7\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_7\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_7\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_7\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_7\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_7\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980602     107.74         2.64          107.74              2.64\n1         1  19980603       0.00        61.26          107.74             61.26\n2         1  19980608       0.00        72.59          107.74             72.59\n3         1  19980610       0.00        83.00          107.74             83.00\n4         1  19980611       0.00       367.06          107.74            367.06\n5         1  19980613       0.00       476.80          107.74            476.80\n6         1  19980614       0.00       518.27          107.74            518.27\n7         1  19980617     117.06       527.74          117.06            527.74\n8         1  19980619       0.00       558.45          117.06            558.45\n9         1  19980620       0.00       682.57          117.06            682.57\n10        1  19980622       0.00       697.57          117.06            697.57\n11        1  19980624       0.00       865.14          117.06            865.14\n12        1  19980626       0.00       971.16          117.06            971.16\n13        1  19980627       0.00      1043.28          117.06           1043.28\n14        1  19980630     156.44         0.00          156.44           1043.28\n15        1  19980701       0.00      1120.33          156.44           1120.33\n16        1  19980703     290.31         0.00          290.31           1120.33\n17        1  19980704     417.06      1154.59          417.06           1154.59\n18        1  19980705       0.00      1177.30          417.06           1177.30\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                ,store.cume_sales store_sales\n           from web_v1 web\n           full outer join store_v1 store\n           on web.item_sk = store.item_sk and web.d_date = store.d_date\n     )\n) \n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"_Q_1\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"_Q_1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"_Q_1\".\"D_DATE\" AS \"D_DATE\" , \"_Q_1\".\"WEB_SALES\" AS \"WEB_SALES\" , \"_Q_1\".\"STORE_SALES\" AS \"STORE_SALES\" , \"_Q_1\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"_Q_1\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"WEB\" FULL JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.391118,
+                    "execution_time": 1.806951,
+                    "compile_time": 0.000496,
+                    "planning_time": 0.008279,
+                    "create_size": 2426
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 9.631355,
+                    "execution_time": 1.834845,
+                    "compile_time": 7.69887,
+                    "planning_time": 0.064928,
+                    "create_size": 2426
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       202  19980601        NaN        23.54             NaN             23.54\n1       202  19980602        NaN       131.68             NaN            131.68\n2       202  19980603        NaN       142.69             NaN            142.69\n3       202  19980605        NaN       182.39             NaN            182.39\n4       202  19980609        NaN       214.75             NaN            214.75\n5       202  19980611        NaN       216.52             NaN            216.52\n6       202  19980613     110.89          NaN          110.89            216.52\n7       202  19980616        NaN       216.54          110.89            216.54\n8       202  19980618     135.95          NaN          135.95            216.54\n9       202  19980620        NaN       250.33          135.95            250.33\n10      202  19980621        NaN       255.96          135.95            255.96\n11      202  19980622        NaN       282.37          135.95            282.37\n12      202  19980623        NaN       336.53          135.95            336.53\n13      202  19980624        NaN       336.53          135.95            336.53\n14      202  19980625        NaN       390.31          135.95            390.31\n15      202  19980629        NaN       399.97          135.95            399.97\n16      202  19980630        NaN       401.17          135.95            401.17\n17      202  19980701        NaN       408.40          135.95            408.40\n18      202  19980702        NaN       556.26          135.95            556.26\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018657,
+                    "execution_time": 0.008125,
+                    "compile_time": 5.3e-05,
+                    "planning_time": 0.003801
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053559,
+                    "execution_time": 0.007843,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.039255
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       202  19980601        NaN        23.54             NaN             23.54\n1       202  19980602        NaN       131.68             NaN            131.68\n2       202  19980603        NaN       142.69             NaN            142.69\n3       202  19980605        NaN       182.39             NaN            182.39\n4       202  19980609        NaN       214.75             NaN            214.75\n5       202  19980611        NaN       216.52             NaN            216.52\n6       202  19980613     110.89          NaN          110.89            216.52\n7       202  19980616        NaN       216.54          110.89            216.54\n8       202  19980618     135.95          NaN          135.95            216.54\n9       202  19980620        NaN       250.33          135.95            250.33\n10      202  19980621        NaN       255.96          135.95            255.96\n11      202  19980622        NaN       282.37          135.95            282.37\n12      202  19980623        NaN       336.53          135.95            336.53\n13      202  19980624        NaN       336.53          135.95            336.53\n14      202  19980625        NaN       390.31          135.95            390.31\n15      202  19980629        NaN       399.97          135.95            399.97\n16      202  19980630        NaN       401.17          135.95            401.17\n17      202  19980701        NaN       408.40          135.95            408.40\n18      202  19980702        NaN       556.26          135.95            556.26\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web\n           full outer join store_v1 store\n           on web.item_sk = store.item_sk and web.d_date = store.d_date\n     )\n)/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"_Q_1\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"_Q_1\".\"ITEM_SK\" AS \"ITEM_SK\" , \"_Q_1\".\"D_DATE\" AS \"D_DATE\" , \"_Q_1\".\"WEB_SALES\" AS \"WEB_SALES\" , \"_Q_1\".\"STORE_SALES\" AS \"STORE_SALES\" , \"_Q_1\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"_Q_1\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"_Q_1\" AS \"_Q_1\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       260  19980601        NaN        36.54             NaN             36.54\n1       260  19980602        NaN       156.02             NaN            156.02\n2       260  19980603        NaN       239.33             NaN            239.33\n3       260  19980604      37.10       244.04           37.10            244.04\n4       260  19980605        NaN       252.03           37.10            252.03\n5       260  19980608     194.97       318.50          194.97            318.50\n6       260  19980610        NaN       348.66          194.97            348.66\n7       260  19980611        NaN       430.56          194.97            430.56\n8       260  19980614     210.26          NaN          210.26            430.56\n9       260  19980615        NaN       475.44          210.26            475.44\n10      260  19980616        NaN       495.00          210.26            495.00\n11      260  19980617        NaN       514.16          210.26            514.16\n12      260  19980619        NaN       600.21          210.26            600.21\n13      260  19980620        NaN       780.42          210.26            780.42\n14      260  19980621        NaN       849.21          210.26            849.21\n15      260  19980623        NaN       900.95          210.26            900.95\n16      260  19980625        NaN       977.50          210.26            977.50\n17      260  19980627        NaN      1027.65          210.26           1027.65\n18      260  19980629     246.44      1130.58          246.44           1130.58\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.029788,
+                    "execution_time": 0.007924,
+                    "compile_time": 5.8e-05,
+                    "planning_time": 0.003865
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.01825,
+                    "execution_time": 0.008,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.003841
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       260  19980601        NaN        36.54             NaN             36.54\n1       260  19980602        NaN       156.02             NaN            156.02\n2       260  19980603        NaN       239.33             NaN            239.33\n3       260  19980604      37.10       244.04           37.10            244.04\n4       260  19980605        NaN       252.03           37.10            252.03\n5       260  19980608     194.97       318.50          194.97            318.50\n6       260  19980610        NaN       348.66          194.97            348.66\n7       260  19980611        NaN       430.56          194.97            430.56\n8       260  19980614     210.26          NaN          210.26            430.56\n9       260  19980615        NaN       475.44          210.26            475.44\n10      260  19980616        NaN       495.00          210.26            495.00\n11      260  19980617        NaN       514.16          210.26            514.16\n12      260  19980619        NaN       600.21          210.26            600.21\n13      260  19980620        NaN       780.42          210.26            780.42\n14      260  19980621        NaN       849.21          210.26            849.21\n15      260  19980623        NaN       900.95          210.26            900.95\n16      260  19980625        NaN       977.50          210.26            977.50\n17      260  19980627        NaN      1027.65          210.26           1027.65\n18      260  19980629     246.44      1130.58          246.44           1130.58\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date_sk as d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date_sk rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date_sk),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date_sk as d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date_sk rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date_sk)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n           and web.d_date = store.d_date)) subquery\n/*CURSOR_IDENTIFIER*/\n           )",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE_SK\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE_SK\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\" ) , \"_Q_0\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"_Q_0\".\"ITEM_SK\" AS \"ITEM_SK\" , \"_Q_0\".\"D_DATE\" AS \"D_DATE\" , \"_Q_0\".\"WEB_SALES\" AS \"WEB_SALES\" , \"_Q_0\".\"STORE_SALES\" AS \"STORE_SALES\" , \"_Q_0\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"_Q_0\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"_Q_0\" AS \"_Q_0\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"SPEQLITE_TEMP_TABLE_1\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"SPEQLITE_TEMP_TABLE_1\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"SPEQLITE_TEMP_TABLE_1\" AS \"SPEQLITE_TEMP_TABLE_1\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.064236,
+                    "execution_time": 0.036854,
+                    "compile_time": 0.000239,
+                    "planning_time": 0.002996,
+                    "create_size": 15
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.129914,
+                    "execution_time": 0.037762,
+                    "compile_time": 0.000253,
+                    "planning_time": 0.065382,
+                    "create_size": 20
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE_SK\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.691429,
+                    "execution_time": 1.365273,
+                    "compile_time": 0.069122,
+                    "planning_time": 0.028358,
+                    "create_size": 1664
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 5.704282,
+                    "execution_time": 2.062545,
+                    "compile_time": 3.302191,
+                    "planning_time": 0.094099,
+                    "create_size": 1664
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE_SK\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_9\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 3.936978,
+                    "execution_time": 3.579769,
+                    "compile_time": 0.09552,
+                    "planning_time": 0.027015,
+                    "create_size": 1914
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 9.828318,
+                    "execution_time": 6.169096,
+                    "compile_time": 3.309835,
+                    "planning_time": 0.087631,
+                    "create_size": 1914
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"WEB\" FULL JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 2.478576,
+                    "execution_time": 1.860454,
+                    "compile_time": 0.000519,
+                    "planning_time": 0.008867,
+                    "create_size": 2426
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 2.64663,
+                    "execution_time": 1.986331,
+                    "compile_time": 0.000516,
+                    "planning_time": 0.065537,
+                    "create_size": 2426
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_12\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_12\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_12\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_12\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_12\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" LIMIT 21",
+                "preview": "\n/*    item_sk   d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  2450967     107.74         2.64          107.74              2.64\n1         1  2450968        NaN        61.26          107.74             61.26\n2         1  2450973        NaN        72.59          107.74             72.59\n3         1  2450975        NaN        83.00          107.74             83.00\n4         1  2450976        NaN       367.06          107.74            367.06\n5         1  2450978        NaN       476.80          107.74            476.80\n6         1  2450979        NaN       518.27          107.74            518.27\n7         1  2450982     117.06       527.74          117.06            527.74\n8         1  2450984        NaN       558.45          117.06            558.45\n9         1  2450985        NaN       682.57          117.06            682.57\n10        1  2450987        NaN       697.57          117.06            697.57\n11        1  2450989        NaN       865.14          117.06            865.14\n12        1  2450991        NaN       971.16          117.06            971.16\n13        1  2450992        NaN      1043.28          117.06           1043.28\n14        1  2450995     156.44          NaN          156.44           1043.28\n15        1  2450996        NaN      1120.33          156.44           1120.33\n16        1  2450998     290.31          NaN          290.31           1120.33\n17        1  2450999     417.06      1154.59          417.06           1154.59\n18        1  2451000        NaN      1177.30          417.06           1177.30\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018423,
+                    "execution_time": 0.00832,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.0038
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 2.504578,
+                    "execution_time": 0.008586,
+                    "compile_time": 2.449479,
+                    "planning_time": 0.038892
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_12\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_12\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_12\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_12\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_12\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_12\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_12\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_12\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_12\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_12\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_12\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\""
+            }
+        ],
+        "preview": "\n/*    item_sk   d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  2450967     107.74         2.64          107.74              2.64\n1         1  2450968        NaN        61.26          107.74             61.26\n2         1  2450973        NaN        72.59          107.74             72.59\n3         1  2450975        NaN        83.00          107.74             83.00\n4         1  2450976        NaN       367.06          107.74            367.06\n5         1  2450978        NaN       476.80          107.74            476.80\n6         1  2450979        NaN       518.27          107.74            518.27\n7         1  2450982     117.06       527.74          117.06            527.74\n8         1  2450984        NaN       558.45          117.06            558.45\n9         1  2450985        NaN       682.57          117.06            682.57\n10        1  2450987        NaN       697.57          117.06            697.57\n11        1  2450989        NaN       865.14          117.06            865.14\n12        1  2450991        NaN       971.16          117.06            971.16\n13        1  2450992        NaN      1043.28          117.06           1043.28\n14        1  2450995     156.44          NaN          156.44           1043.28\n15        1  2450996        NaN      1120.33          156.44           1120.33\n16        1  2450998     290.31          NaN          290.31           1120.33\n17        1  2450999     417.06      1154.59          417.06           1154.59\n18        1  2451000        NaN      1177.30          417.06           1177.30\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n                                                          and web.d_date = store.d_date)) as combined) as final\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"FINAL\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"FINAL\".\"ITEM_SK\" AS \"ITEM_SK\" , \"FINAL\".\"D_DATE\" AS \"D_DATE\" , \"FINAL\".\"WEB_SALES\" AS \"WEB_SALES\" , \"FINAL\".\"STORE_SALES\" AS \"STORE_SALES\" , \"FINAL\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"FINAL\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"FINAL\" AS \"FINAL\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       181  19980601        NaN        38.90             NaN             38.90\n1       181  19980602        NaN        48.74             NaN             48.74\n2       181  19980603      32.05       185.44           32.05            185.44\n3       181  19980604      50.22          NaN           50.22            185.44\n4       181  19980605        NaN       282.89           50.22            282.89\n5       181  19980608        NaN       423.27           50.22            423.27\n6       181  19980609      59.20       462.61           59.20            462.61\n7       181  19980610        NaN       522.16           59.20            522.16\n8       181  19980611        NaN       556.94           59.20            556.94\n9       181  19980612        NaN       737.97           59.20            737.97\n10      181  19980615        NaN       795.73           59.20            795.73\n11      181  19980616        NaN       826.58           59.20            826.58\n12      181  19980617     116.92       936.78          116.92            936.78\n13      181  19980618        NaN       937.65          116.92            937.65\n14      181  19980619        NaN       985.75          116.92            985.75\n15      181  19980621        NaN      1052.76          116.92           1052.76\n16      181  19980622        NaN      1054.96          116.92           1054.96\n17      181  19980624        NaN      1077.08          116.92           1077.08\n18      181  19980625        NaN      1220.27          116.92           1220.27\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017838,
+                    "execution_time": 0.007826,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.003768
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018784,
+                    "execution_time": 0.00847,
+                    "compile_time": 5.1e-05,
+                    "planning_time": 0.003911
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       181  19980601        NaN        38.90             NaN             38.90\n1       181  19980602        NaN        48.74             NaN             48.74\n2       181  19980603      32.05       185.44           32.05            185.44\n3       181  19980604      50.22          NaN           50.22            185.44\n4       181  19980605        NaN       282.89           50.22            282.89\n5       181  19980608        NaN       423.27           50.22            423.27\n6       181  19980609      59.20       462.61           59.20            462.61\n7       181  19980610        NaN       522.16           59.20            522.16\n8       181  19980611        NaN       556.94           59.20            556.94\n9       181  19980612        NaN       737.97           59.20            737.97\n10      181  19980615        NaN       795.73           59.20            795.73\n11      181  19980616        NaN       826.58           59.20            826.58\n12      181  19980617     116.92       936.78          116.92            936.78\n13      181  19980618        NaN       937.65          116.92            937.65\n14      181  19980619        NaN       985.75          116.92            985.75\n15      181  19980621        NaN      1052.76          116.92           1052.76\n16      181  19980622        NaN      1054.96          116.92           1054.96\n17      181  19980624        NaN      1077.08          116.92           1077.08\n18      181  19980625        NaN      1220.27          116.92           1220.27\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n                                                          and web.d_date = store.d_date)\n          )x )y\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"Y\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"Y\".\"ITEM_SK\" AS \"ITEM_SK\" , \"Y\".\"D_DATE\" AS \"D_DATE\" , \"Y\".\"WEB_SALES\" AS \"WEB_SALES\" , \"Y\".\"STORE_SALES\" AS \"STORE_SALES\" , \"Y\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"Y\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"Y\" AS \"Y\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       202  19980601        NaN        23.54             NaN             23.54\n1       202  19980602        NaN       131.68             NaN            131.68\n2       202  19980603        NaN       142.69             NaN            142.69\n3       202  19980605        NaN       182.39             NaN            182.39\n4       202  19980609        NaN       214.75             NaN            214.75\n5       202  19980611        NaN       216.52             NaN            216.52\n6       202  19980613     110.89          NaN          110.89            216.52\n7       202  19980616        NaN       216.54          110.89            216.54\n8       202  19980618     135.95          NaN          135.95            216.54\n9       202  19980620        NaN       250.33          135.95            250.33\n10      202  19980621        NaN       255.96          135.95            255.96\n11      202  19980622        NaN       282.37          135.95            282.37\n12      202  19980623        NaN       336.53          135.95            336.53\n13      202  19980624        NaN       336.53          135.95            336.53\n14      202  19980625        NaN       390.31          135.95            390.31\n15      202  19980629        NaN       399.97          135.95            399.97\n16      202  19980630        NaN       401.17          135.95            401.17\n17      202  19980701        NaN       408.40          135.95            408.40\n18      202  19980702        NaN       556.26          135.95            556.26\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018684,
+                    "execution_time": 0.00843,
+                    "compile_time": 5.3e-05,
+                    "planning_time": 0.003787
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018035,
+                    "execution_time": 0.007702,
+                    "compile_time": 5.3e-05,
+                    "planning_time": 0.003835
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0       202  19980601        NaN        23.54             NaN             23.54\n1       202  19980602        NaN       131.68             NaN            131.68\n2       202  19980603        NaN       142.69             NaN            142.69\n3       202  19980605        NaN       182.39             NaN            182.39\n4       202  19980609        NaN       214.75             NaN            214.75\n5       202  19980611        NaN       216.52             NaN            216.52\n6       202  19980613     110.89          NaN          110.89            216.52\n7       202  19980616        NaN       216.54          110.89            216.54\n8       202  19980618     135.95          NaN          135.95            216.54\n9       202  19980620        NaN       250.33          135.95            250.33\n10      202  19980621        NaN       255.96          135.95            255.96\n11      202  19980622        NaN       282.37          135.95            282.37\n12      202  19980623        NaN       336.53          135.95            336.53\n13      202  19980624        NaN       336.53          135.95            336.53\n14      202  19980625        NaN       390.31          135.95            390.31\n15      202  19980629        NaN       399.97          135.95            399.97\n16      202  19980630        NaN       401.17          135.95            401.17\n17      202  19980701        NaN       408.40          135.95            408.40\n18      202  19980702        NaN       556.26          135.95            556.26\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n                                                          and web.d_date = store.d_date)\n          )x )y\nwhere web_cumulative > store_cumulative\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"Y\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"Y\".\"ITEM_SK\" AS \"ITEM_SK\" , \"Y\".\"D_DATE\" AS \"D_DATE\" , \"Y\".\"WEB_SALES\" AS \"WEB_SALES\" , \"Y\".\"STORE_SALES\" AS \"STORE_SALES\" , \"Y\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"Y\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"Y\" AS \"Y\" WHERE \"Y\".\"STORE_CUMULATIVE\" < \"Y\".\"WEB_CUMULATIVE\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_13\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" < \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.657208,
+                    "execution_time": 0.123107,
+                    "compile_time": 0.049226,
+                    "planning_time": 0.004329,
+                    "create_size": 1152
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 9.006303,
+                    "execution_time": 0.541351,
+                    "compile_time": 7.899933,
+                    "planning_time": 0.061411,
+                    "create_size": 1152
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0      1868  19980603      31.66        25.50           31.66             25.50\n1      1868  19980604      98.88        50.70           98.88             50.70\n2      1868  19980606        NaN        84.41           98.88             84.41\n3      1868  19980607        NaN        84.41           98.88             84.41\n4      1868  19980608        NaN        89.42           98.88             89.42\n5      2410  19980604        NaN         6.47           26.31              6.47\n6      2848  19980619     238.90          NaN          238.90            203.13\n7      2848  19980620        NaN       216.44          238.90            216.44\n8      2848  19980622     435.21          NaN          435.21            294.66\n9      2848  19980623     610.44       309.00          610.44            309.00\n10     2848  19980625     709.49          NaN          709.49            309.00\n11     2848  19980628        NaN       319.72          709.49            319.72\n12     2848  19980629        NaN       321.44          709.49            321.44\n13     2848  19980630        NaN       351.21          709.49            351.21\n14     2848  19980701     712.24       402.48          712.24            402.48\n15     2848  19980702     714.36          NaN          714.36            402.48\n16     2848  19980704        NaN       458.64          714.36            458.64\n17     2848  19980706        NaN       532.12          714.36            532.12\n18     2848  19980707     721.53          NaN          721.53            532.12\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017573,
+                    "execution_time": 0.007512,
+                    "compile_time": 5.2e-05,
+                    "planning_time": 0.003729
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.067032,
+                    "execution_time": 0.007817,
+                    "compile_time": 5.3e-05,
+                    "planning_time": 0.039472
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" < \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\""
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0      1868  19980603      31.66        25.50           31.66             25.50\n1      1868  19980604      98.88        50.70           98.88             50.70\n2      1868  19980606        NaN        84.41           98.88             84.41\n3      1868  19980607        NaN        84.41           98.88             84.41\n4      1868  19980608        NaN        89.42           98.88             89.42\n5      2410  19980604        NaN         6.47           26.31              6.47\n6      2848  19980619     238.90          NaN          238.90            203.13\n7      2848  19980620        NaN       216.44          238.90            216.44\n8      2848  19980622     435.21          NaN          435.21            294.66\n9      2848  19980623     610.44       309.00          610.44            309.00\n10     2848  19980625     709.49          NaN          709.49            309.00\n11     2848  19980628        NaN       319.72          709.49            319.72\n12     2848  19980629        NaN       321.44          709.49            321.44\n13     2848  19980630        NaN       351.21          709.49            351.21\n14     2848  19980701     712.24       402.48          712.24            402.48\n15     2848  19980702     714.36          NaN          714.36            402.48\n16     2848  19980704        NaN       458.64          714.36            458.64\n17     2848  19980706        NaN       532.12          714.36            532.12\n18     2848  19980707     721.53          NaN          721.53            532.12\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n                                                          and web.d_date = store.d_date)\n          )x )y\nwhere web_cumulative > store_cumulative\norder by item_sk\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"Y\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"Y\".\"ITEM_SK\" AS \"ITEM_SK\" , \"Y\".\"D_DATE\" AS \"D_DATE\" , \"Y\".\"WEB_SALES\" AS \"WEB_SALES\" , \"Y\".\"STORE_SALES\" AS \"STORE_SALES\" , \"Y\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"Y\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"Y\" AS \"Y\" WHERE \"Y\".\"STORE_CUMULATIVE\" < \"Y\".\"WEB_CUMULATIVE\" ORDER BY \"Y\".\"ITEM_SK\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ORDER BY \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980608        NaN        72.59          107.74             72.59\n1         1  19980610        NaN        83.00          107.74             83.00\n2         1  19980603        NaN        61.26          107.74             61.26\n3         1  19980602     107.74         2.64          107.74              2.64\n4         7  19980601     125.37        51.18          125.37             51.18\n5         7  19980602        NaN        89.31          125.37             89.31\n6         7  19980604        NaN        89.89          125.37             89.89\n7        10  19980607        NaN        87.82          117.20             87.82\n8        10  19980616     324.11          NaN          324.11            312.76\n9        10  19980608        NaN       105.54          117.20            105.54\n10       10  19980605     117.20          NaN          117.20             60.57\n11       13  19980609     351.71       129.56          351.71            129.56\n12       13  19980616        NaN       288.15          362.79            288.15\n13       13  19980612        NaN       155.72          354.63            155.72\n14       13  19980611        NaN       132.52          354.63            132.52\n15       13  19980610     354.63          NaN          354.63            129.56\n16       13  19980615     362.79       181.39          362.79            181.39\n17       13  19980618        NaN       344.13          362.79            344.13\n18       13  19980617        NaN       344.13          362.79            344.13\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.055006,
+                    "execution_time": 0.011443,
+                    "compile_time": 0.015358,
+                    "planning_time": 0.004019
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 4.767238,
+                    "execution_time": 0.01211,
+                    "compile_time": 4.714018,
+                    "planning_time": 0.038823
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" < \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" ORDER BY \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ORDER BY \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980608        NaN        72.59          107.74             72.59\n1         1  19980610        NaN        83.00          107.74             83.00\n2         1  19980603        NaN        61.26          107.74             61.26\n3         1  19980602     107.74         2.64          107.74              2.64\n4         7  19980601     125.37        51.18          125.37             51.18\n5         7  19980602        NaN        89.31          125.37             89.31\n6         7  19980604        NaN        89.89          125.37             89.89\n7        10  19980607        NaN        87.82          117.20             87.82\n8        10  19980616     324.11          NaN          324.11            312.76\n9        10  19980608        NaN       105.54          117.20            105.54\n10       10  19980605     117.20          NaN          117.20             60.57\n11       13  19980609     351.71       129.56          351.71            129.56\n12       13  19980616        NaN       288.15          362.79            288.15\n13       13  19980612        NaN       155.72          354.63            155.72\n14       13  19980611        NaN       132.52          354.63            132.52\n15       13  19980610     354.63          NaN          354.63            129.56\n16       13  19980615     362.79       181.39          362.79            181.39\n17       13  19980618        NaN       344.13          362.79            344.13\n18       13  19980617        NaN       344.13          362.79            344.13\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n                                                          and web.d_date = store.d_date)\n          )x )y\nwhere web_cumulative > store_cumulative\norder by item_sk\n        ,d_date\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"Y\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"Y\".\"ITEM_SK\" AS \"ITEM_SK\" , \"Y\".\"D_DATE\" AS \"D_DATE\" , \"Y\".\"WEB_SALES\" AS \"WEB_SALES\" , \"Y\".\"STORE_SALES\" AS \"STORE_SALES\" , \"Y\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"Y\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"Y\" AS \"Y\" WHERE \"Y\".\"STORE_CUMULATIVE\" < \"Y\".\"WEB_CUMULATIVE\" ORDER BY \"Y\".\"ITEM_SK\" NULLS LAST , \"Y\".\"D_DATE\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ORDER BY \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980602     107.74         2.64          107.74              2.64\n1         1  19980603        NaN        61.26          107.74             61.26\n2         1  19980608        NaN        72.59          107.74             72.59\n3         1  19980610        NaN        83.00          107.74             83.00\n4         7  19980601     125.37        51.18          125.37             51.18\n5         7  19980602        NaN        89.31          125.37             89.31\n6         7  19980604        NaN        89.89          125.37             89.89\n7        10  19980605     117.20          NaN          117.20             60.57\n8        10  19980607        NaN        87.82          117.20             87.82\n9        10  19980608        NaN       105.54          117.20            105.54\n10       10  19980616     324.11          NaN          324.11            312.76\n11       13  19980603        NaN        61.84           85.61             61.84\n12       13  19980606     235.99          NaN          235.99            126.43\n13       13  19980609     351.71       129.56          351.71            129.56\n14       13  19980610     354.63          NaN          354.63            129.56\n15       13  19980611        NaN       132.52          354.63            132.52\n16       13  19980612        NaN       155.72          354.63            155.72\n17       13  19980615     362.79       181.39          362.79            181.39\n18       13  19980616        NaN       288.15          362.79            288.15\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.128081,
+                    "execution_time": 0.010556,
+                    "compile_time": 0.105876,
+                    "planning_time": 0.00449
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 4.472647,
+                    "execution_time": 0.011363,
+                    "compile_time": 4.422324,
+                    "planning_time": 0.039135
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" < \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" ORDER BY \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ORDER BY \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980602     107.74         2.64          107.74              2.64\n1         1  19980603        NaN        61.26          107.74             61.26\n2         1  19980608        NaN        72.59          107.74             72.59\n3         1  19980610        NaN        83.00          107.74             83.00\n4         7  19980601     125.37        51.18          125.37             51.18\n5         7  19980602        NaN        89.31          125.37             89.31\n6         7  19980604        NaN        89.89          125.37             89.89\n7        10  19980605     117.20          NaN          117.20             60.57\n8        10  19980607        NaN        87.82          117.20             87.82\n9        10  19980608        NaN       105.54          117.20            105.54\n10       10  19980616     324.11          NaN          324.11            312.76\n11       13  19980603        NaN        61.84           85.61             61.84\n12       13  19980606     235.99          NaN          235.99            126.43\n13       13  19980609     351.71       129.56          351.71            129.56\n14       13  19980610     354.63          NaN          354.63            129.56\n15       13  19980611        NaN       132.52          354.63            132.52\n16       13  19980612        NaN       155.72          354.63            155.72\n17       13  19980615     362.79       181.39          362.79            181.39\n18       13  19980616        NaN       288.15          362.79            288.15\n...*/"
+    },
+    {
+        "input": "-- start template query51.tpl query 46 in stream 0\nWITH /* TPC-DS query51.tpl 0.46 */ web_v1 as (\nselect\n  ws_item_sk item_sk, d_date,\n  sum(sum(ws_sales_price))\n      over (partition by ws_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom web_sales\n    ,date_dim\nwhere ws_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ws_item_sk is not NULL\ngroup by ws_item_sk, d_date),\nstore_v1 as (\nselect\n  ss_item_sk item_sk, d_date,\n  sum(sum(ss_sales_price))\n      over (partition by ss_item_sk order by d_date rows between unbounded preceding and current row) cume_sales\nfrom store_sales\n    ,date_dim\nwhere ss_sold_date_sk=d_date_sk\n  and d_month_seq between 1181 and 1181+11\n  and ss_item_sk is not NULL\ngroup by ss_item_sk, d_date)\n select  *\nfrom (select item_sk\n     ,d_date\n     ,web_sales\n     ,store_sales\n     ,max(web_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) web_cumulative\n     ,max(store_sales)\n         over (partition by item_sk order by d_date rows between unbounded preceding and current row) store_cumulative\n     from (select case when web.item_sk is not null then web.item_sk else store.item_sk end item_sk\n                 ,case when web.d_date is not null then web.d_date else store.d_date end d_date\n                 ,web.cume_sales web_sales\n                 ,store.cume_sales store_sales\n           from web_v1 web full outer join store_v1 store on (web.item_sk = store.item_sk\n                                                          and web.d_date = store.d_date)\n          )x )y\nwhere web_cumulative > store_cumulative\norder by item_sk\n        ,d_date\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , \"DATE_DIM\".\"D_MONTH_SEQ\" AS \"D_MONTH_SEQ\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MONTH_SEQ\" <= 1192 AND \"DATE_DIM\".\"D_MONTH_SEQ\" >= 1181 ) , \"WEB_V1\" AS ( SELECT \"WEB_SALES\".\"WS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"WEB_SALES\".\"WS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"WEB_SALES\".\"WS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" WHERE NOT \"WEB_SALES\".\"WS_ITEM_SK\" IS NULL GROUP BY \"WEB_SALES\".\"WS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"STORE_V1\" AS ( SELECT \"STORE_SALES\".\"SS_ITEM_SK\" AS \"ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" AS \"D_DATE\" , SUM ( SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) ) OVER ( PARTITION BY \"STORE_SALES\".\"SS_ITEM_SK\" ORDER BY \"DATE_DIM\".\"D_DATE\" NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"CUME_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" WHERE NOT \"STORE_SALES\".\"SS_ITEM_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_ITEM_SK\" , \"DATE_DIM\".\"D_DATE\" ) , \"Y\" AS ( SELECT CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END AS \"ITEM_SK\" , CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END AS \"D_DATE\" , \"WEB\".\"CUME_SALES\" AS \"WEB_SALES\" , \"STORE\".\"CUME_SALES\" AS \"STORE_SALES\" , MAX ( \"WEB\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"WEB_CUMULATIVE\" , MAX ( \"STORE\".\"CUME_SALES\" ) OVER ( PARTITION BY CASE WHEN NOT \"WEB\".\"ITEM_SK\" IS NULL THEN \"WEB\".\"ITEM_SK\" ELSE \"STORE\".\"ITEM_SK\" END ORDER BY CASE WHEN NOT \"WEB\".\"D_DATE\" IS NULL THEN \"WEB\".\"D_DATE\" ELSE \"STORE\".\"D_DATE\" END NULLS LAST ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) AS \"STORE_CUMULATIVE\" FROM \"WEB_V1\" AS \"WEB\" FULL JOIN \"STORE_V1\" AS \"STORE\" ON \"STORE\".\"D_DATE\" = \"WEB\".\"D_DATE\" AND \"STORE\".\"ITEM_SK\" = \"WEB\".\"ITEM_SK\" ) SELECT \"Y\".\"ITEM_SK\" AS \"ITEM_SK\" , \"Y\".\"D_DATE\" AS \"D_DATE\" , \"Y\".\"WEB_SALES\" AS \"WEB_SALES\" , \"Y\".\"STORE_SALES\" AS \"STORE_SALES\" , \"Y\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"Y\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"Y\" AS \"Y\" WHERE \"Y\".\"STORE_CUMULATIVE\" < \"Y\".\"WEB_CUMULATIVE\" ORDER BY \"Y\".\"ITEM_SK\" NULLS LAST , \"Y\".\"D_DATE\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ORDER BY \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" LIMIT 21",
+                "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980602     107.74         2.64          107.74              2.64\n1         1  19980603        NaN        61.26          107.74             61.26\n2         1  19980608        NaN        72.59          107.74             72.59\n3         1  19980610        NaN        83.00          107.74             83.00\n4         7  19980601     125.37        51.18          125.37             51.18\n5         7  19980602        NaN        89.31          125.37             89.31\n6         7  19980604        NaN        89.89          125.37             89.89\n7        10  19980605     117.20          NaN          117.20             60.57\n8        10  19980607        NaN        87.82          117.20             87.82\n9        10  19980608        NaN       105.54          117.20            105.54\n10       10  19980616     324.11          NaN          324.11            312.76\n11       13  19980603        NaN        61.84           85.61             61.84\n12       13  19980606     235.99          NaN          235.99            126.43\n13       13  19980609     351.71       129.56          351.71            129.56\n14       13  19980610     354.63          NaN          354.63            129.56\n15       13  19980611        NaN       132.52          354.63            132.52\n16       13  19980612        NaN       155.72          354.63            155.72\n17       13  19980615     362.79       181.39          362.79            181.39\n18       13  19980616        NaN       288.15          362.79            288.15\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.019813,
+                    "execution_time": 0.009889,
+                    "compile_time": 7.1e-05,
+                    "planning_time": 0.003889
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.021124,
+                    "execution_time": 0.010126,
+                    "compile_time": 8e-05,
+                    "planning_time": 0.004244
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_8\".\"STORE_CUMULATIVE\" < \"SPEQLITE_TEMP_TABLE_8\".\"WEB_CUMULATIVE\" ORDER BY \"SPEQLITE_TEMP_TABLE_8\".\"ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_8\".\"D_DATE\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" AS \"ITEM_SK\" , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" AS \"D_DATE\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_SALES\" AS \"WEB_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_SALES\" AS \"STORE_SALES\" , \"SPEQLITE_TEMP_TABLE_13\".\"WEB_CUMULATIVE\" AS \"WEB_CUMULATIVE\" , \"SPEQLITE_TEMP_TABLE_13\".\"STORE_CUMULATIVE\" AS \"STORE_CUMULATIVE\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" ORDER BY \"SPEQLITE_TEMP_TABLE_13\".\"ITEM_SK\" NULLS LAST , \"SPEQLITE_TEMP_TABLE_13\".\"D_DATE\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*    item_sk    d_date  web_sales  store_sales  web_cumulative  store_cumulative\n0         1  19980602     107.74         2.64          107.74              2.64\n1         1  19980603        NaN        61.26          107.74             61.26\n2         1  19980608        NaN        72.59          107.74             72.59\n3         1  19980610        NaN        83.00          107.74             83.00\n4         7  19980601     125.37        51.18          125.37             51.18\n5         7  19980602        NaN        89.31          125.37             89.31\n6         7  19980604        NaN        89.89          125.37             89.89\n7        10  19980605     117.20          NaN          117.20             60.57\n8        10  19980607        NaN        87.82          117.20             87.82\n9        10  19980608        NaN       105.54          117.20            105.54\n10       10  19980616     324.11          NaN          324.11            312.76\n11       13  19980603        NaN        61.84           85.61             61.84\n12       13  19980606     235.99          NaN          235.99            126.43\n13       13  19980609     351.71       129.56          351.71            129.56\n14       13  19980610     354.63          NaN          354.63            129.56\n15       13  19980611        NaN       132.52          354.63            132.52\n16       13  19980612        NaN       155.72          354.63            155.72\n17       13  19980615     362.79       181.39          362.79            181.39\n18       13  19980616        NaN       288.15          362.79            288.15\n...*/"
+    }
+]

@@ -1,0 +1,816 @@
+[
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id, sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n    i_manufact_id in (\n        select i_manufact_id\n        from item\n        where i_category in ('Jewelry')\n    )\n and ss_item_sk = i_item_sk\n and ss_sold_date_sk = d_date_sk\n and d_year = 2001\n and d_moy = 3\n and ss_addr_sk = ca_address_sk\n and ca_gmt_offset = -5 \n group by i_manufact_id\n),\ncs as (\n select\n          i_manufact_id, sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n    i_manufact_id in (\n        select i_manufact_id\n        from item\n        where i_category in ('Jewelry')\n    )\n and cs_item_sk = i_item_sk\n and cs_sold_date_sk = d_date_sk\n and d_year = 2001\n and d_moy = 3\n and cs_bill_addr_sk = ca_address_sk\n and ca_gmt_offset = -5 \n group by i_manufact_id\n),\nws as (\n select\n          i_manufact_id, sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n    customer_address,\n    item\n where\n    i_manufact_id in (\n        select i_manufact_id\n        from item\n        where i_category in ('Jewelry')\n    )\n and ws_item_sk = i_item_sk\n and ws_sold_date_sk = d_date_sk\n and d_year = 2001\n and d_moy = 3\n and ws_ship_addr_sk = ca_address_sk\n and ca_gmt_offset = -5 \n group by i_manufact_id\n)\nselect * from ss\nunion all\nselect * from cs\nunion all\nselect * from ws;\n/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_ship_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id)\nselect i_manufact_id, sum(total_sales) as total_sales\nfrom (\n  select * from ss\n  union all\n  select * from cs\n  union all\n  select * from ws\n) sales\ngroup by i_manufact_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SALES\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SALES\" AS \"SALES\" GROUP BY \"SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.386912,
+                    "execution_time": 0.188552,
+                    "compile_time": 0.050041,
+                    "planning_time": 0.022117,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.421282,
+                    "execution_time": 0.880252,
+                    "compile_time": 3.314055,
+                    "planning_time": 0.09186,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.104835,
+                    "execution_time": 0.0312,
+                    "compile_time": 0.025935,
+                    "planning_time": 0.024105,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.445068,
+                    "execution_time": 0.033883,
+                    "compile_time": 3.298443,
+                    "planning_time": 0.086103,
+                    "create_size": 6
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.262374,
+                    "execution_time": 0.058815,
+                    "compile_time": 0.083931,
+                    "planning_time": 0.022666,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.608094,
+                    "execution_time": 0.058596,
+                    "compile_time": 3.362639,
+                    "planning_time": 0.083597,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.134671,
+                    "execution_time": 0.043498,
+                    "compile_time": 0.04351,
+                    "planning_time": 0.023152,
+                    "create_size": 512
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.440485,
+                    "execution_time": 0.049607,
+                    "compile_time": 3.270249,
+                    "planning_time": 0.086349,
+                    "create_size": 512
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"SPEQLITE_TEMP_TABLE_4\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.202453,
+                    "execution_time": 0.131835,
+                    "compile_time": 0.000565,
+                    "planning_time": 0.03478,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.93974,
+                    "execution_time": 0.209698,
+                    "compile_time": 4.5964,
+                    "planning_time": 0.09876,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.198419,
+                    "execution_time": 0.125715,
+                    "compile_time": 0.000518,
+                    "planning_time": 0.037799,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 5.930717,
+                    "execution_time": 1.377982,
+                    "compile_time": 4.413487,
+                    "planning_time": 0.101424,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.173729,
+                    "execution_time": 0.102176,
+                    "compile_time": 0.000511,
+                    "planning_time": 0.037239,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 5.457483,
+                    "execution_time": 0.900663,
+                    "compile_time": 4.416941,
+                    "planning_time": 0.101514,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT \"SPEQLITE_TEMP_TABLE_5\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_5\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_6\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_6\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_7\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_7\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.104273,
+                    "execution_time": 0.05698,
+                    "compile_time": 0.014359,
+                    "planning_time": 0.006871,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.665733,
+                    "execution_time": 0.058061,
+                    "compile_time": 3.52818,
+                    "planning_time": 0.048363,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.090779,
+                    "execution_time": 0.046302,
+                    "compile_time": 0.017651,
+                    "planning_time": 0.00353,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 3.665906,
+                    "execution_time": 0.046873,
+                    "compile_time": 3.531281,
+                    "planning_time": 0.059993,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             496   3196037.20\n1             220   6669139.52\n2             536   3096712.84\n3             305   6965300.76\n4             427   4055781.50\n5             478   3146833.91\n6             215   6127405.82\n7             181   6731045.11\n8             183   6626595.68\n9             285   6286346.19\n10            837    775492.27\n11            741    899028.67\n12            808   1307054.25\n13             90   6192831.66\n14            470   4008818.16\n15             65   7012584.45\n16            178   5419089.21\n17            580   3163546.64\n18            630   2792725.52\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.045852,
+                    "execution_time": 0.007665,
+                    "compile_time": 0.029102,
+                    "planning_time": 0.003111
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.399675,
+                    "execution_time": 0.008322,
+                    "compile_time": 3.344135,
+                    "planning_time": 0.038277
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_9\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             496   3196037.20\n1             220   6669139.52\n2             536   3096712.84\n3             305   6965300.76\n4             427   4055781.50\n5             478   3146833.91\n6             215   6127405.82\n7             181   6731045.11\n8             183   6626595.68\n9             285   6286346.19\n10            837    775492.27\n11            741    899028.67\n12            808   1307054.25\n13             90   6192831.66\n14            470   4008818.16\n15             65   7012584.45\n16            178   5419089.21\n17            580   3163546.64\n18            630   2792725.52\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_ship_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id\n)\n/* Main query after CTEs */\nselect i_manufact_id, sum(total_sales) as grand_total_sales\nfrom (\n    select * from ss\n    union all\n    select * from cs\n    union all\n    select * from ws\n) as all_sales\ngroup by i_manufact_id; /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"ALL_SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"ALL_SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"ALL_SALES\".\"TOTAL_SALES\" ) AS \"GRAND_TOTAL_SALES\" FROM \"ALL_SALES\" AS \"ALL_SALES\" GROUP BY \"ALL_SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_10\" AS SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" ) AS \"GRAND_TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.073939,
+                    "execution_time": 0.045453,
+                    "compile_time": 0.000231,
+                    "planning_time": 0.004024,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.188799,
+                    "execution_time": 0.044596,
+                    "compile_time": 0.061783,
+                    "planning_time": 0.058325,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_10\".\"GRAND_TOTAL_SALES\" AS \"GRAND_TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  grand_total_sales\n0             849         1220025.40\n1             633         2687920.95\n2             672          847335.95\n3             933         1218540.54\n4              90         6192831.66\n5             470         4008818.16\n6              65         7012584.45\n7             178         5419089.21\n8             580         3163546.64\n9             630         2792725.52\n10            495         3941999.71\n11            169         5779611.49\n12            899          910850.72\n13            153         6328186.14\n14            927          712404.26\n15            579         3245255.33\n16            650         3485621.35\n17             74         7120264.34\n18            322         6714819.17\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01563,
+                    "execution_time": 0.007007,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002975
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.168424,
+                    "execution_time": 0.007584,
+                    "compile_time": 0.116586,
+                    "planning_time": 0.038039
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_8\".\"TOTAL_SALES\" ) AS \"GRAND_TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" GROUP BY \"SPEQLITE_TEMP_TABLE_8\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_10\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_10\".\"GRAND_TOTAL_SALES\" AS \"GRAND_TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_10\" AS \"SPEQLITE_TEMP_TABLE_10\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  grand_total_sales\n0             849         1220025.40\n1             633         2687920.95\n2             672          847335.95\n3             933         1218540.54\n4              90         6192831.66\n5             470         4008818.16\n6              65         7012584.45\n7             178         5419089.21\n8             580         3163546.64\n9             630         2792725.52\n10            495         3941999.71\n11            169         5779611.49\n12            899          910850.72\n13            153         6328186.14\n14            927          712404.26\n15            579         3245255.33\n16            650         3485621.35\n17             74         7120264.34\n18            322         6714819.17\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim d,\n         customer_address ca,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d.d_year                  = 2001\n and     d.d_moy                   = 3\n and     ss_addr_sk              = ca.ca_address_sk\n and     ca.ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim d,\n         customer_address ca,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d.d_year                  = 2001\n and     d.d_moy                   = 3\n and     cs_bill_addr_sk         = ca.ca_address_sk\n and     ca.ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim d,\n         customer_address ca,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d.d_year                  = 2001\n and     d.d_moy                   = 3\n and     ws_ship_addr_sk          = ca.ca_address_sk\n and     ca.ca_gmt_offset           = -5 \n group by i_manufact_id)\nselect * from ss, cs, ws\nwhere ss.i_manufact_id = cs.i_manufact_id\nand cs.i_manufact_id = ws.i_manufact_id;\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CA\" AS ( SELECT \"CA\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CA\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CA\" WHERE \"CA\".\"CA_GMT_OFFSET\" = -5 ) , \"D\" AS ( SELECT \"D\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"D\".\"D_YEAR\" AS \"D_YEAR\" , \"D\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"D\" WHERE \"D\".\"D_MOY\" = 3 AND \"D\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CA\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"D\" AS \"D\" ON \"D\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CA\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" JOIN \"D\" AS \"D\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"D\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CA\" AS \"CA\" ON \"CA\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"D\" AS \"D\" ON \"D\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" JOIN \"CS\" AS \"CS\" ON \"CS\".\"I_MANUFACT_ID\" = \"SS\".\"I_MANUFACT_ID\" JOIN \"WS\" AS \"WS\" ON \"CS\".\"I_MANUFACT_ID\" = \"WS\".\"I_MANUFACT_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_11\" AS SELECT \"CA\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CA\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CA\" WHERE \"CA\".\"CA_GMT_OFFSET\" = -5",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.313209,
+                    "execution_time": 0.165164,
+                    "compile_time": 0.000265,
+                    "planning_time": 0.022517,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.518069,
+                    "execution_time": 0.167382,
+                    "compile_time": 0.141672,
+                    "planning_time": 0.081464,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_12\" AS SELECT \"D\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"D\".\"D_YEAR\" AS \"D_YEAR\" , \"D\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"D\" WHERE \"D\".\"D_MOY\" = 3 AND \"D\".\"D_YEAR\" = 2001",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.080236,
+                    "execution_time": 0.032091,
+                    "compile_time": 0.000237,
+                    "planning_time": 0.024348,
+                    "create_size": 6
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.219853,
+                    "execution_time": 0.030792,
+                    "compile_time": 0.080137,
+                    "planning_time": 0.084835,
+                    "create_size": 6
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_13\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"SPEQLITE_TEMP_TABLE_11\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ON \"SPEQLITE_TEMP_TABLE_12\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" ON \"SPEQLITE_TEMP_TABLE_4\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"SPEQLITE_TEMP_TABLE_4\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.200199,
+                    "execution_time": 0.131129,
+                    "compile_time": 0.000541,
+                    "planning_time": 0.034608,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.264487,
+                    "execution_time": 0.131992,
+                    "compile_time": 0.000511,
+                    "planning_time": 0.098167,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_14\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"SPEQLITE_TEMP_TABLE_11\".\"CA_ADDRESS_SK\" = \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"SPEQLITE_TEMP_TABLE_12\".\"D_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.194583,
+                    "execution_time": 0.122721,
+                    "compile_time": 0.000536,
+                    "planning_time": 0.037956,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.257468,
+                    "execution_time": 0.121128,
+                    "compile_time": 0.000541,
+                    "planning_time": 0.101221,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_15\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_11\" AS \"SPEQLITE_TEMP_TABLE_11\" ON \"SPEQLITE_TEMP_TABLE_11\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_SHIP_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_12\" AS \"SPEQLITE_TEMP_TABLE_12\" ON \"SPEQLITE_TEMP_TABLE_12\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.174681,
+                    "execution_time": 0.103454,
+                    "compile_time": 0.00053,
+                    "planning_time": 0.037263,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.23467,
+                    "execution_time": 0.100073,
+                    "compile_time": 0.00055,
+                    "planning_time": 0.099868,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_16\" AS SELECT \"SPEQLITE_TEMP_TABLE_13\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_13\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_14\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID_COL_2\" , \"SPEQLITE_TEMP_TABLE_14\".\"TOTAL_SALES\" AS \"TOTAL_SALES_COL_3\" , \"SPEQLITE_TEMP_TABLE_15\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID_COL_4\" , \"SPEQLITE_TEMP_TABLE_15\".\"TOTAL_SALES\" AS \"TOTAL_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ON \"SPEQLITE_TEMP_TABLE_14\".\"I_MANUFACT_ID\" = \"SPEQLITE_TEMP_TABLE_13\".\"I_MANUFACT_ID\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_14\".\"I_MANUFACT_ID\" = \"SPEQLITE_TEMP_TABLE_15\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.266352,
+                    "execution_time": 0.070495,
+                    "compile_time": 0.160137,
+                    "planning_time": 0.006402,
+                    "create_size": 1152
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 12.428002,
+                    "execution_time": 0.072095,
+                    "compile_time": 12.258247,
+                    "planning_time": 0.061811,
+                    "create_size": 1152
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_16\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_16\".\"I_MANUFACT_ID_COL_2\" AS \"I_MANUFACT_ID_COL_2\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES_COL_3\" AS \"TOTAL_SALES_COL_3\" , \"SPEQLITE_TEMP_TABLE_16\".\"I_MANUFACT_ID_COL_4\" AS \"I_MANUFACT_ID_COL_4\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES_COL_5\" AS \"TOTAL_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales  i_manufact_id_col_2  total_sales_col_3  i_manufact_id_col_4  total_sales_col_5\n0             933    608008.05                  933          347810.44                  933          262722.05\n1             633   1321471.66                  633          919363.44                  633          447085.85\n2             849    606399.74                  849          421717.08                  849          191908.58\n3             672    355127.20                  672          323430.62                  672          168778.13\n4             305   3327003.59                  305         2523052.52                  305         1115244.65\n5             215   2970036.10                  215         2148807.71                  215         1008562.01\n6             181   3246959.31                  181         2331811.46                  181         1152274.34\n7             285   2979617.92                  285         2139565.83                  285         1167162.44\n8             183   2959852.42                  183         2418428.89                  183         1248314.37\n9             220   2905545.42                  220         2624560.35                  220         1139033.75\n10            427   1889736.32                  427         1353754.57                  427          812290.61\n11            808    555816.15                  808          463905.43                  808          287332.67\n12            536   1529927.50                  536         1041541.12                  536          525244.22\n13            496   1556299.78                  496         1043452.75                  496          596284.67\n14            478   1524619.42                  478         1006034.83                  478          616179.66\n15            741    422623.44                  741          304385.35                  741          172019.88\n16            837    387407.09                  837          280028.96                  837          108056.22\n17            266   3378882.98                  266         2422772.21                  266         1230139.84\n18             86   2948828.72                   86         2448374.38                   86         1115062.44\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.069076,
+                    "execution_time": 0.007877,
+                    "compile_time": 0.051097,
+                    "planning_time": 0.003899
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.348032,
+                    "execution_time": 0.008139,
+                    "compile_time": 3.289622,
+                    "planning_time": 0.039609
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_13\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_13\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_14\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_14\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_15\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_15\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_13\" AS \"SPEQLITE_TEMP_TABLE_13\" JOIN \"SPEQLITE_TEMP_TABLE_14\" AS \"SPEQLITE_TEMP_TABLE_14\" ON \"SPEQLITE_TEMP_TABLE_14\".\"I_MANUFACT_ID\" = \"SPEQLITE_TEMP_TABLE_13\".\"I_MANUFACT_ID\" JOIN \"SPEQLITE_TEMP_TABLE_15\" AS \"SPEQLITE_TEMP_TABLE_15\" ON \"SPEQLITE_TEMP_TABLE_14\".\"I_MANUFACT_ID\" = \"SPEQLITE_TEMP_TABLE_15\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_16\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" , \"SPEQLITE_TEMP_TABLE_16\".\"I_MANUFACT_ID_COL_2\" AS \"I_MANUFACT_ID_COL_2\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES_COL_3\" AS \"TOTAL_SALES_COL_3\" , \"SPEQLITE_TEMP_TABLE_16\".\"I_MANUFACT_ID_COL_4\" AS \"I_MANUFACT_ID_COL_4\" , \"SPEQLITE_TEMP_TABLE_16\".\"TOTAL_SALES_COL_5\" AS \"TOTAL_SALES_COL_5\" FROM \"SPEQLITE_TEMP_TABLE_16\" AS \"SPEQLITE_TEMP_TABLE_16\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales  i_manufact_id_col_2  total_sales_col_3  i_manufact_id_col_4  total_sales_col_5\n0             933    608008.05                  933          347810.44                  933          262722.05\n1             633   1321471.66                  633          919363.44                  633          447085.85\n2             849    606399.74                  849          421717.08                  849          191908.58\n3             672    355127.20                  672          323430.62                  672          168778.13\n4             305   3327003.59                  305         2523052.52                  305         1115244.65\n5             215   2970036.10                  215         2148807.71                  215         1008562.01\n6             181   3246959.31                  181         2331811.46                  181         1152274.34\n7             285   2979617.92                  285         2139565.83                  285         1167162.44\n8             183   2959852.42                  183         2418428.89                  183         1248314.37\n9             220   2905545.42                  220         2624560.35                  220         1139033.75\n10            427   1889736.32                  427         1353754.57                  427          812290.61\n11            808    555816.15                  808          463905.43                  808          287332.67\n12            536   1529927.50                  536         1041541.12                  536          525244.22\n13            496   1556299.78                  496         1043452.75                  496          596284.67\n14            478   1524619.42                  478         1006034.83                  478          616179.66\n15            741    422623.44                  741          304385.35                  741          172019.88\n16            837    387407.09                  837          280028.96                  837          108056.22\n17            266   3378882.98                  266         2422772.21                  266         1230139.84\n18             86   2948828.72                   86         2448374.38                   86         1115062.44\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id, sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id, sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id, sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_ship_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id)\nselect\n  'store_sales' as channel, ss.i_manufact_id, ss.total_sales\nfrom\n  ss\nunion all\nselect\n  'catalog_sales' as channel, cs.i_manufact_id, cs.total_sales\nfrom\n  cs\nunion all\nselect\n  'web_sales' as channel, ws.i_manufact_id, ws.total_sales\nfrom\n  ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n group by i_manufact_id)\nselect\n  'store_sales' as channel, ss.i_manufact_id, ss.total_sales\nfrom\n  ss\nunion all\nselect\n  'catalog_sales' as channel, cs.i_manufact_id, cs.total_sales\nfrom\n  cs\nunion all\nselect\n  'web_sales' as channel, ws.i_manufact_id, ws.total_sales\nfrom\n  ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n group by i_manufact_id\n)\nselect * from ss\nunion all\nselect * from cs\nunion all\nselect * from ws/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n group by i_manufact_id)\nselect * from ss\nunion all\nselect * from cs\nunion all\nselect * from ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id\n)\nselect 'store_sales' as channel, i_manufact_id, total_sales from ss\nunion all\nselect 'catalog_sales' as channel, i_manufact_id, total_sales from cs\nunion all\nselect 'web_sales' as channel, i_manufact_id, total_sales from ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\nselect\n  'store_sales' as channel, ss.i_manufact_id, ss.total_sales\nfrom\n  ss\nunion all\nselect\n  'catalog_sales' as channel, cs.i_manufact_id, cs.total_sales\nfrom\n  cs\nunion all\nselect\n  'web_sales' as channel, ws.i_manufact_id, ws.total_sales\nfrom\n  ws\n/*CURSOR_IDENTIFIER*/",
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "with /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id, sum(ss_ext_sales_price) as total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id, sum(cs_ext_sales_price) as total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id, sum(ws_ext_sales_price) as total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\nselect i_manufact_id, sum(total_sales) as total_sales\nfrom (\n  select i_manufact_id, total_sales from ss\n  union all\n  select i_manufact_id, total_sales from cs\n  union all\n  select i_manufact_id, total_sales from ws\n) combined_sales\ngroup by i_manufact_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"COMBINED_SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED_SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"COMBINED_SALES\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED_SALES\" AS \"COMBINED_SALES\" GROUP BY \"COMBINED_SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_17\" AS SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"SPEQLITE_TEMP_TABLE_1\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"SPEQLITE_TEMP_TABLE_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"SPEQLITE_TEMP_TABLE_3\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"SPEQLITE_TEMP_TABLE_4\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.171367,
+                    "execution_time": 0.100939,
+                    "compile_time": 0.000503,
+                    "planning_time": 0.036757,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 4.62328,
+                    "execution_time": 0.11659,
+                    "compile_time": 4.366195,
+                    "planning_time": 0.10272,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_18\" AS SELECT \"SPEQLITE_TEMP_TABLE_5\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_5\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_6\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_6\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" UNION ALL SELECT \"SPEQLITE_TEMP_TABLE_17\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_17\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_17\" AS \"SPEQLITE_TEMP_TABLE_17\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.090825,
+                    "execution_time": 0.05698,
+                    "compile_time": 0.00023,
+                    "planning_time": 0.006796,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.190073,
+                    "execution_time": 0.057014,
+                    "compile_time": 0.05886,
+                    "planning_time": 0.047794,
+                    "create_size": 640
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_19\" AS SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.074616,
+                    "execution_time": 0.046074,
+                    "compile_time": 0.000265,
+                    "planning_time": 0.003643,
+                    "create_size": 640
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.128809,
+                    "execution_time": 0.045441,
+                    "compile_time": 0.000217,
+                    "planning_time": 0.059699,
+                    "create_size": 640
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             579   3245282.38\n1             650   3535200.94\n2              74   7071493.76\n3             322   6750220.67\n4             314   7027168.27\n5               7   5839483.95\n6             723   1089102.27\n7             959   1010914.30\n8             707   1398332.83\n9             716   1058829.89\n10            693   1084676.33\n11            849   1269461.97\n12            633   2704393.85\n13            672    839295.01\n14            933   1196073.98\n15            496   3157829.35\n16            220   6662685.45\n17            536   3113002.84\n18            305   7041830.63\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015538,
+                    "execution_time": 0.007044,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002935
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.052031,
+                    "execution_time": 0.007999,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.038237
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             579   3245282.38\n1             650   3535200.94\n2              74   7071493.76\n3             322   6750220.67\n4             314   7027168.27\n5               7   5839483.95\n6             723   1089102.27\n7             959   1010914.30\n8             707   1398332.83\n9             716   1058829.89\n10            693   1084676.33\n11            849   1269461.97\n12            633   2704393.85\n13            672    839295.01\n14            933   1196073.98\n15            496   3157829.35\n16            220   6662685.45\n17            536   3113002.84\n18            305   7041830.63\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id, sum(total_sales) as total_sales\n from  (select * from ss \n union all\n select * from cs \n union all\n select * from ws) combined_sales\ngroup by i_manufact_id /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"COMBINED_SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED_SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"COMBINED_SALES\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED_SALES\" AS \"COMBINED_SALES\" GROUP BY \"COMBINED_SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             579   3245282.38\n1             650   3535200.94\n2              74   7071493.76\n3             322   6750220.67\n4             314   7027168.27\n5               7   5839483.95\n6             723   1089102.27\n7             959   1010914.30\n8             707   1398332.83\n9             716   1058829.89\n10            693   1084676.33\n11            496   3157829.35\n12            220   6662685.45\n13            536   3113002.84\n14            305   7041830.63\n15            427   3845562.91\n16            478   3144407.72\n17            215   6099420.70\n18            181   6707226.02\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015585,
+                    "execution_time": 0.007252,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.002777
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.050922,
+                    "execution_time": 0.007207,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.038037
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             579   3245282.38\n1             650   3535200.94\n2              74   7071493.76\n3             322   6750220.67\n4             314   7027168.27\n5               7   5839483.95\n6             723   1089102.27\n7             959   1010914.30\n8             707   1398332.83\n9             716   1058829.89\n10            693   1084676.33\n11            496   3157829.35\n12            220   6662685.45\n13            536   3113002.84\n14            305   7041830.63\n15            427   3845562.91\n16            478   3144407.72\n17            215   6099420.70\n18            181   6707226.02\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\nselect * from cs \n        union all\nselect * from ws) combined_sales\ngroup by i_manufact_id /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"COMBINED_SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED_SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"COMBINED_SALES\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED_SALES\" AS \"COMBINED_SALES\" GROUP BY \"COMBINED_SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             355   3482424.16\n1             260   6501900.25\n2             655   2516846.70\n3             461   3673857.79\n4             631   3364097.40\n5             621   3349768.65\n6             871   1231246.65\n7             957    889613.03\n8             969    800137.48\n9             179   6634339.87\n10            135   6493016.71\n11             56   6420178.27\n12            243   7583289.40\n13            947   1478093.66\n14             61   5932259.78\n15            590   3770314.49\n16            522   3293241.09\n17            434   3502059.62\n18            148   6054296.99\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016665,
+                    "execution_time": 0.00729,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.003192
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016894,
+                    "execution_time": 0.008064,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.003084
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             355   3482424.16\n1             260   6501900.25\n2             655   2516846.70\n3             461   3673857.79\n4             631   3364097.40\n5             621   3349768.65\n6             871   1231246.65\n7             957    889613.03\n8             969    800137.48\n9             179   6634339.87\n10            135   6493016.71\n11             56   6420178.27\n12            243   7583289.40\n13            947   1478093.66\n14             61   5932259.78\n15            590   3770314.49\n16            522   3293241.09\n17            434   3502059.62\n18            148   6054296.99\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) as combined_sales\ngroup by i_manufact_id /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"COMBINED_SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED_SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"COMBINED_SALES\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED_SALES\" AS \"COMBINED_SALES\" GROUP BY \"COMBINED_SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             652   3254100.10\n1             202   6183405.09\n2             922   1487676.53\n3             761    944004.68\n4             811    959358.55\n5             355   3482424.16\n6             260   6501900.25\n7             655   2516846.70\n8             461   3673857.79\n9             631   3364097.40\n10            621   3349768.65\n11            871   1231246.65\n12            957    889613.03\n13            969    800137.48\n14            884   1515089.05\n15            167   6495783.69\n16            139   6081774.29\n17            592   3506862.35\n18            589   2922499.69\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015531,
+                    "execution_time": 0.007148,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.002863
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016648,
+                    "execution_time": 0.007906,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.003085
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             652   3254100.10\n1             202   6183405.09\n2             922   1487676.53\n3             761    944004.68\n4             811    959358.55\n5             355   3482424.16\n6             260   6501900.25\n7             655   2516846.70\n8             461   3673857.79\n9             631   3364097.40\n10            621   3349768.65\n11            871   1231246.65\n12            957    889613.03\n13            969    800137.48\n14            884   1515089.05\n15            167   6495783.69\n16            139   6081774.29\n17            592   3506862.35\n18            589   2922499.69\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws\n) combined_sales\ngroup by i_manufact_id /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"COMBINED_SALES\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"COMBINED_SALES\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"COMBINED_SALES\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"COMBINED_SALES\" AS \"COMBINED_SALES\" GROUP BY \"COMBINED_SALES\".\"I_MANUFACT_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             179   6634339.87\n1             135   6493016.71\n2              56   6420178.27\n3             243   7583289.40\n4             947   1478093.66\n5              61   5932259.78\n6             590   3770314.49\n7             522   3293241.09\n8             434   3502059.62\n9             148   6054296.99\n10              1   6813159.77\n11            752   1317170.73\n12            946   1220828.17\n13            877   1034550.04\n14            504   3236844.70\n15            355   3482424.16\n16            260   6501900.25\n17            655   2516846.70\n18            461   3673857.79\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016089,
+                    "execution_time": 0.007728,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.002918
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016317,
+                    "execution_time": 0.007915,
+                    "compile_time": 4.2e-05,
+                    "planning_time": 0.002681
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             179   6634339.87\n1             135   6493016.71\n2              56   6420178.27\n3             243   7583289.40\n4             947   1478093.66\n5              61   5932259.78\n6             590   3770314.49\n7             522   3293241.09\n8             434   3502059.62\n9             148   6054296.99\n10              1   6813159.77\n11            752   1317170.73\n12            946   1220828.17\n13            877   1034550.04\n14            504   3236844.70\n15            355   3482424.16\n16            260   6501900.25\n17            655   2516846.70\n18            461   3673857.79\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select i_manufact_id, sum(total_sales) as total_sales\n from (select i_manufact_id, total_sales from ss \n        union all\n        select i_manufact_id, total_sales from cs \n        union all\n        select i_manufact_id, total_sales from ws) tmp1\ngroup by i_manufact_id /*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_MANUFACT_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             579   3245282.38\n1             650   3535200.94\n2              74   7071493.76\n3             322   6750220.67\n4             314   7027168.27\n5               7   5839483.95\n6             723   1089102.27\n7             959   1010914.30\n8             707   1398332.83\n9             716   1058829.89\n10            693   1084676.33\n11             90   6321661.14\n12            470   4008667.25\n13             65   7129028.50\n14            178   5282687.26\n15            580   3178957.04\n16            630   2731643.04\n17            495   3883277.35\n18            169   5820959.51\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.015892,
+                    "execution_time": 0.007227,
+                    "compile_time": 4e-05,
+                    "planning_time": 0.003018
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016414,
+                    "execution_time": 0.007608,
+                    "compile_time": 4.1e-05,
+                    "planning_time": 0.003052
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             579   3245282.38\n1             650   3535200.94\n2              74   7071493.76\n3             322   6750220.67\n4             314   7027168.27\n5               7   5839483.95\n6             723   1089102.27\n7             959   1010914.30\n8             707   1398332.83\n9             716   1058829.89\n10            693   1084676.33\n11             90   6321661.14\n12            470   4008667.25\n13             65   7129028.50\n14            178   5282687.26\n15            580   3178957.04\n16            630   2731643.04\n17            495   3883277.35\n18            169   5820959.51\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_manufact_id\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_MANUFACT_ID\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             355   3482424.16\n1             260   6501900.25\n2             655   2516846.70\n3             461   3673857.79\n4             631   3364097.40\n5             621   3349768.65\n6             871   1231246.65\n7             957    889613.03\n8             969    800137.48\n9              61   5932259.78\n10            590   3770314.49\n11            522   3293241.09\n12            434   3502059.62\n13            148   6054296.99\n14              1   6813159.77\n15            752   1317170.73\n16            946   1220828.17\n17            877   1034550.04\n18            504   3236844.70\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017055,
+                    "execution_time": 0.007378,
+                    "compile_time": 4.8e-05,
+                    "planning_time": 0.003349
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.016844,
+                    "execution_time": 0.007326,
+                    "compile_time": 4.9e-05,
+                    "planning_time": 0.003193
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_19\""
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             355   3482424.16\n1             260   6501900.25\n2             655   2516846.70\n3             461   3673857.79\n4             631   3364097.40\n5             621   3349768.65\n6             871   1231246.65\n7             957    889613.03\n8             969    800137.48\n9              61   5932259.78\n10            590   3770314.49\n11            522   3293241.09\n12            434   3502059.62\n13            148   6054296.99\n14              1   6813159.77\n15            752   1317170.73\n16            946   1220828.17\n17            877   1034550.04\n18            504   3236844.70\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_manufact_id\n order by total_sales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_MANUFACT_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" ORDER BY \"TOTAL_SALES\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             701    540136.96\n1             901    625263.90\n2             806    653750.18\n3             971    670874.24\n4             943    680776.14\n5             680    681121.06\n6             789    682117.92\n7             950    687832.37\n8             998    697432.66\n9             888    698448.36\n10            678    700949.45\n11            831    704792.06\n12            983    708670.79\n13            773    710257.91\n14            927    713253.42\n15            960    716686.06\n16            685    738681.75\n17            848    741455.45\n18            837    771538.02\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.032758,
+                    "execution_time": 0.009665,
+                    "compile_time": 0.014288,
+                    "planning_time": 0.003191
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 3.519467,
+                    "execution_time": 0.009007,
+                    "compile_time": 3.468759,
+                    "planning_time": 0.038346
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" ORDER BY \"TOTAL_SALES\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             701    540136.96\n1             901    625263.90\n2             806    653750.18\n3             971    670874.24\n4             943    680776.14\n5             680    681121.06\n6             789    682117.92\n7             950    687832.37\n8             998    697432.66\n9             888    698448.36\n10            678    700949.45\n11            831    704792.06\n12            983    708670.79\n13            773    710257.91\n14            927    713253.42\n15            960    716686.06\n16            685    738681.75\n17            848    741455.45\n18            837    771538.02\n...*/"
+    },
+    {
+        "input": "-- start template query33.tpl query 22 in stream 0\nwith /* TPC-DS query33.tpl 0.22 */ ss as (\n select\n          i_manufact_id,sum(ss_ext_sales_price) total_sales\n from\n \tstore_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ss_item_sk              = i_item_sk\n and     ss_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ss_addr_sk              = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n cs as (\n select\n          i_manufact_id,sum(cs_ext_sales_price) total_sales\n from\n \tcatalog_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     cs_item_sk              = i_item_sk\n and     cs_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     cs_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5 \n group by i_manufact_id),\n ws as (\n select\n          i_manufact_id,sum(ws_ext_sales_price) total_sales\n from\n \tweb_sales,\n \tdate_dim,\n         customer_address,\n         item\n where\n         i_manufact_id               in (select\n  i_manufact_id\nfrom\n item\nwhere i_category in ('Jewelry'))\n and     ws_item_sk              = i_item_sk\n and     ws_sold_date_sk         = d_date_sk\n and     d_year                  = 2001\n and     d_moy                   = 3\n and     ws_bill_addr_sk         = ca_address_sk\n and     ca_gmt_offset           = -5\n group by i_manufact_id)\n  select  i_manufact_id ,sum(total_sales) total_sales\n from  (select * from ss \n        union all\n        select * from cs \n        union all\n        select * from ws) tmp1\n group by i_manufact_id\n order by total_sales\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"CUSTOMER_ADDRESS_2\" AS ( SELECT \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AS \"CA_ADDRESS_SK\" , \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" AS \"CA_GMT_OFFSET\" FROM \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" WHERE \"CUSTOMER_ADDRESS\".\"CA_GMT_OFFSET\" = -5 ) , \"DATE_DIM_2\" AS ( SELECT \"DATE_DIM\".\"D_DATE_SK\" AS \"D_DATE_SK\" , \"DATE_DIM\".\"D_YEAR\" AS \"D_YEAR\" , \"DATE_DIM\".\"D_MOY\" AS \"D_MOY\" FROM \"DATE_DIM\" AS \"DATE_DIM\" WHERE \"DATE_DIM\".\"D_MOY\" = 3 AND \"DATE_DIM\".\"D_YEAR\" = 2001 ) , \"ITEM_2\" AS ( SELECT \"ITEM\".\"I_ITEM_SK\" AS \"I_ITEM_SK\" , \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" ) , \"_U_0\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" FROM \"ITEM\" AS \"ITEM\" WHERE \"ITEM\".\"I_CATEGORY\" IN ( 'Jewelry' ) GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"SS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"STORE_SALES\".\"SS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"STORE_SALES\".\"SS_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"STORE_SALES\".\"SS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_0\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"CS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"CATALOG_SALES\".\"CS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"CATALOG_SALES\" AS \"CATALOG_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CATALOG_SALES\".\"CS_BILL_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"CATALOG_SALES\".\"CS_SOLD_DATE_SK\" = \"DATE_DIM\".\"D_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"CATALOG_SALES\".\"CS_ITEM_SK\" = \"ITEM\".\"I_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_1\" ON \"_U_1\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_1\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"WS\" AS ( SELECT \"ITEM\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"WEB_SALES\".\"WS_EXT_SALES_PRICE\" ) AS \"TOTAL_SALES\" FROM \"WEB_SALES\" AS \"WEB_SALES\" JOIN \"CUSTOMER_ADDRESS_2\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" = \"WEB_SALES\".\"WS_BILL_ADDR_SK\" JOIN \"DATE_DIM_2\" AS \"DATE_DIM\" ON \"DATE_DIM\".\"D_DATE_SK\" = \"WEB_SALES\".\"WS_SOLD_DATE_SK\" JOIN \"ITEM_2\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"WEB_SALES\".\"WS_ITEM_SK\" LEFT JOIN \"_U_0\" AS \"_U_2\" ON \"_U_2\".\"I_MANUFACT_ID\" = \"ITEM\".\"I_MANUFACT_ID\" WHERE NOT \"_U_2\".\"I_MANUFACT_ID\" IS NULL GROUP BY \"ITEM\".\"I_MANUFACT_ID\" ) , \"TMP1\" AS ( SELECT \"SS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SS\" AS \"SS\" UNION ALL SELECT \"CS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"CS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"CS\" AS \"CS\" UNION ALL SELECT \"WS\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"WS\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"WS\" AS \"WS\" ) SELECT \"TMP1\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"TMP1\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"TMP1\" AS \"TMP1\" GROUP BY \"TMP1\".\"I_MANUFACT_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" ORDER BY \"TOTAL_SALES\" LIMIT 21",
+                "preview": "\n/*    i_manufact_id  total_sales\n0             701    540136.96\n1             901    625263.90\n2             806    653750.18\n3             971    670874.24\n4             943    680776.14\n5             680    681121.06\n6             789    682117.92\n7             950    687832.37\n8             998    697432.66\n9             888    698448.36\n10            678    700949.45\n11            831    704792.06\n12            983    708670.79\n13            773    710257.91\n14            927    713253.42\n15            960    716686.06\n16            685    738681.75\n17            848    741455.45\n18            837    771538.02\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018355,
+                    "execution_time": 0.009266,
+                    "compile_time": 7e-05,
+                    "planning_time": 0.003264
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018303,
+                    "execution_time": 0.009185,
+                    "compile_time": 7.3e-05,
+                    "planning_time": 0.003185
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , SUM ( \"SPEQLITE_TEMP_TABLE_18\".\"TOTAL_SALES\" ) AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_18\" AS \"SPEQLITE_TEMP_TABLE_18\" GROUP BY \"SPEQLITE_TEMP_TABLE_18\".\"I_MANUFACT_ID\" ORDER BY \"TOTAL_SALES\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_19\".\"I_MANUFACT_ID\" AS \"I_MANUFACT_ID\" , \"SPEQLITE_TEMP_TABLE_19\".\"TOTAL_SALES\" AS \"TOTAL_SALES\" FROM \"SPEQLITE_TEMP_TABLE_19\" AS \"SPEQLITE_TEMP_TABLE_19\" ORDER BY \"TOTAL_SALES\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*    i_manufact_id  total_sales\n0             701    540136.96\n1             901    625263.90\n2             806    653750.18\n3             971    670874.24\n4             943    680776.14\n5             680    681121.06\n6             789    682117.92\n7             950    687832.37\n8             998    697432.66\n9             888    698448.36\n10            678    700949.45\n11            831    704792.06\n12            983    708670.79\n13            773    710257.91\n14            927    713253.42\n15            960    716686.06\n16            685    738681.75\n17            848    741455.45\n18            837    771538.02\n...*/"
+    }
+]

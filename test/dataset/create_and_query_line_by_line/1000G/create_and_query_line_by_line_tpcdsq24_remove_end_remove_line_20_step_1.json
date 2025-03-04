@@ -1,0 +1,690 @@
+[
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select \n      ss_ticket_number\n      ,ss_item_sk\n      ,sum(ss_sales_price) as netpaid\nfrom store_sales\ngroup by \n        ss_ticket_number\n        ,ss_item_sk)\n/*CURSOR_IDENTIFIER*/\nSELECT * FROM ssales;",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" ) SELECT \"SSALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SSALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1,
+                    "create_size": 0
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SSALES AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" ) SELECT \"SSALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SSALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\" LIMIT 21",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 60,
+                    "execution_time": -1,
+                    "compile_time": -1,
+                    "planning_time": -1
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "WITH SSALES AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" ) SELECT \"SSALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SSALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\"",
+                "rewrite": "WITH SSALES AS ( SELECT \"STORE_SALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_TICKET_NUMBER\" , \"STORE_SALES\".\"SS_ITEM_SK\" ) SELECT \"SSALES\".\"SS_TICKET_NUMBER\" AS \"SS_TICKET_NUMBER\" , \"SSALES\".\"SS_ITEM_SK\" AS \"SS_ITEM_SK\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select \n      sum(SS_SALES_PRICE) netpaid\nfrom store_sales\nwhere SS_SOLD_DATE_SK is not null\nand SS_SOLD_TIME_SK is not null\nand SS_SOLD_DATE_SK >= DATEADD(day, -30, CURRENT_DATE)\nand SS_SALES_PRICE > 0\nand SS_STORE_SK in (select distinct ss_store_sk from store_sales) \nand SS_QUANTITY > 0\nand SS_PROMO_SK is null\ngroup by SS_SOLD_DATE_SK)\n/*CURSOR_IDENTIFIER*/\nselect * from ssales",
+        "optimize": [
+            "WITH \"_U_0\" AS ( SELECT DISTINCT \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_STORE_SK\" ) , \"SSALES\" AS ( SELECT SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" LEFT JOIN \"_U_0\" AS \"_U_0\" ON \"_U_0\".\"SS_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" WHERE \"STORE_SALES\".\"SS_PROMO_SK\" IS NULL AND \"STORE_SALES\".\"SS_QUANTITY\" > 0 AND \"STORE_SALES\".\"SS_SALES_PRICE\" > 0 AND \"STORE_SALES\".\"SS_SOLD_DATE_SK\" >= TS_OR_DS_ADD ( 'DAY' , -30 , DAY , TIMESTAMP ) AND NOT \"_U_0\".\"SS_STORE_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_DATE_SK\" IS NULL AND NOT \"STORE_SALES\".\"SS_SOLD_TIME_SK\" IS NULL GROUP BY \"STORE_SALES\".\"SS_SOLD_DATE_SK\" ) SELECT \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_1\" AS SELECT DISTINCT \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 1.898071,
+                    "execution_time": 1.848885,
+                    "compile_time": 0.000271,
+                    "planning_time": 0.023938,
+                    "create_size": 500
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 2.477973,
+                    "execution_time": 2.360916,
+                    "compile_time": 0.00198,
+                    "planning_time": 0.085979,
+                    "create_size": 500
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "WITH SSALES AS ( SELECT SUM ( SS_SALES_PRICE ) AS NETPAID FROM STORE_SALES WHERE NOT SS_SOLD_DATE_SK IS NULL AND NOT SS_SOLD_TIME_SK IS NULL AND SS_SOLD_DATE_SK >= DATEADD ( DAY , -30 , CURRENT_DATE ) AND SS_SALES_PRICE > 0 AND SS_STORE_SK IN ( SELECT DISTINCT SS_STORE_SK FROM STORE_SALES ) AND SS_QUANTITY > 0 AND SS_PROMO_SK IS NULL GROUP BY SS_SOLD_DATE_SK ) SELECT * FROM SSALES LIMIT 21",
+                "preview": "\n/*      netpaid\n0   116077.07\n1   108136.41\n2   108153.16\n3   111670.32\n4   166043.23\n5   171432.60\n6   166117.45\n7   169730.54\n8   163665.88\n9   170160.43\n10  171415.32\n11  166380.75\n12  167962.90\n13  163733.72\n14  173255.12\n15  167445.46\n16   48104.06\n17  109136.85\n18  116821.20\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 21.476033,
+                    "execution_time": 21.419973,
+                    "compile_time": 0.000205,
+                    "planning_time": 0.041504
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 36.723172,
+                    "execution_time": 32.663283,
+                    "compile_time": 3.949794,
+                    "planning_time": 0.092799
+                }
+            }
+        ],
+        "rewrite_main_query": null,
+        "preview": "\n/*      netpaid\n0   116077.07\n1   108136.41\n2   108153.16\n3   111670.32\n4   166043.23\n5   171432.60\n6   166117.45\n7   169730.54\n8   163665.88\n9   170160.43\n10  171415.32\n11  166380.75\n12  167962.90\n13  163733.72\n14  173255.12\n15  167445.46\n16   48104.06\n17  109136.85\n18  116821.20\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select ss_customer_sk\n      ,ss_store_sk\n      ,sum(ss_sales_price) as netpaid\nfrom store_sales\ngroup by ss_customer_sk\n        ,ss_store_sk\n)\n/*CURSOR_IDENTIFIER*/\nselect *\nfrom ssales",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" ) SELECT \"SSALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"SSALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_2\" AS SELECT \"STORE_SALES\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" GROUP BY \"STORE_SALES\".\"SS_CUSTOMER_SK\" , \"STORE_SALES\".\"SS_STORE_SK\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 38.500475,
+                    "execution_time": 38.213954,
+                    "compile_time": 0.000297,
+                    "planning_time": 0.024177,
+                    "create_size": 6784
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 37.935911,
+                    "execution_time": 37.593222,
+                    "compile_time": 0.001467,
+                    "planning_time": 0.084069,
+                    "create_size": 6784
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\" LIMIT 21",
+                "preview": "\n/*    ss_customer_sk  ss_store_sk  netpaid\n0          2954859           86   767.11\n1          4022790          920   535.33\n2          5813118          427   231.66\n3          1593478          922   376.73\n4          7842258           44   218.92\n5          3077898          388   534.11\n6         10068188          220   562.97\n7          8627594          926   664.19\n8           893054          560   436.02\n9          9875696           76   259.42\n10         9486940          838   382.93\n11        11862845          806   569.47\n12        10822087          548   240.56\n13          437560          610   263.89\n14          890529          499   198.94\n15         2089977          409   499.86\n16         3723189          566   584.20\n17         2139429          700   342.31\n18        10163677          188   314.64\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017075,
+                    "execution_time": 0.007905,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003351
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054072,
+                    "execution_time": 0.008375,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.038169
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_2\".\"SS_CUSTOMER_SK\" AS \"SS_CUSTOMER_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"SS_STORE_SK\" AS \"SS_STORE_SK\" , \"SPEQLITE_TEMP_TABLE_2\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_2\" AS \"SPEQLITE_TEMP_TABLE_2\""
+            }
+        ],
+        "preview": "\n/*    ss_customer_sk  ss_store_sk  netpaid\n0          2954859           86   767.11\n1          4022790          920   535.33\n2          5813118          427   231.66\n3          1593478          922   376.73\n4          7842258           44   218.92\n5          3077898          388   534.11\n6         10068188          220   562.97\n7          8627594          926   664.19\n8           893054          560   436.02\n9          9875696           76   259.42\n10         9486940          838   382.93\n11        11862845          806   569.47\n12        10822087          548   240.56\n13          437560          610   263.89\n14          890529          499   198.94\n15         2089977          409   499.86\n16         3723189          566   584.20\n17         2139429          700   342.31\n18        10163677          188   314.64\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(SS_SALES_PRICE) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\n  and s_market_id = 5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect * from ssales\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" AS \"CA_STATE\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" AS \"I_UNITS\" , \"ITEM\".\"I_SIZE\" AS \"I_SIZE\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SSALES\".\"CA_STATE\" AS \"CA_STATE\" , \"SSALES\".\"S_STATE\" AS \"S_STATE\" , \"SSALES\".\"I_COLOR\" AS \"I_COLOR\" , \"SSALES\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SSALES\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SSALES\".\"I_UNITS\" AS \"I_UNITS\" , \"SSALES\".\"I_SIZE\" AS \"I_SIZE\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_3\" AS SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" AS \"CA_STATE\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" AS \"I_UNITS\" , \"ITEM\".\"I_SIZE\" AS \"I_SIZE\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 27.320403,
+                    "execution_time": 27.08777,
+                    "compile_time": 0.000691,
+                    "planning_time": 0.07702,
+                    "create_size": 560
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 37.603573,
+                    "execution_time": 33.352743,
+                    "compile_time": 3.945104,
+                    "planning_time": 0.15717,
+                    "create_size": 560
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"CA_STATE\" AS \"CA_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STATE\" AS \"S_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_UNITS\" AS \"I_UNITS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_SIZE\" AS \"I_SIZE\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name ca_state s_state   i_color  i_current_price  i_manager_id  i_units  i_size  netpaid\n0       Rhodes       Rhonda         eing       FL      FL       tan             0.68            29      Box     N/A   147.34\n1       Hanson         Adam         able       MI      IN    purple            66.35            12    Bunch     N/A     0.74\n2         Zink       Vivian         able       WI      MN     slate             4.75            49    Ounce     N/A     7.62\n3      Hoskins       Josiah          pri       MS      MN    powder             5.44            38      Tbl     N/A    19.20\n4        Jones       Teresa        ought       OH      MI     sandy             2.22            33      Ton   small     0.27\n5        Lewis        Amber         able       OH      IN   magenta             5.92            13     Dram  medium     0.70\n6     Williams        Cathy         eing       GA      FL      peru             4.99            57     Gram     N/A    87.13\n7       Walker       Miriam        cally       VA      NC      plum             6.92            45       Lb     N/A     4.75\n8          Gay        Simon        ation       IN      MI       red             1.64            21   Bundle     N/A    33.97\n9       Walker        Bruce          pri       MO      NE     ghost             0.12             5   Bundle   small     8.46\n10     Chapman         Sara          pri       IA      MN     khaki             3.66            56  Unknown     N/A    21.42\n11     Mcnulty      Johanna          ese       AR      LA       sky             2.57            10      Tbl     N/A     1.01\n12    Quintana         Mike         able       IN      IN    purple             1.81             9      Ton  petite    10.24\n13    Reynolds        Sammy        cally       PA      PA     green             6.29            90    Bunch     N/A    48.81\n14    Johnston         John        ation       GA      AL    tomato             4.85            52  Unknown     N/A    20.97\n15       Davis     Kimberly        cally       GA      FL     white             3.85            14      Cup     N/A    23.54\n16       Davis     Kimberly        cally       GA      FL      peru            18.89            61      Tbl     N/A     1.05\n17   Alexander      Jeffrey        cally       PA      NY      pink            26.17            75    Bunch   small     1.86\n18    Johnston         John        ation       GA      AL      peru            16.09            63       Oz   large     0.00\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.019176,
+                    "execution_time": 0.007543,
+                    "compile_time": 5.3e-05,
+                    "planning_time": 0.00492
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.056249,
+                    "execution_time": 0.008329,
+                    "compile_time": 5.6e-05,
+                    "planning_time": 0.04032
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"CA_STATE\" AS \"CA_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STATE\" AS \"S_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_UNITS\" AS \"I_UNITS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_SIZE\" AS \"I_SIZE\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"CA_STATE\" AS \"CA_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STATE\" AS \"S_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_UNITS\" AS \"I_UNITS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_SIZE\" AS \"I_SIZE\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name ca_state s_state   i_color  i_current_price  i_manager_id  i_units  i_size  netpaid\n0       Rhodes       Rhonda         eing       FL      FL       tan             0.68            29      Box     N/A   147.34\n1       Hanson         Adam         able       MI      IN    purple            66.35            12    Bunch     N/A     0.74\n2         Zink       Vivian         able       WI      MN     slate             4.75            49    Ounce     N/A     7.62\n3      Hoskins       Josiah          pri       MS      MN    powder             5.44            38      Tbl     N/A    19.20\n4        Jones       Teresa        ought       OH      MI     sandy             2.22            33      Ton   small     0.27\n5        Lewis        Amber         able       OH      IN   magenta             5.92            13     Dram  medium     0.70\n6     Williams        Cathy         eing       GA      FL      peru             4.99            57     Gram     N/A    87.13\n7       Walker       Miriam        cally       VA      NC      plum             6.92            45       Lb     N/A     4.75\n8          Gay        Simon        ation       IN      MI       red             1.64            21   Bundle     N/A    33.97\n9       Walker        Bruce          pri       MO      NE     ghost             0.12             5   Bundle   small     8.46\n10     Chapman         Sara          pri       IA      MN     khaki             3.66            56  Unknown     N/A    21.42\n11     Mcnulty      Johanna          ese       AR      LA       sky             2.57            10      Tbl     N/A     1.01\n12    Quintana         Mike         able       IN      IN    purple             1.81             9      Ton  petite    10.24\n13    Reynolds        Sammy        cally       PA      PA     green             6.29            90    Bunch     N/A    48.81\n14    Johnston         John        ation       GA      AL    tomato             4.85            52  Unknown     N/A    20.97\n15       Davis     Kimberly        cally       GA      FL     white             3.85            14      Cup     N/A    23.54\n16       Davis     Kimberly        cally       GA      FL      peru            18.89            61      Tbl     N/A     1.05\n17   Alexander      Jeffrey        cally       PA      NY      pink            26.17            75    Bunch   small     1.86\n18    Johnston         John        ation       GA      AL      peru            16.09            63       Oz   large     0.00\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\n/*CURSOR_IDENTIFIER*/\nselect * from ssales",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" AS \"CA_STATE\" , \"STORE\".\"S_STATE\" AS \"S_STATE\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" AS \"I_UNITS\" , \"ITEM\".\"I_SIZE\" AS \"I_SIZE\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SSALES\".\"CA_STATE\" AS \"CA_STATE\" , \"SSALES\".\"S_STATE\" AS \"S_STATE\" , \"SSALES\".\"I_COLOR\" AS \"I_COLOR\" , \"SSALES\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SSALES\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SSALES\".\"I_UNITS\" AS \"I_UNITS\" , \"SSALES\".\"I_SIZE\" AS \"I_SIZE\" , \"SSALES\".\"NETPAID\" AS \"NETPAID\" FROM \"SSALES\" AS \"SSALES\""
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"CA_STATE\" AS \"CA_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STATE\" AS \"S_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_UNITS\" AS \"I_UNITS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_SIZE\" AS \"I_SIZE\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name ca_state s_state    i_color  i_current_price  i_manager_id i_units  i_size  netpaid\n0     Williams      William         anti       MI      MI     spring             9.79            37     N/A     N/A    54.86\n1       Murray     Danielle         anti       AR      LA       navy             0.47            68      Oz  medium     5.72\n2     Reynolds       Joshua         eing       GA      GA     maroon             2.31            78     N/A     N/A    18.51\n3          Day        James          pri       IN      MI       peru             2.48            22   Dozen     N/A    62.49\n4         Bell     Lorraine        ation       IN      MI     saddle             8.68            24    Case     N/A   139.69\n5       Murray       Sylvia          pri       NM      CO   midnight             6.70            23     Tbl     N/A    29.81\n6      Jackson       Bennie          pri       MO      NE      slate             5.59            14    Gram     N/A    43.80\n7      Herring         John        ought       MI      MI     spring             0.51            14  Pallet   small     5.25\n8        Blake      Vanessa          ese       OH      IN  chocolate             1.17             6      Oz  medium    93.43\n9      Morales         Eric         eing       OH      OH  turquoise             1.88             2     Tbl   large    38.75\n10    Montalvo        Teddy          ese       MN      SD     violet             3.45            22   Ounce  medium   116.86\n11        Rose        Frank          ese       NM      NM   honeydew             0.89            25  Carton  medium    38.54\n12     Spriggs     Margaret          ese       NM      NM      white             1.25             8  Bundle   large    81.00\n13       Lewis        Amber         able       OH      IN     purple             3.59            52   Bunch  petite     4.01\n14    Cloutier         Paul        ought       OH      MI   seashell             4.13            31    Each  medium   104.85\n15     Brinson      Janessa         able       WI      MN       plum             4.03            45     Tbl  petite     3.81\n16       Meier     Nathalie          bar       NY      PA      ghost             0.70            19   Ounce     N/A    48.25\n17      Morgan      Anthony          ese       MI      IN        tan             6.25            14     Cup     N/A     6.47\n18      George      Jeffrey         n st       AZ      NM       blue            23.79            55    Each     N/A    17.56\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.019156,
+                    "execution_time": 0.007666,
+                    "compile_time": 5.5e-05,
+                    "planning_time": 0.004722
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.020021,
+                    "execution_time": 0.008337,
+                    "compile_time": 5.5e-05,
+                    "planning_time": 0.004884
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"CA_STATE\" AS \"CA_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STATE\" AS \"S_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_UNITS\" AS \"I_UNITS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_SIZE\" AS \"I_SIZE\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"CA_STATE\" AS \"CA_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STATE\" AS \"S_STATE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_CURRENT_PRICE\" AS \"I_CURRENT_PRICE\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_MANAGER_ID\" AS \"I_MANAGER_ID\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_UNITS\" AS \"I_UNITS\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_SIZE\" AS \"I_SIZE\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name ca_state s_state    i_color  i_current_price  i_manager_id i_units  i_size  netpaid\n0     Williams      William         anti       MI      MI     spring             9.79            37     N/A     N/A    54.86\n1       Murray     Danielle         anti       AR      LA       navy             0.47            68      Oz  medium     5.72\n2     Reynolds       Joshua         eing       GA      GA     maroon             2.31            78     N/A     N/A    18.51\n3          Day        James          pri       IN      MI       peru             2.48            22   Dozen     N/A    62.49\n4         Bell     Lorraine        ation       IN      MI     saddle             8.68            24    Case     N/A   139.69\n5       Murray       Sylvia          pri       NM      CO   midnight             6.70            23     Tbl     N/A    29.81\n6      Jackson       Bennie          pri       MO      NE      slate             5.59            14    Gram     N/A    43.80\n7      Herring         John        ought       MI      MI     spring             0.51            14  Pallet   small     5.25\n8        Blake      Vanessa          ese       OH      IN  chocolate             1.17             6      Oz  medium    93.43\n9      Morales         Eric         eing       OH      OH  turquoise             1.88             2     Tbl   large    38.75\n10    Montalvo        Teddy          ese       MN      SD     violet             3.45            22   Ounce  medium   116.86\n11        Rose        Frank          ese       NM      NM   honeydew             0.89            25  Carton  medium    38.54\n12     Spriggs     Margaret          ese       NM      NM      white             1.25             8  Bundle   large    81.00\n13       Lewis        Amber         able       OH      IN     purple             3.59            52   Bunch  petite     4.01\n14    Cloutier         Paul        ought       OH      MI   seashell             4.13            31    Each  medium   104.85\n15     Brinson      Janessa         able       WI      MN       plum             4.03            45     Tbl  petite     3.81\n16       Meier     Nathalie          bar       NY      PA      ghost             0.70            19   Ounce     N/A    48.25\n17      Morgan      Anthony          ese       MI      IN        tan             6.25            14     Cup     N/A     6.47\n18      George      Jeffrey         n st       AZ      NM       blue            23.79            55    Each     N/A    17.56\n...*/"
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "with /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(SS_SALES_PRICE) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_4\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.113031,
+                    "execution_time": 0.045762,
+                    "compile_time": 0.00024,
+                    "planning_time": 0.003496,
+                    "create_size": 259
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.181526,
+                    "execution_time": 0.048223,
+                    "compile_time": 0.001337,
+                    "planning_time": 0.064728,
+                    "create_size": 259
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_5\" AS SELECT \"SPEQLITE_TEMP_TABLE_4\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_4\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" GROUP BY \"SPEQLITE_TEMP_TABLE_4\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"S_STORE_NAME\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.106235,
+                    "execution_time": 0.05278,
+                    "compile_time": 0.000289,
+                    "planning_time": 0.004123,
+                    "create_size": 154
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.32195,
+                    "execution_time": 0.046666,
+                    "compile_time": 0.162937,
+                    "planning_time": 0.060045,
+                    "create_size": 154
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name    paid\n0        Davis       Justin        ought   91.40\n1       Bright       Donald          ese  265.30\n2         Bush     Michelle         anti  120.00\n3     Rafferty        Corey          ese  183.20\n4        White        Norma         able    1.15\n5     Schrader        Lucas        cally   11.46\n6      Workman       Robert          ese   25.43\n7        Mayer         John        ought  108.13\n8     Clifford  Christopher        cally   27.86\n9     Williams      Jeffrey        ation   37.10\n10      Wilson     Margaret         anti   66.97\n11     Dickson       Joseph          bar    5.13\n12       Woods         Theo         able  127.64\n13                   Donald         able   99.08\n14      Morgan       Sylvia          ese   21.40\n15    Mccarthy      Christa          bar    4.18\n16       White     Madeline          ese   14.35\n17      Atwood         Adam          ese   21.78\n18     Santana        David          ese   57.43\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.01638,
+                    "execution_time": 0.007249,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003247
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053267,
+                    "execution_time": 0.007409,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.038358
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_4\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_4\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_4\" AS \"SPEQLITE_TEMP_TABLE_4\" GROUP BY \"SPEQLITE_TEMP_TABLE_4\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_4\".\"S_STORE_NAME\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_5\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_5\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_5\" AS \"SPEQLITE_TEMP_TABLE_5\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name    paid\n0        Davis       Justin        ought   91.40\n1       Bright       Donald          ese  265.30\n2         Bush     Michelle         anti  120.00\n3     Rafferty        Corey          ese  183.20\n4        White        Norma         able    1.15\n5     Schrader        Lucas        cally   11.46\n6      Workman       Robert          ese   25.43\n7        Mayer         John        ought  108.13\n8     Clifford  Christopher        cally   27.86\n9     Williams      Jeffrey        ation   37.10\n10      Wilson     Margaret         anti   66.97\n11     Dickson       Joseph          bar    5.13\n12       Woods         Theo         able  127.64\n13                   Donald         able   99.08\n14      Morgan       Sylvia          ese   21.40\n15    Mccarthy      Christa          bar    4.18\n16       White     Madeline          ese   14.35\n17      Atwood         Adam          ese   21.78\n18     Santana        David          ese   57.43\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name,\n      c_first_name,\n      s_store_name,\n      sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\n  group by c_last_name,\n        c_first_name,\n        s_store_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\""
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_6\" AS SELECT \"SPEQLITE_TEMP_TABLE_3\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_3\".\"I_COLOR\" AS \"I_COLOR\" , \"SPEQLITE_TEMP_TABLE_3\".\"NETPAID\" AS \"NETPAID\" FROM \"SPEQLITE_TEMP_TABLE_3\" AS \"SPEQLITE_TEMP_TABLE_3\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.126095,
+                    "execution_time": 0.049678,
+                    "compile_time": 0.000246,
+                    "planning_time": 0.003513,
+                    "create_size": 288
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.191436,
+                    "execution_time": 0.054737,
+                    "compile_time": 0.001442,
+                    "planning_time": 0.059746,
+                    "create_size": 296
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_7\" AS SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.071668,
+                    "execution_time": 0.038902,
+                    "compile_time": 0.000288,
+                    "planning_time": 0.00497,
+                    "create_size": 7
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.137907,
+                    "execution_time": 0.039436,
+                    "compile_time": 0.000289,
+                    "planning_time": 0.067661,
+                    "create_size": 7
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0        Burks     Jennifer         n st  13.71\n1       Miller       Porter          pri   1.94\n2       Harris          Ann        cally  18.29\n3     Mcdowell      Anthony          ese   1.72\n4                     Pedro         able  46.62\n5       Tucker      Shawana        ought  57.06\n6                                  ation  10.14\n7     Childers         Mark         eing  58.99\n8        Bryan       Nicole         able   1.80\n9         Webb      Deborah        ation   7.02\n10   Henderson       Gladys        cally   2.13\n11       Novak      Rosanne        ation  88.51\n12      Harris         Alla         able  14.52\n13       Moore       Thomas          ese  74.72\n14       Dumas      Richard        cally  12.92\n15     Walters        Larry         able  28.75\n16       Kraft          Sun        cally  56.70\n17      Lawson      Anthony          pri   7.99\n18       Sykes       Dennis        cally  41.42\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017394,
+                    "execution_time": 0.008093,
+                    "compile_time": 4.3e-05,
+                    "planning_time": 0.003336
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053715,
+                    "execution_time": 0.007858,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.038361
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\"",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_7\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_7\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_7\" AS \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0        Burks     Jennifer         n st  13.71\n1       Miller       Porter          pri   1.94\n2       Harris          Ann        cally  18.29\n3     Mcdowell      Anthony          ese   1.72\n4                     Pedro         able  46.62\n5       Tucker      Shawana        ought  57.06\n6                                  ation  10.14\n7     Childers         Mark         eing  58.99\n8        Bryan       Nicole         able   1.80\n9         Webb      Deborah        ation   7.02\n10   Henderson       Gladys        cally   2.13\n11       Novak      Rosanne        ation  88.51\n12      Harris         Alla         able  14.52\n13       Moore       Thomas          ese  74.72\n14       Dumas      Richard        cally  12.92\n15     Walters        Larry         able  28.75\n16       Kraft          Sun        cally  56.70\n17      Lawson      Anthony          pri   7.99\n18       Sykes       Dennis        cally  41.42\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    join store_returns on ss_ticket_number = sr_ticket_number and ss_item_sk = sr_item_sk\n    join store on ss_store_sk = s_store_sk\n    join item on ss_item_sk = i_item_sk\n    join customer on ss_customer_sk = c_customer_sk\n    join customer_address on c_current_addr_sk = ca_address_sk\nwhere c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": null,
+        "optimize": null,
+        "create": null,
+        "query": null,
+        "rewrite_main_query": null,
+        "preview": null
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\""
+        ],
+        "create": null,
+        "query": null,
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\"",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_7\""
+            }
+        ],
+        "preview": null
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) as netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) as paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\nhaving sum(netpaid) > (select 0.05*avg(netpaid) from ssales)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) , \"_U_0\" AS ( SELECT 0.05 * AVG ( \"SSALES\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SSALES\" AS \"SSALES\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" HAVING MAX ( \"_U_0\".\"_COL_0\" ) < SUM ( \"SSALES\".\"NETPAID\" )"
+        ],
+        "create": [
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_8\" AS SELECT 0.05 * AVG ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\"",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.067619,
+                    "execution_time": 0.03834,
+                    "compile_time": 0.000288,
+                    "planning_time": 0.003501,
+                    "create_size": 4
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.124896,
+                    "execution_time": 0.038353,
+                    "compile_time": 0.000286,
+                    "planning_time": 0.060029,
+                    "create_size": 4
+                }
+            },
+            {
+                "create": "CREATE TEMPORARY TABLE \"SPEQLITE_TEMP_TABLE_9\" AS SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" )",
+                "retry_time": 0,
+                "create_metrics": {
+                    "elapsed_time": 0.082293,
+                    "execution_time": 0.048716,
+                    "compile_time": 0.000352,
+                    "planning_time": 0.007001,
+                    "create_size": 7
+                },
+                "create_metrics_warm_up": {
+                    "elapsed_time": 0.147974,
+                    "execution_time": 0.049122,
+                    "compile_time": 0.00035,
+                    "planning_time": 0.070163,
+                    "create_size": 7
+                }
+            }
+        ],
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name    paid\n0       Lawson      Anthony          pri    7.99\n1         Webb      Deborah        ation    7.02\n2    Henderson       Gladys        cally    2.13\n3        Novak      Rosanne        ation   88.51\n4       Harris         Alla         able   14.52\n5        Moore       Thomas          ese   74.72\n6        Sykes       Dennis        cally   41.42\n7        Dumas      Richard        cally   12.92\n8      Walters        Larry         able   28.75\n9        Kraft          Sun        cally   56.70\n10    Childers         Mark         eing   58.99\n11       Burks     Jennifer         n st   13.71\n12      Miller       Porter          pri    1.94\n13      Taylor      Breanna         eing  115.96\n14      Harris          Ann        cally   18.29\n15                    Pedro         able   46.62\n16      Tucker      Shawana        ought   57.06\n17                                 ation   10.14\n18       Jones        Elmer         eing   75.95\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016824,
+                    "execution_time": 0.007114,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003567
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054562,
+                    "execution_time": 0.008119,
+                    "compile_time": 4.7e-05,
+                    "planning_time": 0.038848
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" )",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name    paid\n0       Lawson      Anthony          pri    7.99\n1         Webb      Deborah        ation    7.02\n2    Henderson       Gladys        cally    2.13\n3        Novak      Rosanne        ation   88.51\n4       Harris         Alla         able   14.52\n5        Moore       Thomas          ese   74.72\n6        Sykes       Dennis        cally   41.42\n7        Dumas      Richard        cally   12.92\n8      Walters        Larry         able   28.75\n9        Kraft          Sun        cally   56.70\n10    Childers         Mark         eing   58.99\n11       Burks     Jennifer         n st   13.71\n12      Miller       Porter          pri    1.94\n13      Taylor      Breanna         eing  115.96\n14      Harris          Ann        cally   18.29\n15                    Pedro         able   46.62\n16      Tucker      Shawana        ought   57.06\n17                                 ation   10.14\n18       Jones        Elmer         eing   75.95\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\nhaving sum(netpaid) > (select 0.05*avg(netpaid)\n                                 from ssales)\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) , \"_U_0\" AS ( SELECT 0.05 * AVG ( \"SSALES\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SSALES\" AS \"SSALES\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" HAVING MAX ( \"_U_0\".\"_COL_0\" ) < SUM ( \"SSALES\".\"NETPAID\" )"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name    paid\n0       Lawson      Anthony          pri    7.99\n1         Webb      Deborah        ation    7.02\n2    Henderson       Gladys        cally    2.13\n3        Novak      Rosanne        ation   88.51\n4       Harris         Alla         able   14.52\n5        Moore       Thomas          ese   74.72\n6        Sykes       Dennis        cally   41.42\n7        Dumas      Richard        cally   12.92\n8      Walters        Larry         able   28.75\n9        Kraft          Sun        cally   56.70\n10    Childers         Mark         eing   58.99\n11       Burks     Jennifer         n st   13.71\n12      Miller       Porter          pri    1.94\n13      Taylor      Breanna         eing  115.96\n14      Harris          Ann        cally   18.29\n15                    Pedro         able   46.62\n16      Tucker      Shawana        ought   57.06\n17                                 ation   10.14\n18       Jones        Elmer         eing   75.95\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.016722,
+                    "execution_time": 0.007364,
+                    "compile_time": 4.4e-05,
+                    "planning_time": 0.003311
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.051721,
+                    "execution_time": 0.007189,
+                    "compile_time": 4.6e-05,
+                    "planning_time": 0.038422
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" )",
+                "rewrite": "SELECT * FROM \"SPEQLITE_TEMP_TABLE_9\""
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name    paid\n0       Lawson      Anthony          pri    7.99\n1         Webb      Deborah        ation    7.02\n2    Henderson       Gladys        cally    2.13\n3        Novak      Rosanne        ation   88.51\n4       Harris         Alla         able   14.52\n5        Moore       Thomas          ese   74.72\n6        Sykes       Dennis        cally   41.42\n7        Dumas      Richard        cally   12.92\n8      Walters        Larry         able   28.75\n9        Kraft          Sun        cally   56.70\n10    Childers         Mark         eing   58.99\n11       Burks     Jennifer         n st   13.71\n12      Miller       Porter          pri    1.94\n13      Taylor      Breanna         eing  115.96\n14      Harris          Ann        cally   18.29\n15                    Pedro         able   46.62\n16      Tucker      Shawana        ought   57.06\n17                                 ation   10.14\n18       Jones        Elmer         eing   75.95\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\nhaving sum(netpaid) > (select 0.05*avg(netpaid)\n                                 from ssales)\norder by c_last_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) , \"_U_0\" AS ( SELECT 0.05 * AVG ( \"SSALES\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SSALES\" AS \"SSALES\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" HAVING MAX ( \"_U_0\".\"_COL_0\" ) < SUM ( \"SSALES\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                  ation  10.14\n1                     Amada        ation  87.01\n2                                   able   5.91\n3                    Amanda         able  19.10\n4                   Gilbert          ese   7.40\n5                                    pri  68.85\n6                                  cally  21.60\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017445,
+                    "execution_time": 0.008212,
+                    "compile_time": 6.8e-05,
+                    "planning_time": 0.003445
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.055109,
+                    "execution_time": 0.008324,
+                    "compile_time": 7.5e-05,
+                    "planning_time": 0.039193
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                  ation  10.14\n1                     Amada        ation  87.01\n2                                   able   5.91\n3                    Amanda         able  19.10\n4                   Gilbert          ese   7.40\n5                                    pri  68.85\n6                                  cally  21.60\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\nhaving sum(netpaid) > (select 0.05*avg(netpaid)\n                                 from ssales)\norder by c_last_name\n        ,c_first_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) , \"_U_0\" AS ( SELECT 0.05 * AVG ( \"SSALES\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SSALES\" AS \"SSALES\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" HAVING MAX ( \"_U_0\".\"_COL_0\" ) < SUM ( \"SSALES\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" , \"C_FIRST_NAME\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                  cally  21.60\n1                                   able   5.91\n2                                    pri  68.85\n3                                  ation  10.14\n4                     Amada        ation  87.01\n5                    Amanda         able  19.10\n6                   Gilbert          ese   7.40\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.017903,
+                    "execution_time": 0.008023,
+                    "compile_time": 7.5e-05,
+                    "planning_time": 0.003726
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.054036,
+                    "execution_time": 0.009036,
+                    "compile_time": 7.5e-05,
+                    "planning_time": 0.03887
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                  cally  21.60\n1                                   able   5.91\n2                                    pri  68.85\n3                                  ation  10.14\n4                     Amada        ation  87.01\n5                    Amanda         able  19.10\n6                   Gilbert          ese   7.40\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\nhaving sum(netpaid) > (select 0.05*avg(netpaid)\n                                 from ssales)\norder by c_last_name\n        ,c_first_name\n        ,s_store_name\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) , \"_U_0\" AS ( SELECT 0.05 * AVG ( \"SSALES\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SSALES\" AS \"SSALES\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" HAVING MAX ( \"_U_0\".\"_COL_0\" ) < SUM ( \"SSALES\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST , \"S_STORE_NAME\" NULLS LAST"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" , \"C_FIRST_NAME\" , \"S_STORE_NAME\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                   able   5.91\n1                                  ation  10.14\n2                                  cally  21.60\n3                                    pri  68.85\n4                     Amada        ation  87.01\n5                    Amanda         able  19.10\n6                   Gilbert          ese   7.40\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018854,
+                    "execution_time": 0.008723,
+                    "compile_time": 7.2e-05,
+                    "planning_time": 0.003895
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.053325,
+                    "execution_time": 0.007981,
+                    "compile_time": 7.4e-05,
+                    "planning_time": 0.039085
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST , \"S_STORE_NAME\" NULLS LAST",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST , \"S_STORE_NAME\" NULLS LAST"
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                   able   5.91\n1                                  ation  10.14\n2                                  cally  21.60\n3                                    pri  68.85\n4                     Amada        ation  87.01\n5                    Amanda         able  19.10\n6                   Gilbert          ese   7.40\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/"
+    },
+    {
+        "input": "-- end template query24.tpl query 92 in stream 0\n-- start template query24.tpl query 92 in stream 0\nwith /* TPC-DS query24.tpl 0.92 */ ssales as\n(select c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,ca_state\n      ,s_state\n      ,i_color\n      ,i_current_price\n      ,i_manager_id\n      ,i_units\n      ,i_size\n      ,sum(ss_sales_price) netpaid\nfrom store_sales\n    ,store_returns\n    ,store\n    ,item\n    ,customer\n    ,customer_address\nwhere ss_ticket_number = sr_ticket_number\n  and ss_item_sk = sr_item_sk\n  and ss_customer_sk = c_customer_sk\n  and ss_item_sk = i_item_sk\n  and ss_store_sk = s_store_sk\n  and c_current_addr_sk = ca_address_sk\n  and c_birth_country <> upper(ca_country)\n  and s_zip = ca_zip\nand s_market_id=5\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\n        ,ca_state\n        ,s_state\n        ,i_color\n        ,i_current_price\n        ,i_manager_id\n        ,i_units\n        ,i_size)\nselect c_last_name\n      ,c_first_name\n      ,s_store_name\n      ,sum(netpaid) paid\nfrom ssales\nwhere i_color = 'gainsboro'\ngroup by c_last_name\n        ,c_first_name\n        ,s_store_name\nhaving sum(netpaid) > (select 0.05*avg(netpaid)\n                                 from ssales)\norder by c_last_name\n        ,c_first_name\n        ,s_store_name\nlimit 100\n/*CURSOR_IDENTIFIER*/",
+        "optimize": [
+            "WITH \"SSALES\" AS ( SELECT \"CUSTOMER\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"ITEM\".\"I_COLOR\" AS \"I_COLOR\" , SUM ( \"STORE_SALES\".\"SS_SALES_PRICE\" ) AS \"NETPAID\" FROM \"STORE_SALES\" AS \"STORE_SALES\" JOIN \"CUSTOMER\" AS \"CUSTOMER\" ON \"CUSTOMER\".\"C_CUSTOMER_SK\" = \"STORE_SALES\".\"SS_CUSTOMER_SK\" JOIN \"ITEM\" AS \"ITEM\" ON \"ITEM\".\"I_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" JOIN \"STORE\" AS \"STORE\" ON \"STORE\".\"S_MARKET_ID\" = 5 AND \"STORE\".\"S_STORE_SK\" = \"STORE_SALES\".\"SS_STORE_SK\" JOIN \"STORE_RETURNS\" AS \"STORE_RETURNS\" ON \"STORE_RETURNS\".\"SR_ITEM_SK\" = \"STORE_SALES\".\"SS_ITEM_SK\" AND \"STORE_RETURNS\".\"SR_TICKET_NUMBER\" = \"STORE_SALES\".\"SS_TICKET_NUMBER\" JOIN \"CUSTOMER_ADDRESS\" AS \"CUSTOMER_ADDRESS\" ON \"CUSTOMER\".\"C_BIRTH_COUNTRY\" <> UPPER ( \"CUSTOMER_ADDRESS\".\"CA_COUNTRY\" ) AND \"CUSTOMER\".\"C_CURRENT_ADDR_SK\" = \"CUSTOMER_ADDRESS\".\"CA_ADDRESS_SK\" AND \"CUSTOMER_ADDRESS\".\"CA_ZIP\" = \"STORE\".\"S_ZIP\" GROUP BY \"CUSTOMER\".\"C_LAST_NAME\" , \"CUSTOMER\".\"C_FIRST_NAME\" , \"STORE\".\"S_STORE_NAME\" , \"CUSTOMER_ADDRESS\".\"CA_STATE\" , \"STORE\".\"S_STATE\" , \"ITEM\".\"I_COLOR\" , \"ITEM\".\"I_CURRENT_PRICE\" , \"ITEM\".\"I_MANAGER_ID\" , \"ITEM\".\"I_UNITS\" , \"ITEM\".\"I_SIZE\" ) , \"_U_0\" AS ( SELECT 0.05 * AVG ( \"SSALES\".\"NETPAID\" ) AS \"_COL_0\" FROM \"SSALES\" AS \"SSALES\" ) SELECT \"SSALES\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SSALES\".\"NETPAID\" ) AS \"PAID\" FROM \"SSALES\" AS \"SSALES\" CROSS JOIN \"_U_0\" AS \"_U_0\" WHERE \"SSALES\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SSALES\".\"C_LAST_NAME\" , \"SSALES\".\"C_FIRST_NAME\" , \"SSALES\".\"S_STORE_NAME\" HAVING MAX ( \"_U_0\".\"_COL_0\" ) < SUM ( \"SSALES\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST , \"S_STORE_NAME\" NULLS LAST LIMIT 100"
+        ],
+        "create": null,
+        "query": [
+            {
+                "query": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" , \"C_FIRST_NAME\" , \"S_STORE_NAME\" LIMIT 21",
+                "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                   able   5.91\n1                                  ation  10.14\n2                                  cally  21.60\n3                                    pri  68.85\n4                     Amada        ation  87.01\n5                    Amanda         able  19.10\n6                   Gilbert          ese   7.40\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/",
+                "retry_time": 0,
+                "query_metrics": {
+                    "elapsed_time": 0.018057,
+                    "execution_time": 0.008159,
+                    "compile_time": 7.4e-05,
+                    "planning_time": 0.003778
+                },
+                "query_metrics_warm_up": {
+                    "elapsed_time": 0.018941,
+                    "execution_time": 0.008993,
+                    "compile_time": 7.3e-05,
+                    "planning_time": 0.003823
+                }
+            }
+        ],
+        "rewrite_main_query": [
+            {
+                "script": "SELECT \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_6\" AS \"SPEQLITE_TEMP_TABLE_6\" CROSS JOIN \"SPEQLITE_TEMP_TABLE_8\" AS \"SPEQLITE_TEMP_TABLE_8\" WHERE \"SPEQLITE_TEMP_TABLE_6\".\"I_COLOR\" = 'gainsboro' GROUP BY \"SPEQLITE_TEMP_TABLE_6\".\"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_6\".\"S_STORE_NAME\" HAVING MAX ( \"SPEQLITE_TEMP_TABLE_8\".\"_COL_0\" ) < SUM ( \"SPEQLITE_TEMP_TABLE_6\".\"NETPAID\" ) ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST , \"S_STORE_NAME\" NULLS LAST LIMIT 100",
+                "rewrite": "SELECT \"SPEQLITE_TEMP_TABLE_9\".\"C_LAST_NAME\" AS \"C_LAST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"C_FIRST_NAME\" AS \"C_FIRST_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"S_STORE_NAME\" AS \"S_STORE_NAME\" , \"SPEQLITE_TEMP_TABLE_9\".\"PAID\" AS \"PAID\" FROM \"SPEQLITE_TEMP_TABLE_9\" AS \"SPEQLITE_TEMP_TABLE_9\" ORDER BY \"C_LAST_NAME\" NULLS LAST , \"C_FIRST_NAME\" NULLS LAST , \"S_STORE_NAME\" NULLS LAST LIMIT 100"
+            }
+        ],
+        "preview": "\n/*   c_last_name c_first_name s_store_name   paid\n0                                   able   5.91\n1                                  ation  10.14\n2                                  cally  21.60\n3                                    pri  68.85\n4                     Amada        ation  87.01\n5                    Amanda         able  19.10\n6                   Gilbert          ese   7.40\n7                     Pedro         able  46.62\n8      Acevedo         Dean          ese  28.79\n9    Albertson        David         anti  66.79\n10        Amos        Alice          bar  36.57\n11    Anderson      Richard          bar  46.71\n12    Anderson       Vivian          ese  49.09\n13       Arias    Josephine        cally  92.00\n14      Arnett      Lucille        ought  94.86\n15      Arnold         Dana          ese  33.52\n16        Baca        Buddy        cally  16.10\n17       Baker       Ursula         able   9.48\n18      Barnes         Jose          pri   7.21\n...*/"
+    }
+]
