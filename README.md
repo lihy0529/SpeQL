@@ -234,4 +234,12 @@ Now you can see the SpeQL icon on the bottom right corner of VSCode. Please clic
 
 ## 📚 Citation
 
-Cite us: TBD.
+Cite us: 
+```bibtex
+@article{li2025speculative,
+  title={Speculative Ad-hoc Querying},
+  author={Li, Haoyu and Kandula, Srikanth and de Luis Balaguer, Maria Angels and Akella, Aditya and Arun, Venkat},
+  journal={arXiv preprint arXiv:2503.00714},
+  year={2025}
+}
+```
