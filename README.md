@@ -21,7 +21,7 @@ The user's input will be first sent to the VSCode extension, then the extension 
 
 ## 📦 TODO: Plug-and-Play Extension
 
-User can easily download the public available extension on VSCode Marketplace that has been connected to the SpeQL server with TPCDS data. We will release the extension once we get the grant. It may take a week or so to release the extension.
+User can easily download the public available extension on VSCode Marketplace that has been connected to the SpeQL server with TPCDS data. We will release the extension once we get the grant.
 
 **When you are using the extension, we will not record your IP address. And your data will not be used for any purpose. If you have concerns, you may setup your own SpeQL server (see later in this README).**
 
